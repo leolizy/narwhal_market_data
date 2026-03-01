@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSD-0002 Product Canonical Query v0.1</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.65;
+      color: #2d3748;
+      background: #f7f8fa;
+      margin: 0;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      padding: 2.5rem 3rem;
+    }
+    h1 {
+      font-size: 2em;
+      color: #1a3d5c;
+      border-bottom: 3px solid #2c5f8a;
+      padding-bottom: .4em;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 1.45em;
+      color: #2c5f8a;
+      border-bottom: 1px solid #d0dce8;
+      padding-bottom: .25em;
+      margin-top: 2.2em;
+    }
+    h3 { font-size: 1.15em; color: #3a6ea8; margin-top: 1.5em; }
+    h4, h5, h6 { color: #4a5568; margin-top: 1.2em; }
+    p { margin: .8em 0; }
+    a { color: #2c5f8a; }
+    hr {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 2em 0;
+    }
+    code {
+      background: #eef2f7;
+      padding: .15em .4em;
+      border-radius: 4px;
+      font-size: .88em;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+    }
+    pre {
+      background: #1e2433;
+      color: #cdd5e0;
+      padding: 1.1em 1.4em;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1em 0;
+    }
+    pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+      font-size: .9em;
+    }
+    blockquote {
+      border-left: 4px solid #2c5f8a;
+      margin: 1em 0;
+      padding: .6em 1.1em;
+      background: #f0f5fb;
+      color: #4a5568;
+      border-radius: 0 4px 4px 0;
+    }
+    blockquote p { margin: 0; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1.2em 0;
+      font-size: .9em;
+    }
+    th {
+      background: #2c5f8a;
+      color: #fff;
+      padding: .55em .9em;
+      text-align: left;
+      font-weight: 600;
+    }
+    td {
+      padding: .45em .9em;
+      border: 1px solid #d0dce8;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #f7f9fc; }
+    ul, ol { padding-left: 1.8em; margin: .6em 0; }
+    li { margin: .3em 0; }
+    strong { color: #1a3d5c; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+<h1>Product Specification Document — Product Canonical Query</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Document ID</td>
+      <td>PSD-0002</td>
+    </tr>
+    <tr>
+      <td>Title</td>
+      <td>Product Canonical Query</td>
+    </tr>
+    <tr>
+      <td>Version</td>
+      <td>v0.1</td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>Draft</td>
+    </tr>
+    <tr>
+      <td>Created</td>
+      <td>2026-03-01</td>
+    </tr>
+    <tr>
+      <td>Last Updated</td>
+      <td>2026-03-01</td>
+    </tr>
+    <tr>
+      <td>Author</td>
+      <td>Leo</td>
+    </tr>
+    <tr>
+      <td>Reviewer</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Approver</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Parent Document</td>
+      <td>FRD-NMD-0001</td>
+    </tr>
+    <tr>
+      <td>Related Documents</td>
+      <td>PC-NMD-0001, FRD-NMD-0001, PSD-0001</td>
+    </tr>
+    <tr>
+      <td>Classification</td>
+      <td>Internal</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>1. Function Overview</h2>
+<p>Provides a read-only query interface for all internal modules to resolve instrument identity against the canonical entity table — supporting lookup by canonical key and attribute-based search with role-dependent status filtering.</p>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Function Type</td>
+      <td>PROCESS_FLOW</td>
+    </tr>
+    <tr>
+      <td>Module</td>
+      <td>NMD-CANONICAL</td>
+    </tr>
+    <tr>
+      <td>Triggering Actors</td>
+      <td>Data Owner via Operator UI (ACT-001/ACT-002), Data Ingestion Module (ACT-003), Query &amp; Export Module (ACT-004)</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>2. User Roles and Permissions</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Role</th>
+      <th>Type</th>
+      <th>Permitted Operations</th>
+      <th>Status Filter</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Data Owner</td>
+      <td>Human</td>
+      <td>Lookup by canonical key; Attribute search</td>
+      <td>All status types — Active, Inactive, Disabled</td>
+    </tr>
+    <tr>
+      <td>Data Ingestion Module</td>
+      <td>System</td>
+      <td>Lookup by canonical key; Attribute search</td>
+      <td>All status types — Active, Inactive, Disabled</td>
+    </tr>
+    <tr>
+      <td>Query &amp; Export Module</td>
+      <td>System</td>
+      <td>Lookup by canonical key; Attribute search</td>
+      <td>Active by default; Inactive allowed if explicitly specified — Disabled never returned</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>3. Preconditions and Dependencies</h2>
+<h3>Preconditions</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Precondition</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PRE-001</td>
+      <td>Canonical entity table is initialised and accessible</td>
+    </tr>
+    <tr>
+      <td>PRE-002</td>
+      <td>Caller is authenticated and their role is determinable at query time</td>
+    </tr>
+    <tr>
+      <td>PRE-003</td>
+      <td>Canonical records exist — created via PSD-0001 (Canonical Maintenance)</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Dependencies</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Dependency</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>DEP-001</td>
+      <td>PSD-0001 (Canonical Maintenance)</td>
+      <td>Canonical records must exist before queries can return results</td>
+    </tr>
+    <tr>
+      <td>DEP-002</td>
+      <td>FRD-NMD-0002 source configuration schema</td>
+      <td>Source identifier lookup (FR-NMD-001-011) is out of scope for this PSD and will be specified under FRD-NMD-0002</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>4. Process Flow Specification</h2>
+<h3>Flow A — Lookup by Canonical Key</h3>
+<p><strong>Trigger:</strong> ET-006 — Internal module requests canonical lookup by canonical key</p>
+<p><strong>Inputs:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Match Type</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>canonical_key</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>Exact</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>status_filter</code></td>
+      <td>enum</td>
+      <td>No</td>
+      <td>N/A</td>
+      <td>Optional — role-dependent; omit to use default (Active only)</td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Processing Steps:</strong></p>
+<ol>
+  <li>Validate <code>canonical_key</code> is non-empty</li>
+  <li>Resolve caller role and permitted status filter</li>
+  <li>Query canonical table by exact <code>canonical_key</code> match</li>
+  <li>Apply status filter per caller role</li>
+  <li>Return full canonical record or <code>NOT_FOUND</code></li>
+</ol>
+<p><strong>Outputs:</strong></p>
+<ul>
+  <li><strong>Success:</strong> Full canonical record — all 5 hierarchy columns, <code>canonical_key</code>, <code>asset_class</code>,</li>
+</ul>
+<p>  <code>entity_type</code>, <code>status</code>, <code>source</code>, <code>created_by</code>, <code>created_at</code>, <code>last_updated_by</code>, <code>last_updated_at</code></p>
+<ul>
+  <li><strong>Not found:</strong> <code>NOT_FOUND</code> response — no auto-create</li>
+</ul>
+<p><strong>SLA:</strong> Hot path — called by every ingestion run; must meet platform latency target (NFR-NMD-001-001, TBD)</p>
+<hr>
+<h3>Flow B — Attribute Search</h3>
+<p><strong>Trigger:</strong> ET-007 — Caller searches canonical by attribute</p>
+<p><strong>Inputs:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Match Type</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>exchange</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>Exact</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>commodity</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>Exact</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>product_type</code></td>
+      <td>enum</td>
+      <td>No</td>
+      <td>Exact</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>product_code</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>Exact</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>contract</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>Prefix match</td>
+      <td>Fuzzy ticker search — prefix match only</td>
+    </tr>
+    <tr>
+      <td><code>entity_type</code></td>
+      <td>enum</td>
+      <td>No</td>
+      <td>Exact</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>status_filter</code></td>
+      <td>enum</td>
+      <td>No</td>
+      <td>N/A</td>
+      <td>Optional — role-dependent; omit to use default (Active only)</td>
+    </tr>
+  </tbody>
+</table>
+<p>At least one of the above search fields must be provided.</p>
+<p><strong>Processing Steps:</strong></p>
+<ol>
+  <li>Validate at least one search attribute is provided</li>
+  <li>Resolve caller role and permitted status filter</li>
+  <li>Build AND filter query across all provided attributes; apply prefix match on <code>contract</code> if supplied</li>
+  <li>Apply status filter per caller role</li>
+  <li>Sort results: Active first, then Inactive, then Disabled; then by <code>exchange</code>, <code>commodity</code>,</li>
+</ol>
+<p>   <code>product_type</code>, <code>product_code</code></p>
+<ol>
+  <li>Apply pagination — default page size 50, maximum 2000</li>
+  <li>Return paginated result set</li>
+</ol>
+<p><strong>Outputs:</strong></p>
+<ul>
+  <li><strong>Success:</strong> Paginated list of matching canonical records — full record per item; empty list if</li>
+</ul>
+<p>  no matches</p>
+<ul>
+  <li><strong>Pagination:</strong> Default page size 50; maximum page size 2000</li>
+</ul>
+<p><strong>SLA:</strong> Non-hot path — UI and export use; SLA TBD (OQ-001)</p>
+<hr>
+<h3>Out of Scope</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Flow</th>
+      <th>Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Lookup by Source Identifier</td>
+      <td>Source identifier resolution requires source-to-canonical mapping owned by FRD-NMD-0002 — to be specified in a PSD under FRD-NMD-0002 (FR-NMD-001-011)</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>5. Business Rules</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Rule</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>BR-001</td>
+      <td>Active records are returned by default; Inactive records returned only when caller explicitly requests them</td>
+    </tr>
+    <tr>
+      <td>BR-002</td>
+      <td>Disabled records are never returned to Query &amp; Export Module regardless of filter parameter</td>
+    </tr>
+    <tr>
+      <td>BR-003</td>
+      <td>A NOT_FOUND result is returned when no matching record exists — the query never auto-creates a canonical record</td>
+    </tr>
+    <tr>
+      <td>BR-004</td>
+      <td>Every query response includes the full canonical record: all 5 hierarchy columns, canonical_key, status, and audit metadata</td>
+    </tr>
+    <tr>
+      <td>BR-005</td>
+      <td>Attribute search requires at least one attribute — open-ended queries with no filter are not permitted</td>
+    </tr>
+    <tr>
+      <td>BR-006</td>
+      <td>Caller identity determines the permitted status filter — callers cannot override their role&#x27;s status access boundary</td>
+    </tr>
+    <tr>
+      <td>BR-007</td>
+      <td>Attribute search sort order is fixed: status ascending (Active → Inactive → Disabled), then exchange, commodity, product_type, product_code</td>
+    </tr>
+    <tr>
+      <td>BR-008</td>
+      <td>Attribute search results are paginated — default page size 50, maximum 2000; requests exceeding 2000 are capped at 2000</td>
+    </tr>
+    <tr>
+      <td>BR-009</td>
+      <td>Contract ticker search uses prefix match only — contains or suffix match not supported in Phase 1</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>6. Validation Rules</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Field</th>
+      <th>Rule</th>
+      <th>Error Message</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>VAL-001</td>
+      <td><code>canonical_key</code></td>
+      <td>Must be non-empty for Flow A</td>
+      <td>&quot;Canonical key is required&quot;</td>
+    </tr>
+    <tr>
+      <td>VAL-002</td>
+      <td>Attribute search inputs</td>
+      <td>At least one of exchange, commodity, product_type, product_code, contract, entity_type must be provided</td>
+      <td>&quot;At least one search attribute is required&quot;</td>
+    </tr>
+    <tr>
+      <td>VAL-003</td>
+      <td><code>status_filter</code></td>
+      <td>Query &amp; Export Module may not request Disabled records</td>
+      <td>&quot;Status filter not permitted for caller role&quot;</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>7. Acceptance Criteria</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Criterion</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>AC-001</td>
+      <td>Given a caller submits a valid canonical_key, When Flow A executes, Then the matching record is returned in full or NOT_FOUND if no match exists</td>
+    </tr>
+    <tr>
+      <td>AC-002</td>
+      <td>Given the same canonical_key is submitted by two different callers, When queried, Then both receive identical records subject to their respective status filters</td>
+    </tr>
+    <tr>
+      <td>AC-003</td>
+      <td>Given a canonical_key lookup with no status filter specified, When the query runs, Then only Active records are returned by default</td>
+    </tr>
+    <tr>
+      <td>AC-004</td>
+      <td>Given a Data Ingestion Module submits a lookup for a Disabled record, When the query runs, Then the Disabled record is returned</td>
+    </tr>
+    <tr>
+      <td>AC-005</td>
+      <td>Given a Query &amp; Export Module requests Disabled records explicitly, When the query runs, Then the request is rejected with &quot;Status filter not permitted for caller role&quot;</td>
+    </tr>
+    <tr>
+      <td>AC-006</td>
+      <td>Given a caller submits an attribute search with at least one attribute, When Flow B executes, Then all matching records are returned subject to the caller&#x27;s status filter</td>
+    </tr>
+    <tr>
+      <td>AC-007</td>
+      <td>Given a caller submits a contract prefix search, When Flow B executes, Then all records with contract values beginning with the supplied prefix are returned</td>
+    </tr>
+    <tr>
+      <td>AC-008</td>
+      <td>Given an attribute search is submitted with no attributes, When validation runs, Then the request is rejected with &quot;At least one search attribute is required&quot;</td>
+    </tr>
+    <tr>
+      <td>AC-009</td>
+      <td>Given a Query &amp; Export Module submits an attribute search with no status flag, When the query runs, Then only Active records are returned</td>
+    </tr>
+    <tr>
+      <td>AC-010</td>
+      <td>Given a Query &amp; Export Module submits an attribute search with Inactive flag specified, When the query runs, Then Active and Inactive records are returned — Disabled records excluded</td>
+    </tr>
+    <tr>
+      <td>AC-011</td>
+      <td>Given an attribute search returns results, When the response is built, Then records are sorted Active first, then Inactive, then Disabled, then by exchange, commodity, product_type, product_code</td>
+    </tr>
+    <tr>
+      <td>AC-012</td>
+      <td>Given an attribute search returns more than 50 records with no page size specified, When the response is built, Then only the first 50 records are returned</td>
+    </tr>
+    <tr>
+      <td>AC-013</td>
+      <td>Given a caller requests a page size greater than 2000, When the query runs, Then the result set is capped at 2000 records</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>8. Assumptions and Constraints</h2>
+<h3>Assumptions</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Assumption</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ASM-001</td>
+      <td>Caller identity is determinable at query time — the canonical module can resolve which role a caller maps to</td>
+    </tr>
+    <tr>
+      <td>ASM-002</td>
+      <td>Source identifier lookup (FR-NMD-001-011) is out of scope for this PSD — to be specified in a PSD under FRD-NMD-0002</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Constraints</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Constraint</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CON-001</td>
+      <td>Read-only — no writes occur in this function</td>
+    </tr>
+    <tr>
+      <td>CON-002</td>
+      <td>Query &amp; Export Module is restricted to Active and Inactive results only — Disabled records never returned regardless of filter</td>
+    </tr>
+    <tr>
+      <td>CON-003</td>
+      <td>Attribute search requires at least one input — unrestricted open queries are not permitted</td>
+    </tr>
+    <tr>
+      <td>CON-004</td>
+      <td>Contract ticker search is prefix match only — contains or suffix match not supported in Phase 1</td>
+    </tr>
+    <tr>
+      <td>CON-005</td>
+      <td>Attribute search results are paginated — default page size 50, maximum 2000</td>
+    </tr>
+    <tr>
+      <td>CON-006</td>
+      <td>Attribute search sort order is fixed: status ascending (Active → Inactive → Disabled), then exchange, commodity, product_type, product_code</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>9. Open Questions</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Question</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>OQ-001</td>
+      <td>What is the response time SLA for attribute search distinct from the hot-path lookup SLA (NFR-NMD-001-001)?</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>Change Log</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th>Date</th>
+      <th>Author</th>
+      <th>Summary</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>v0.1</td>
+      <td>2026-03-01</td>
+      <td>Leo</td>
+      <td>Initial draft — PROCESS_FLOW spec for FA-02 Canonical Query from FRD-NMD-0001. Covers lookup by canonical key (FLOW-A) and attribute search (FLOW-B) with role-dependent status filtering, prefix match on contract ticker, fixed sort order, and pagination (default 50, max 2000). Source identifier lookup (FR-NMD-001-011) explicitly out of scope — deferred to FRD-NMD-0002.</td>
+    </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

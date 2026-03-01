@@ -1,0 +1,376 @@
+{
+  "kind": "ProductSpecification",
+  "metadata": {
+    "document_id": "PSD-0002",
+    "title": "Product Canonical Query",
+    "version": "v0.1",
+    "status": "Draft",
+    "classification": "Internal",
+    "created_date": "2026-03-01",
+    "last_updated": "2026-03-01",
+    "author": "Leo",
+    "reviewer": "TBD",
+    "approver": "TBD",
+    "parent_document": "FRD-NMD-0001",
+    "related_documents": [
+      "PC-NMD-0001",
+      "FRD-NMD-0001",
+      "PSD-0001"
+    ],
+    "tags": [
+      "canonical",
+      "query",
+      "market-data"
+    ],
+    "supersedes": null
+  },
+  "function_overview": {
+    "content": "Provides a read-only query interface for all internal modules to resolve instrument identity against the canonical entity table — supporting lookup by canonical key and attribute-based search with role-dependent status filtering.",
+    "function_type": "PROCESS_FLOW",
+    "module": "NMD-CANONICAL",
+    "triggering_actor": [
+      "Data Owner via Operator UI (ACT-001/ACT-002)",
+      "Data Ingestion Module (ACT-003)",
+      "Query & Export Module (ACT-004)"
+    ]
+  },
+  "user_roles_and_permissions": {
+    "roles": [
+      {
+        "role": "Data Owner",
+        "type": "Human",
+        "permissions": [
+          "Lookup by canonical key",
+          "Attribute search"
+        ],
+        "status_filter": "All status types — Active, Inactive, Disabled"
+      },
+      {
+        "role": "Data Ingestion Module",
+        "type": "System",
+        "permissions": [
+          "Lookup by canonical key",
+          "Attribute search"
+        ],
+        "status_filter": "All status types — Active, Inactive, Disabled"
+      },
+      {
+        "role": "Query & Export Module",
+        "type": "System",
+        "permissions": [
+          "Lookup by canonical key",
+          "Attribute search"
+        ],
+        "status_filter": "Active by default; Inactive allowed if explicitly specified — Disabled never returned"
+      }
+    ]
+  },
+  "preconditions_and_dependencies": {
+    "preconditions": [
+      {
+        "id": "PRE-001",
+        "description": "Canonical entity table is initialised and accessible"
+      },
+      {
+        "id": "PRE-002",
+        "description": "Caller is authenticated and their role is determinable at query time"
+      },
+      {
+        "id": "PRE-003",
+        "description": "Canonical records exist — created via PSD-0001 (Canonical Maintenance)"
+      }
+    ],
+    "dependencies": [
+      {
+        "id": "DEP-001",
+        "description": "PSD-0001 (Canonical Maintenance) — canonical records must exist before queries can return results"
+      },
+      {
+        "id": "DEP-002",
+        "description": "FRD-NMD-0002 source configuration schema — source identifier lookup (FR-NMD-001-011) is out of scope for this PSD and will be specified under FRD-NMD-0002"
+      }
+    ]
+  },
+  "process_flow_spec": {
+    "required_when": "function_type == PROCESS_FLOW",
+    "flows": [
+      {
+        "flow_id": "FLOW-A",
+        "name": "Lookup by Canonical Key",
+        "trigger": "ET-006: Internal module requests canonical lookup by canonical key",
+        "inputs": [
+          {
+            "field": "canonical_key",
+            "type": "string",
+            "required": true,
+            "match_type": "Exact"
+          },
+          {
+            "field": "status_filter",
+            "type": "enum",
+            "required": false,
+            "match_type": "N/A",
+            "notes": "Optional — role-dependent; omit to use default (Active only)"
+          }
+        ],
+        "processing_steps": [
+          "1. Validate canonical_key is non-empty",
+          "2. Resolve caller role and permitted status filter",
+          "3. Query canonical table by exact canonical_key match",
+          "4. Apply status filter per caller role",
+          "5. Return full canonical record or NOT_FOUND"
+        ],
+        "outputs": {
+          "success": "Full canonical record — all 5 hierarchy columns, canonical_key, asset_class, entity_type, status, source, created_by, created_at, last_updated_by, last_updated_at",
+          "not_found": "NOT_FOUND response — no auto-create"
+        },
+        "sla": "Hot path — called by every ingestion run; must meet platform latency target (NFR-NMD-001-001, TBD)"
+      },
+      {
+        "flow_id": "FLOW-B",
+        "name": "Attribute Search",
+        "trigger": "ET-007: Caller searches canonical by attribute",
+        "inputs": [
+          {
+            "field": "exchange",
+            "type": "string",
+            "required": false,
+            "match_type": "Exact"
+          },
+          {
+            "field": "commodity",
+            "type": "string",
+            "required": false,
+            "match_type": "Exact"
+          },
+          {
+            "field": "product_type",
+            "type": "enum",
+            "required": false,
+            "match_type": "Exact"
+          },
+          {
+            "field": "product_code",
+            "type": "string",
+            "required": false,
+            "match_type": "Exact"
+          },
+          {
+            "field": "contract",
+            "type": "string",
+            "required": false,
+            "match_type": "Prefix match",
+            "notes": "Fuzzy ticker search — prefix match only"
+          },
+          {
+            "field": "entity_type",
+            "type": "enum",
+            "required": false,
+            "match_type": "Exact"
+          },
+          {
+            "field": "status_filter",
+            "type": "enum",
+            "required": false,
+            "match_type": "N/A",
+            "notes": "Optional — role-dependent; omit to use default (Active only)"
+          }
+        ],
+        "processing_steps": [
+          "1. Validate at least one search attribute is provided",
+          "2. Resolve caller role and permitted status filter",
+          "3. Build AND filter query across all provided attributes; apply prefix match on contract if supplied",
+          "4. Apply status filter per caller role",
+          "5. Sort results: Active first, then Inactive, then Disabled; then by exchange, commodity, product_type, product_code",
+          "6. Apply pagination — default page size 50, maximum 2000",
+          "7. Return paginated result set"
+        ],
+        "outputs": {
+          "success": "Paginated list of matching canonical records — full record per item; empty list if no matches",
+          "pagination": "Default page size: 50; maximum page size: 2000"
+        },
+        "sla": "Non-hot path — UI and export use; SLA TBD (OQ-002)"
+      }
+    ],
+    "out_of_scope": [
+      {
+        "flow": "Lookup by Source Identifier",
+        "reason": "Source identifier resolution requires source-to-canonical mapping owned by FRD-NMD-0002 — to be specified in a PSD under FRD-NMD-0002 (FR-NMD-001-011)"
+      }
+    ]
+  },
+  "business_rules": {
+    "rules": [
+      {
+        "id": "BR-001",
+        "rule": "Active records are returned by default; Inactive records returned only when caller explicitly requests them"
+      },
+      {
+        "id": "BR-002",
+        "rule": "Disabled records are never returned to Query & Export Module regardless of filter parameter"
+      },
+      {
+        "id": "BR-003",
+        "rule": "A NOT_FOUND result is returned when no matching record exists — the query never auto-creates a canonical record"
+      },
+      {
+        "id": "BR-004",
+        "rule": "Every query response includes the full canonical record: all 5 hierarchy columns, canonical_key, status, and audit metadata"
+      },
+      {
+        "id": "BR-005",
+        "rule": "Attribute search requires at least one attribute — open-ended queries with no filter are not permitted"
+      },
+      {
+        "id": "BR-006",
+        "rule": "Caller identity determines the permitted status filter — callers cannot override their role's status access boundary"
+      },
+      {
+        "id": "BR-007",
+        "rule": "Attribute search sort order is fixed: status ascending (Active → Inactive → Disabled), then exchange, commodity, product_type, product_code"
+      },
+      {
+        "id": "BR-008",
+        "rule": "Attribute search results are paginated — default page size 50, maximum 2000; requests exceeding 2000 are capped at 2000"
+      },
+      {
+        "id": "BR-009",
+        "rule": "Contract ticker search uses prefix match only — contains or suffix match not supported in Phase 1"
+      }
+    ]
+  },
+  "validation_rules": {
+    "rules": [
+      {
+        "id": "VAL-001",
+        "field": "canonical_key",
+        "rule": "Must be non-empty for Flow A",
+        "error_message": "Canonical key is required"
+      },
+      {
+        "id": "VAL-002",
+        "field": "Attribute search inputs",
+        "rule": "At least one of exchange, commodity, product_type, product_code, contract, entity_type must be provided for Flow B",
+        "error_message": "At least one search attribute is required"
+      },
+      {
+        "id": "VAL-003",
+        "field": "status_filter",
+        "rule": "Query & Export Module may not request Disabled records",
+        "error_message": "Status filter not permitted for caller role"
+      }
+    ]
+  },
+  "acceptance_criteria": {
+    "criteria": [
+      {
+        "id": "AC-001",
+        "criterion": "Given a caller submits a valid canonical_key, When Flow A executes, Then the matching record is returned in full or NOT_FOUND if no match exists"
+      },
+      {
+        "id": "AC-002",
+        "criterion": "Given the same canonical_key is submitted by two different callers, When queried, Then both receive identical records subject to their respective status filters"
+      },
+      {
+        "id": "AC-003",
+        "criterion": "Given a canonical_key lookup with no status filter specified, When the query runs, Then only Active records are returned by default"
+      },
+      {
+        "id": "AC-004",
+        "criterion": "Given a Data Ingestion Module submits a lookup for a Disabled record, When the query runs, Then the Disabled record is returned"
+      },
+      {
+        "id": "AC-005",
+        "criterion": "Given a Query & Export Module requests Disabled records explicitly, When the query runs, Then the request is rejected with 'Status filter not permitted for caller role'"
+      },
+      {
+        "id": "AC-006",
+        "criterion": "Given a caller submits an attribute search with at least one attribute, When Flow B executes, Then all matching records are returned subject to the caller's status filter"
+      },
+      {
+        "id": "AC-007",
+        "criterion": "Given a caller submits a contract prefix search, When Flow B executes, Then all records with contract values beginning with the supplied prefix are returned"
+      },
+      {
+        "id": "AC-008",
+        "criterion": "Given an attribute search is submitted with no attributes, When validation runs, Then the request is rejected with 'At least one search attribute is required'"
+      },
+      {
+        "id": "AC-009",
+        "criterion": "Given a Query & Export Module submits an attribute search with no status flag, When the query runs, Then only Active records are returned"
+      },
+      {
+        "id": "AC-010",
+        "criterion": "Given a Query & Export Module submits an attribute search with Inactive flag specified, When the query runs, Then Active and Inactive records are returned — Disabled records excluded"
+      },
+      {
+        "id": "AC-011",
+        "criterion": "Given an attribute search returns results, When the response is built, Then records are sorted Active first, then Inactive, then Disabled, then by exchange, commodity, product_type, product_code"
+      },
+      {
+        "id": "AC-012",
+        "criterion": "Given an attribute search returns more than 50 records with no page size specified, When the response is built, Then only the first 50 records are returned"
+      },
+      {
+        "id": "AC-013",
+        "criterion": "Given a caller requests a page size greater than 2000, When the query runs, Then the result set is capped at 2000 records"
+      }
+    ]
+  },
+  "assumptions_and_constraints": {
+    "assumptions": [
+      {
+        "id": "ASM-001",
+        "description": "Caller identity is determinable at query time — the canonical module can resolve which role a caller maps to"
+      },
+      {
+        "id": "ASM-002",
+        "description": "Source identifier lookup (FR-NMD-001-011) is out of scope for this PSD — to be specified in a PSD under FRD-NMD-0002"
+      }
+    ],
+    "constraints": [
+      {
+        "id": "CON-001",
+        "description": "Read-only — no writes occur in this function"
+      },
+      {
+        "id": "CON-002",
+        "description": "Query & Export Module is restricted to Active and Inactive results only — Disabled records never returned regardless of filter"
+      },
+      {
+        "id": "CON-003",
+        "description": "Attribute search requires at least one input — unrestricted open queries are not permitted"
+      },
+      {
+        "id": "CON-004",
+        "description": "Contract ticker search is prefix match only — contains or suffix match not supported in Phase 1"
+      },
+      {
+        "id": "CON-005",
+        "description": "Attribute search results are paginated — default page size 50, maximum 2000"
+      },
+      {
+        "id": "CON-006",
+        "description": "Attribute search sort order is fixed: status ascending (Active → Inactive → Disabled), then exchange, commodity, product_type, product_code"
+      }
+    ]
+  },
+  "open_questions": {
+    "questions": [
+      {
+        "id": "OQ-001",
+        "question": "What is the response time SLA for attribute search distinct from the hot-path lookup SLA (NFR-NMD-001-001)?"
+      }
+    ]
+  },
+  "change_log": {
+    "entries": [
+      {
+        "version": "v0.1",
+        "date": "2026-03-01",
+        "author": "Leo",
+        "description": "Initial draft — PROCESS_FLOW spec for FA-02 Canonical Query from FRD-NMD-0001. Covers lookup by canonical key (FLOW-A) and attribute search (FLOW-B) with role-dependent status filtering, prefix match on contract ticker, fixed sort order, and pagination (default 50, max 2000). Source identifier lookup (FR-NMD-001-011) explicitly out of scope — deferred to FRD-NMD-0002."
+      }
+    ]
+  }
+}

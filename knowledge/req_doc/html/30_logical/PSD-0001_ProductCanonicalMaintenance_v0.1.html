@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSD-0001 Product Canonical Maintenance v0.1</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.65;
+      color: #2d3748;
+      background: #f7f8fa;
+      margin: 0;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      padding: 2.5rem 3rem;
+    }
+    h1 {
+      font-size: 2em;
+      color: #1a3d5c;
+      border-bottom: 3px solid #2c5f8a;
+      padding-bottom: .4em;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 1.45em;
+      color: #2c5f8a;
+      border-bottom: 1px solid #d0dce8;
+      padding-bottom: .25em;
+      margin-top: 2.2em;
+    }
+    h3 { font-size: 1.15em; color: #3a6ea8; margin-top: 1.5em; }
+    h4, h5, h6 { color: #4a5568; margin-top: 1.2em; }
+    p { margin: .8em 0; }
+    a { color: #2c5f8a; }
+    hr {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 2em 0;
+    }
+    code {
+      background: #eef2f7;
+      padding: .15em .4em;
+      border-radius: 4px;
+      font-size: .88em;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+    }
+    pre {
+      background: #1e2433;
+      color: #cdd5e0;
+      padding: 1.1em 1.4em;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1em 0;
+    }
+    pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+      font-size: .9em;
+    }
+    blockquote {
+      border-left: 4px solid #2c5f8a;
+      margin: 1em 0;
+      padding: .6em 1.1em;
+      background: #f0f5fb;
+      color: #4a5568;
+      border-radius: 0 4px 4px 0;
+    }
+    blockquote p { margin: 0; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1.2em 0;
+      font-size: .9em;
+    }
+    th {
+      background: #2c5f8a;
+      color: #fff;
+      padding: .55em .9em;
+      text-align: left;
+      font-weight: 600;
+    }
+    td {
+      padding: .45em .9em;
+      border: 1px solid #d0dce8;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #f7f9fc; }
+    ul, ol { padding-left: 1.8em; margin: .6em 0; }
+    li { margin: .3em 0; }
+    strong { color: #1a3d5c; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+<h1>Product Specification Document — Product Canonical Maintenance</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Document ID</td>
+      <td>PSD-0001</td>
+    </tr>
+    <tr>
+      <td>Title</td>
+      <td>Product Canonical Maintenance</td>
+    </tr>
+    <tr>
+      <td>Version</td>
+      <td>v0.1</td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>Draft</td>
+    </tr>
+    <tr>
+      <td>Created</td>
+      <td>2026-03-01</td>
+    </tr>
+    <tr>
+      <td>Last Updated</td>
+      <td>2026-03-01</td>
+    </tr>
+    <tr>
+      <td>Author</td>
+      <td>Leo</td>
+    </tr>
+    <tr>
+      <td>Reviewer</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Approver</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Parent Document</td>
+      <td>FRD-NMD-0001</td>
+    </tr>
+    <tr>
+      <td>Related Documents</td>
+      <td>PC-NMD-0001, FRD-NMD-0001</td>
+    </tr>
+    <tr>
+      <td>Classification</td>
+      <td>Internal</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>1. Function Overview</h2>
+<p>Provides full lifecycle management of the NMD product canonical entity table — creating, updating, deactivating, and managing the status of instrument master records, with a full audit trail on every write.</p>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Function Type</td>
+      <td>DATA_PAGE</td>
+    </tr>
+    <tr>
+      <td>Module</td>
+      <td>NMD-CANONICAL</td>
+    </tr>
+    <tr>
+      <td>Triggering Actors</td>
+      <td>Data Owner (ACT-001), Data Ingestion Module / Source Processing (ACT-003)</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>2. User Roles and Permissions</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Role</th>
+      <th>Type</th>
+      <th>Permitted Operations</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Data Owner</td>
+      <td>Human</td>
+      <td>Create canonical record; Update canonical record (non-locked fields only); Deactivate canonical record (via Disable status); Change status to any value subject to parent status constraint (BR-006)</td>
+    </tr>
+    <tr>
+      <td>Data Ingestion Module (Source Processing)</td>
+      <td>System</td>
+      <td>Create canonical record (golden source only); Set status as defined by source configuration only</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>3. Preconditions and Dependencies</h2>
+<h3>Preconditions</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Precondition</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PRE-001</td>
+      <td>Canonical entity table is initialised and accessible</td>
+    </tr>
+    <tr>
+      <td>PRE-002</td>
+      <td>Phase 1 asset class definitions (Futures &amp; Options, FX) are configured in the system</td>
+    </tr>
+    <tr>
+      <td>PRE-003</td>
+      <td>Hash algorithm is agreed and implemented platform-wide (see OI-001 in FRD-NMD-0001)</td>
+    </tr>
+    <tr>
+      <td>PRE-004</td>
+      <td>For Data Owner path: user is authenticated with Data Owner role</td>
+    </tr>
+    <tr>
+      <td>PRE-005</td>
+      <td>For Source Processing path: source configuration exists with golden source flag and initial status defined (FRD-NMD-0002)</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Dependencies</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Dependency</th>
+      <th>Blocks</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>DEP-001</td>
+      <td>FRD-NMD-0002 source configuration schema</td>
+      <td>Auto-create path cannot be designed until source configuration is finalised</td>
+    </tr>
+    <tr>
+      <td>DEP-002</td>
+      <td>Asset class mapping definitions for Phase 1 (Futures &amp; Options, FX)</td>
+      <td>Field validation rules for entity type and Product Type cannot be finalised</td>
+    </tr>
+    <tr>
+      <td>DEP-003</td>
+      <td>Hash algorithm agreed across all NMD modules</td>
+      <td>Canonical key computation must be consistent platform-wide</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>4. Data Page Specification</h2>
+<h3>Entity Definition</h3>
+<p><strong>Entity:</strong> Canonical Record</p>
+<p>A single row in the canonical entity table representing one unique financial instrument, identified by its canonical key. No hard delete — retirement via Disable status only.</p>
+<p><strong>Primary Key:</strong> <code>canonical_key</code></p>
+<h3>Field Catalog</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Source</th>
+      <th>Create</th>
+      <th>Update</th>
+      <th>Required</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>canonical_key</code></td>
+      <td>string</td>
+      <td>System-computed</td>
+      <td>Auto — hash of 5 hierarchy columns</td>
+      <td>Locked — fixed at creation</td>
+      <td>Yes</td>
+      <td>Deterministic hash; same 5-column input always produces the same key</td>
+    </tr>
+    <tr>
+      <td><code>exchange</code></td>
+      <td>string</td>
+      <td>User / Source Processing</td>
+      <td>Required</td>
+      <td>Locked</td>
+      <td>Yes</td>
+      <td>Mandatory on every record. For FX records: fixed value &#x27;FX&#x27;</td>
+    </tr>
+    <tr>
+      <td><code>commodity</code></td>
+      <td>string</td>
+      <td>User / Source Processing</td>
+      <td>Optional — required for entity types above L1</td>
+      <td>Locked</td>
+      <td>No</td>
+      <td>For FX Currency Pair: must be XXXYYY format (6 uppercase characters)</td>
+    </tr>
+    <tr>
+      <td><code>product_type</code></td>
+      <td>enum</td>
+      <td>User / Source Processing</td>
+      <td>Optional — required for L3+ entity types</td>
+      <td>Locked</td>
+      <td>No</td>
+      <td>Futures &amp; Options: PHY \</td>
+    </tr>
+    <tr>
+      <td><code>product_code</code></td>
+      <td>string</td>
+      <td>User / Source Processing</td>
+      <td>Optional — required for L3+ entity types</td>
+      <td>Locked</td>
+      <td>No</td>
+      <td>FX: must be null</td>
+    </tr>
+    <tr>
+      <td><code>contract</code></td>
+      <td>string</td>
+      <td>User / Source Processing</td>
+      <td>Optional — required for contract-level entity types</td>
+      <td>Locked</td>
+      <td>No</td>
+      <td>Format validated per entity type. Option Contract: YYYYMM_CP_STRIKE \</td>
+    </tr>
+    <tr>
+      <td><code>asset_class</code></td>
+      <td>enum</td>
+      <td>User / Source Processing</td>
+      <td>Required</td>
+      <td>Locked</td>
+      <td>Yes</td>
+      <td>Futures &amp; Options \</td>
+    </tr>
+    <tr>
+      <td><code>entity_type</code></td>
+      <td>enum</td>
+      <td>User / Source Processing</td>
+      <td>Required</td>
+      <td>Locked</td>
+      <td>Yes</td>
+      <td>Must match a predefined entity type for the selected asset class</td>
+    </tr>
+    <tr>
+      <td><code>status</code></td>
+      <td>enum</td>
+      <td>User / Source Processing</td>
+      <td>Required</td>
+      <td>Editable</td>
+      <td>Yes</td>
+      <td>Active \</td>
+    </tr>
+    <tr>
+      <td><code>source</code></td>
+      <td>string</td>
+      <td>System</td>
+      <td>Auto</td>
+      <td>Read-only</td>
+      <td>Yes</td>
+      <td>Identifies creation actor: &#x27;User&#x27; or source processing identifier</td>
+    </tr>
+    <tr>
+      <td><code>created_by</code></td>
+      <td>string</td>
+      <td>System</td>
+      <td>Auto</td>
+      <td>Read-only</td>
+      <td>Yes</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>created_at</code></td>
+      <td>timestamp</td>
+      <td>System</td>
+      <td>Auto</td>
+      <td>Read-only</td>
+      <td>Yes</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>last_updated_by</code></td>
+      <td>string</td>
+      <td>System</td>
+      <td>Auto</td>
+      <td>Auto</td>
+      <td>Yes</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>last_updated_at</code></td>
+      <td>timestamp</td>
+      <td>System</td>
+      <td>Auto</td>
+      <td>Auto</td>
+      <td>Yes</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<h3>List View</h3>
+<p><strong>Columns:</strong> <code>canonical_key</code>, <code>exchange</code>, <code>commodity</code>, <code>product_type</code>, <code>product_code</code>, <code>contract</code>, <code>asset_class</code>, <code>entity_type</code>, <code>status</code>, <code>last_updated_at</code></p>
+<p><strong>Default Sort:</strong> <code>last_updated_at DESC</code></p>
+<p><strong>Filters:</strong> <code>status</code>, <code>asset_class</code>, <code>exchange</code></p>
+<h3>Detail View</h3>
+<p>All fields including <code>created_by</code>, <code>created_at</code>, <code>source</code>, and link to full immutable audit trail.</p>
+<h3>CRUD Operations</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Operation</th>
+      <th>Actors</th>
+      <th>Description</th>
+      <th>Post-conditions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Create</td>
+      <td>Data Owner, Source Processing</td>
+      <td>Create a new canonical record. Canonical key computed from 5 hierarchy columns. Initial status set by actor: user-selected for Data Owner, source configuration for Source Processing.</td>
+      <td>Record persisted; canonical key computed and stored; audit log entry created; <code>canonical.record.created</code> event published</td>
+    </tr>
+    <tr>
+      <td>Update</td>
+      <td>Data Owner, Source Processing</td>
+      <td>Update non-locked fields on an existing canonical record. The 5 hierarchy columns, asset_class, entity_type, and canonical_key are immutable after creation.</td>
+      <td>Record updated; audit log entry created for each changed field; <code>canonical.record.updated</code> event published</td>
+    </tr>
+    <tr>
+      <td>Status Change</td>
+      <td>Data Owner, Source Processing</td>
+      <td>Change the status of a canonical record. Triggers top-down cascade to all non-Disabled descendants.</td>
+      <td>Record status updated; cascade applied to non-Disabled descendants; audit log entry created for each affected record; <code>canonical.status.changed</code> event published</td>
+    </tr>
+    <tr>
+      <td>Delete</td>
+      <td>—</td>
+      <td>Not permitted. Retirement via Disable status only.</td>
+      <td>—</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>5. Business Rules</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Rule</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>BR-001</td>
+      <td>Exchange is mandatory on every record — creation rejected without it</td>
+    </tr>
+    <tr>
+      <td>BR-002</td>
+      <td>Canonical key is computed as a deterministic hash of all 5 columns (null placeholders for skipped levels) at creation and is immutable thereafter</td>
+    </tr>
+    <tr>
+      <td>BR-003</td>
+      <td>The 5 hierarchy columns (exchange, commodity, product_type, product_code, contract), asset_class, and entity_type are locked after creation — corrections require deactivating the record and creating a new one</td>
+    </tr>
+    <tr>
+      <td>BR-004</td>
+      <td>Entity type must match a predefined type for the selected asset class; column population must conform to that entity type&#x27;s rules</td>
+    </tr>
+    <tr>
+      <td>BR-005</td>
+      <td>Status cascade is top-down — a status change propagates to all non-Disabled descendants; Disabled descendants are exempt and remain unchanged</td>
+    </tr>
+    <tr>
+      <td>BR-006</td>
+      <td>A child record&#x27;s status cannot be more permissive than its parent: child cannot be Active if parent is Inactive or Disabled; child cannot be Inactive if parent is Disabled</td>
+    </tr>
+    <tr>
+      <td>BR-007</td>
+      <td>Data Owner may set status to any value subject to BR-006; Source Processing may only set status as defined by source configuration</td>
+    </tr>
+    <tr>
+      <td>BR-008</td>
+      <td>Source Processing initial status is taken from source configuration — never defaulted to Active</td>
+    </tr>
+    <tr>
+      <td>BR-009</td>
+      <td>Duplicate records (same canonical key hash) are rejected on creation</td>
+    </tr>
+    <tr>
+      <td>BR-010</td>
+      <td>All writes produce an immutable audit log entry — no write path bypasses the audit trail</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>6. Validation Rules</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Field</th>
+      <th>Rule</th>
+      <th>Error Message</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>VAL-001</td>
+      <td><code>exchange</code></td>
+      <td>Must be non-empty</td>
+      <td>&quot;Exchange is required&quot;</td>
+    </tr>
+    <tr>
+      <td>VAL-002</td>
+      <td><code>asset_class</code></td>
+      <td>Must be one of: Futures &amp; Options, FX</td>
+      <td>&quot;Invalid asset class&quot;</td>
+    </tr>
+    <tr>
+      <td>VAL-003</td>
+      <td><code>entity_type</code></td>
+      <td>Must match a predefined entity type for the selected asset_class</td>
+      <td>&quot;Entity type not valid for asset class&quot;</td>
+    </tr>
+    <tr>
+      <td>VAL-004</td>
+      <td><code>product_type</code></td>
+      <td>For Futures &amp; Options: must be one of PHY, FUT, CMB, OOP, OOF, OOC. For FX: must be null</td>
+      <td>&quot;Invalid product type for asset class&quot;</td>
+    </tr>
+    <tr>
+      <td>VAL-005</td>
+      <td><code>contract</code></td>
+      <td>For Option Contract entity type: must match YYYYMM_CP_STRIKE \</td>
+      <td>YYYYMMDD_CP_STRIKE \</td>
+    </tr>
+    <tr>
+      <td>VAL-006</td>
+      <td><code>commodity</code></td>
+      <td>For FX Currency Pair entity type: must be exactly 6 uppercase characters (XXXYYY format)</td>
+      <td>&quot;Currency pair must be 6 uppercase characters&quot;</td>
+    </tr>
+    <tr>
+      <td>VAL-007</td>
+      <td><code>canonical_key</code></td>
+      <td>Must be unique across all records</td>
+      <td>&quot;Duplicate canonical record&quot;</td>
+    </tr>
+    <tr>
+      <td>VAL-008</td>
+      <td><code>status</code></td>
+      <td>Child status cannot be more permissive than parent status</td>
+      <td>&quot;Status not permitted — parent is [parent_status]&quot;</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>7. Acceptance Criteria</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Criterion</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>AC-001</td>
+      <td>Given a Data Owner submits a valid new canonical record with all required fields, When the create operation executes, Then the record is persisted with a computed canonical key and an audit log entry is created</td>
+    </tr>
+    <tr>
+      <td>AC-002</td>
+      <td>Given the same 5 hierarchy column values are submitted twice, When canonical key is computed, Then both produce the identical hash</td>
+    </tr>
+    <tr>
+      <td>AC-003</td>
+      <td>Given a create is attempted without an Exchange value, When validation runs, Then the request is rejected with &quot;Exchange is required&quot;</td>
+    </tr>
+    <tr>
+      <td>AC-004</td>
+      <td>Given a create is attempted with a duplicate canonical key, When the system checks uniqueness, Then the request is rejected with &quot;Duplicate canonical record&quot;</td>
+    </tr>
+    <tr>
+      <td>AC-005</td>
+      <td>Given a Data Owner changes the status of a parent record, When the change is saved, Then all non-Disabled descendants are updated to the new status and audit entries are created for each</td>
+    </tr>
+    <tr>
+      <td>AC-006</td>
+      <td>Given a Data Owner attempts to set a child record to Active when the parent is Inactive or Disabled, When validation runs, Then the request is rejected with the parent status constraint error</td>
+    </tr>
+    <tr>
+      <td>AC-007</td>
+      <td>Given Source Processing creates a canonical record from a golden source, When the record is persisted, Then initial status is taken from source configuration — never defaulted to Active</td>
+    </tr>
+    <tr>
+      <td>AC-008</td>
+      <td>Given an entity type of Option Contract is submitted, When contract format is validated, Then only YYYYMM_CP_STRIKE, YYYYMMDD_CP_STRIKE, or YYYYMMWN_CP_STRIKE formats are accepted</td>
+    </tr>
+    <tr>
+      <td>AC-009</td>
+      <td>Given a Futures &amp; Options record is submitted with a Product Type not in PHY/FUT/CMB/OOP/OOF/OOC, When validation runs, Then the request is rejected with permitted values listed</td>
+    </tr>
+    <tr>
+      <td>AC-010</td>
+      <td>Given an FX Currency Pair record is submitted with a Commodity not matching XXXYYY format, When validation runs, Then the request is rejected with &quot;Currency pair must be 6 uppercase characters&quot;</td>
+    </tr>
+    <tr>
+      <td>AC-011</td>
+      <td>Given any canonical write occurs (create, update, status change), When the operation completes, Then an immutable audit log entry exists capturing actor, timestamp, field changed, old value, and new value</td>
+    </tr>
+    <tr>
+      <td>AC-012</td>
+      <td>Given a Data Owner attempts to update any of the 5 hierarchy columns on an existing record, When the update is submitted, Then the request is rejected — locked fields cannot be modified</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>8. Assumptions and Constraints</h2>
+<h3>Assumptions</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Assumption</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ASM-001</td>
+      <td>Asset class column mappings for Phase 1 (Futures &amp; Options, FX) are defined before detailed design begins</td>
+    </tr>
+    <tr>
+      <td>ASM-002</td>
+      <td>Hash algorithm is agreed platform-wide before implementation</td>
+    </tr>
+    <tr>
+      <td>ASM-003</td>
+      <td>Source Processing (FRD-NMD-0002) owns and provides the golden source flag and initial status configuration</td>
+    </tr>
+    <tr>
+      <td>ASM-004</td>
+      <td>No bulk import required in Phase 1 — records created individually by Data Owner or Source Processing</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Constraints</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Constraint</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CON-001</td>
+      <td>Phase 1 asset classes: Futures &amp; Options and FX only</td>
+    </tr>
+    <tr>
+      <td>CON-002</td>
+      <td>No hard deletes — retirement via Disable status only</td>
+    </tr>
+    <tr>
+      <td>CON-003</td>
+      <td>The 5 hierarchy columns and canonical key are immutable after creation — corrections require deactivate + new record</td>
+    </tr>
+    <tr>
+      <td>CON-004</td>
+      <td>Write access restricted to Data Owner and Source Processing only</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>9. Open Questions</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Question</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>OQ-001</td>
+      <td>Is there a formal correction workflow for locked-field errors (e.g., wrong exchange on creation), or is deactivate + new record the only path?</td>
+    </tr>
+    <tr>
+      <td>OQ-002</td>
+      <td>What is the SLA for status cascade on large parent records (e.g., disabling an Exchange with thousands of descendants)? Flagged in NFR-NMD-001-002 but not yet quantified.</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>Change Log</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th>Date</th>
+      <th>Author</th>
+      <th>Summary</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>v0.1</td>
+      <td>2026-03-01</td>
+      <td>Leo</td>
+      <td>Initial draft — DATA_PAGE spec for FA-01 Canonical Maintenance from FRD-NMD-0001. Covers field catalog, CRUD operations, business rules, validation rules, and acceptance criteria for both Futures &amp; Options and FX asset classes.</td>
+    </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

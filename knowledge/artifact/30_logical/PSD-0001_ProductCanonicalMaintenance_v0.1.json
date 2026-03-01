@@ -1,0 +1,512 @@
+{
+  "kind": "ProductSpecification",
+  "metadata": {
+    "document_id": "PSD-0001",
+    "title": "Product Canonical Maintenance",
+    "version": "v0.1",
+    "status": "Draft",
+    "classification": "Internal",
+    "created_date": "2026-03-01",
+    "last_updated": "2026-03-01",
+    "author": "Leo",
+    "reviewer": "TBD",
+    "approver": "TBD",
+    "parent_document": "FRD-NMD-0001",
+    "related_documents": [
+      "PC-NMD-0001",
+      "FRD-NMD-0001"
+    ],
+    "tags": [
+      "canonical",
+      "product-management",
+      "market-data"
+    ],
+    "supersedes": null
+  },
+  "function_overview": {
+    "content": "Provides full lifecycle management of the NMD product canonical entity table — creating, updating, deactivating, and managing the status of instrument master records, with a full audit trail on every write.",
+    "function_type": "DATA_PAGE",
+    "module": "NMD-CANONICAL",
+    "triggering_actor": [
+      "Data Owner (ACT-001)",
+      "Data Ingestion Module / Source Processing (ACT-003)"
+    ]
+  },
+  "user_roles_and_permissions": {
+    "roles": [
+      {
+        "role": "Data Owner",
+        "type": "Human",
+        "permissions": [
+          "Create canonical record",
+          "Update canonical record (non-locked fields only)",
+          "Deactivate canonical record (via Disable status)",
+          "Change status to any value subject to parent status constraint (BR-006)"
+        ]
+      },
+      {
+        "role": "Data Ingestion Module (Source Processing)",
+        "type": "System",
+        "permissions": [
+          "Create canonical record (golden source only)",
+          "Set status as defined by source configuration only"
+        ]
+      }
+    ]
+  },
+  "preconditions_and_dependencies": {
+    "preconditions": [
+      {
+        "id": "PRE-001",
+        "description": "Canonical entity table is initialised and accessible"
+      },
+      {
+        "id": "PRE-002",
+        "description": "Phase 1 asset class definitions (Futures & Options, FX) are configured in the system"
+      },
+      {
+        "id": "PRE-003",
+        "description": "Hash algorithm is agreed and implemented platform-wide (see OI-001 in FRD-NMD-0001)"
+      },
+      {
+        "id": "PRE-004",
+        "description": "For Data Owner path: user is authenticated with Data Owner role"
+      },
+      {
+        "id": "PRE-005",
+        "description": "For Source Processing path: source configuration exists with golden source flag and initial status defined (FRD-NMD-0002)"
+      }
+    ],
+    "dependencies": [
+      {
+        "id": "DEP-001",
+        "description": "FRD-NMD-0002 source configuration schema — auto-create path cannot be designed until source configuration is finalised"
+      },
+      {
+        "id": "DEP-002",
+        "description": "Asset class mapping definitions for Phase 1 (Futures & Options, FX) — field validation rules for entity type and Product Type cannot be finalised without these"
+      },
+      {
+        "id": "DEP-003",
+        "description": "Hash algorithm agreed across all NMD modules — canonical key computation must be consistent platform-wide"
+      }
+    ]
+  },
+  "data_page_spec": {
+    "required_when": "function_type == DATA_PAGE",
+    "entity_definition": {
+      "name": "Canonical Record",
+      "description": "A single row in the canonical entity table representing one unique financial instrument, identified by its canonical key. No hard delete — retirement via Disable status only.",
+      "primary_key": "canonical_key"
+    },
+    "field_catalog": [
+      {
+        "field": "canonical_key",
+        "type": "string",
+        "source": "System-computed",
+        "create": "Auto — hash of 5 hierarchy columns",
+        "update": "Locked — fixed at creation",
+        "required": true,
+        "notes": "Deterministic hash; same 5-column input always produces the same key"
+      },
+      {
+        "field": "exchange",
+        "type": "string",
+        "source": "User / Source Processing",
+        "create": "Required",
+        "update": "Locked",
+        "required": true,
+        "notes": "Mandatory on every record. For FX records: fixed value 'FX'"
+      },
+      {
+        "field": "commodity",
+        "type": "string",
+        "source": "User / Source Processing",
+        "create": "Optional — required for entity types above L1",
+        "update": "Locked",
+        "required": false,
+        "notes": "For FX Currency Pair: must be XXXYYY format (6 uppercase characters)"
+      },
+      {
+        "field": "product_type",
+        "type": "enum",
+        "source": "User / Source Processing",
+        "create": "Optional — required for L3+ entity types",
+        "update": "Locked",
+        "required": false,
+        "notes": "Futures & Options: PHY | FUT | CMB | OOP | OOF | OOC. FX: must be null"
+      },
+      {
+        "field": "product_code",
+        "type": "string",
+        "source": "User / Source Processing",
+        "create": "Optional — required for L3+ entity types",
+        "update": "Locked",
+        "required": false,
+        "notes": "FX: must be null"
+      },
+      {
+        "field": "contract",
+        "type": "string",
+        "source": "User / Source Processing",
+        "create": "Optional — required for contract-level entity types",
+        "update": "Locked",
+        "required": false,
+        "notes": "Format validated per entity type. Option Contract: YYYYMM_CP_STRIKE | YYYYMMDD_CP_STRIKE | YYYYMMWN_CP_STRIKE where CP = C or P. FX: must be null"
+      },
+      {
+        "field": "asset_class",
+        "type": "enum",
+        "source": "User / Source Processing",
+        "create": "Required",
+        "update": "Locked",
+        "required": true,
+        "notes": "Futures & Options | FX"
+      },
+      {
+        "field": "entity_type",
+        "type": "enum",
+        "source": "User / Source Processing",
+        "create": "Required",
+        "update": "Locked",
+        "required": true,
+        "notes": "Must match a predefined entity type for the selected asset class"
+      },
+      {
+        "field": "status",
+        "type": "enum",
+        "source": "User / Source Processing",
+        "create": "Required",
+        "update": "Editable",
+        "required": true,
+        "notes": "Active | Inactive | Disable. Subject to parent status constraint (BR-006). Source Processing: from source configuration only"
+      },
+      {
+        "field": "source",
+        "type": "string",
+        "source": "System",
+        "create": "Auto",
+        "update": "Read-only",
+        "required": true,
+        "notes": "Identifies creation actor: 'User' or source processing identifier"
+      },
+      {
+        "field": "created_by",
+        "type": "string",
+        "source": "System",
+        "create": "Auto",
+        "update": "Read-only",
+        "required": true,
+        "notes": ""
+      },
+      {
+        "field": "created_at",
+        "type": "timestamp",
+        "source": "System",
+        "create": "Auto",
+        "update": "Read-only",
+        "required": true,
+        "notes": ""
+      },
+      {
+        "field": "last_updated_by",
+        "type": "string",
+        "source": "System",
+        "create": "Auto",
+        "update": "Auto",
+        "required": true,
+        "notes": ""
+      },
+      {
+        "field": "last_updated_at",
+        "type": "timestamp",
+        "source": "System",
+        "create": "Auto",
+        "update": "Auto",
+        "required": true,
+        "notes": ""
+      }
+    ],
+    "list_view": {
+      "columns": [
+        "canonical_key",
+        "exchange",
+        "commodity",
+        "product_type",
+        "product_code",
+        "contract",
+        "asset_class",
+        "entity_type",
+        "status",
+        "last_updated_at"
+      ],
+      "default_sort": "last_updated_at DESC",
+      "filters": [
+        "status",
+        "asset_class",
+        "exchange"
+      ]
+    },
+    "detail_view": {
+      "fields": "All fields including created_by, created_at, source, and link to audit trail",
+      "audit_trail": "Full immutable audit log accessible from detail view"
+    },
+    "crud_operations": [
+      {
+        "operation": "Create",
+        "actors": [
+          "Data Owner",
+          "Source Processing"
+        ],
+        "description": "Create a new canonical record. Canonical key computed from 5 hierarchy columns. Initial status set by actor: user-selected for Data Owner, source configuration for Source Processing.",
+        "post_conditions": [
+          "Record persisted",
+          "Canonical key computed and stored",
+          "Audit log entry created",
+          "canonical.record.created event published"
+        ]
+      },
+      {
+        "operation": "Update",
+        "actors": [
+          "Data Owner",
+          "Source Processing"
+        ],
+        "description": "Update non-locked fields on an existing canonical record. The 5 hierarchy columns, asset_class, entity_type, and canonical_key are immutable after creation.",
+        "post_conditions": [
+          "Record updated",
+          "Audit log entry created for each changed field",
+          "canonical.record.updated event published"
+        ]
+      },
+      {
+        "operation": "Status Change",
+        "actors": [
+          "Data Owner",
+          "Source Processing"
+        ],
+        "description": "Change the status of a canonical record. Triggers top-down cascade to all non-Disabled descendants.",
+        "post_conditions": [
+          "Record status updated",
+          "Cascade applied to non-Disabled descendants",
+          "Audit log entry created for each affected record",
+          "canonical.status.changed event published"
+        ]
+      },
+      {
+        "operation": "Delete",
+        "actors": [],
+        "description": "Not permitted. Retirement via Disable status only.",
+        "post_conditions": []
+      }
+    ]
+  },
+  "business_rules": {
+    "rules": [
+      {
+        "id": "BR-001",
+        "rule": "Exchange is mandatory on every record — creation rejected without it"
+      },
+      {
+        "id": "BR-002",
+        "rule": "Canonical key is computed as a deterministic hash of all 5 columns (null placeholders for skipped levels) at creation and is immutable thereafter"
+      },
+      {
+        "id": "BR-003",
+        "rule": "The 5 hierarchy columns (exchange, commodity, product_type, product_code, contract), asset_class, and entity_type are locked after creation — corrections require deactivating the record and creating a new one"
+      },
+      {
+        "id": "BR-004",
+        "rule": "Entity type must match a predefined type for the selected asset class; column population must conform to that entity type's rules"
+      },
+      {
+        "id": "BR-005",
+        "rule": "Status cascade is top-down — a status change propagates to all non-Disabled descendants; Disabled descendants are exempt and remain unchanged"
+      },
+      {
+        "id": "BR-006",
+        "rule": "A child record's status cannot be more permissive than its parent: child cannot be Active if parent is Inactive or Disabled; child cannot be Inactive if parent is Disabled"
+      },
+      {
+        "id": "BR-007",
+        "rule": "Data Owner may set status to any value subject to BR-006; Source Processing may only set status as defined by source configuration"
+      },
+      {
+        "id": "BR-008",
+        "rule": "Source Processing initial status is taken from source configuration — never defaulted to Active"
+      },
+      {
+        "id": "BR-009",
+        "rule": "Duplicate records (same canonical key hash) are rejected on creation"
+      },
+      {
+        "id": "BR-010",
+        "rule": "All writes produce an immutable audit log entry — no write path bypasses the audit trail"
+      }
+    ]
+  },
+  "validation_rules": {
+    "rules": [
+      {
+        "id": "VAL-001",
+        "field": "exchange",
+        "rule": "Must be non-empty",
+        "error_message": "Exchange is required"
+      },
+      {
+        "id": "VAL-002",
+        "field": "asset_class",
+        "rule": "Must be one of: Futures & Options, FX",
+        "error_message": "Invalid asset class"
+      },
+      {
+        "id": "VAL-003",
+        "field": "entity_type",
+        "rule": "Must match a predefined entity type for the selected asset_class",
+        "error_message": "Entity type not valid for asset class"
+      },
+      {
+        "id": "VAL-004",
+        "field": "product_type",
+        "rule": "For Futures & Options: must be one of PHY, FUT, CMB, OOP, OOF, OOC. For FX: must be null",
+        "error_message": "Invalid product type for asset class"
+      },
+      {
+        "id": "VAL-005",
+        "field": "contract",
+        "rule": "For Option Contract entity type: must match YYYYMM_CP_STRIKE | YYYYMMDD_CP_STRIKE | YYYYMMWN_CP_STRIKE where CP = C or P. For FX: must be null",
+        "error_message": "Invalid contract format for entity type"
+      },
+      {
+        "id": "VAL-006",
+        "field": "commodity",
+        "rule": "For FX Currency Pair entity type: must be exactly 6 uppercase characters (XXXYYY format)",
+        "error_message": "Currency pair must be 6 uppercase characters"
+      },
+      {
+        "id": "VAL-007",
+        "field": "canonical_key",
+        "rule": "Must be unique across all records",
+        "error_message": "Duplicate canonical record"
+      },
+      {
+        "id": "VAL-008",
+        "field": "status",
+        "rule": "Child status cannot be more permissive than parent status",
+        "error_message": "Status not permitted — parent is [parent_status]"
+      }
+    ]
+  },
+  "acceptance_criteria": {
+    "criteria": [
+      {
+        "id": "AC-001",
+        "criterion": "Given a Data Owner submits a valid new canonical record with all required fields, When the create operation executes, Then the record is persisted with a computed canonical key and an audit log entry is created"
+      },
+      {
+        "id": "AC-002",
+        "criterion": "Given the same 5 hierarchy column values are submitted twice, When canonical key is computed, Then both produce the identical hash"
+      },
+      {
+        "id": "AC-003",
+        "criterion": "Given a create is attempted without an Exchange value, When validation runs, Then the request is rejected with 'Exchange is required'"
+      },
+      {
+        "id": "AC-004",
+        "criterion": "Given a create is attempted with a duplicate canonical key, When the system checks uniqueness, Then the request is rejected with 'Duplicate canonical record'"
+      },
+      {
+        "id": "AC-005",
+        "criterion": "Given a Data Owner changes the status of a parent record, When the change is saved, Then all non-Disabled descendants are updated to the new status and audit entries are created for each"
+      },
+      {
+        "id": "AC-006",
+        "criterion": "Given a Data Owner attempts to set a child record to Active when the parent is Inactive or Disabled, When validation runs, Then the request is rejected with the parent status constraint error"
+      },
+      {
+        "id": "AC-007",
+        "criterion": "Given Source Processing creates a canonical record from a golden source, When the record is persisted, Then initial status is taken from source configuration — never defaulted to Active"
+      },
+      {
+        "id": "AC-008",
+        "criterion": "Given an entity type of Option Contract is submitted, When contract format is validated, Then only YYYYMM_CP_STRIKE, YYYYMMDD_CP_STRIKE, or YYYYMMWN_CP_STRIKE formats are accepted"
+      },
+      {
+        "id": "AC-009",
+        "criterion": "Given a Futures & Options record is submitted with a Product Type not in PHY/FUT/CMB/OOP/OOF/OOC, When validation runs, Then the request is rejected with permitted values listed"
+      },
+      {
+        "id": "AC-010",
+        "criterion": "Given an FX Currency Pair record is submitted with a Commodity not matching XXXYYY format, When validation runs, Then the request is rejected with 'Currency pair must be 6 uppercase characters'"
+      },
+      {
+        "id": "AC-011",
+        "criterion": "Given any canonical write occurs (create, update, status change), When the operation completes, Then an immutable audit log entry exists capturing actor, timestamp, field changed, old value, and new value"
+      },
+      {
+        "id": "AC-012",
+        "criterion": "Given a Data Owner attempts to update any of the 5 hierarchy columns on an existing record, When the update is submitted, Then the request is rejected — locked fields cannot be modified"
+      }
+    ]
+  },
+  "assumptions_and_constraints": {
+    "assumptions": [
+      {
+        "id": "ASM-001",
+        "description": "Asset class column mappings for Phase 1 (Futures & Options, FX) are defined before detailed design begins"
+      },
+      {
+        "id": "ASM-002",
+        "description": "Hash algorithm is agreed platform-wide before implementation"
+      },
+      {
+        "id": "ASM-003",
+        "description": "Source Processing (FRD-NMD-0002) owns and provides the golden source flag and initial status configuration"
+      },
+      {
+        "id": "ASM-004",
+        "description": "No bulk import required in Phase 1 — records created individually by Data Owner or Source Processing"
+      }
+    ],
+    "constraints": [
+      {
+        "id": "CON-001",
+        "description": "Phase 1 asset classes: Futures & Options and FX only"
+      },
+      {
+        "id": "CON-002",
+        "description": "No hard deletes — retirement via Disable status only"
+      },
+      {
+        "id": "CON-003",
+        "description": "The 5 hierarchy columns and canonical key are immutable after creation — corrections require deactivate + new record"
+      },
+      {
+        "id": "CON-004",
+        "description": "Write access restricted to Data Owner and Source Processing only"
+      }
+    ]
+  },
+  "open_questions": {
+    "questions": [
+      {
+        "id": "OQ-001",
+        "question": "Is there a formal correction workflow for locked-field errors (e.g., wrong exchange on creation), or is deactivate + new record the only path?"
+      },
+      {
+        "id": "OQ-002",
+        "question": "What is the SLA for status cascade on large parent records (e.g., disabling an Exchange with thousands of descendants)? Flagged in NFR-NMD-001-002 but not yet quantified."
+      }
+    ]
+  },
+  "change_log": {
+    "entries": [
+      {
+        "version": "v0.1",
+        "date": "2026-03-01",
+        "author": "Leo",
+        "description": "Initial draft — DATA_PAGE spec for FA-01 Canonical Maintenance from FRD-NMD-0001. Covers field catalog, CRUD operations, business rules, validation rules, and acceptance criteria for both Futures & Options and FX asset classes."
+      }
+    ]
+  }
+}
