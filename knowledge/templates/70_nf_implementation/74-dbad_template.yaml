@@ -1,0 +1,581 @@
+# ============================================================
+# Database Architecture Document (DBAD) Template
+# Version: 1.0
+# Framework: IEEE 1016 / General Best Practice
+# Scope: Per System / Application
+# Audience: Technical Team (DB Engineers, Backend Developers, DevOps)
+# ============================================================
+
+metadata:
+  document_id: "DBAD-[NNNN]"              # e.g., DBAD-0001
+  title: ""
+  version: ""                              # Semantic: Major.Minor (e.g., 1.0)
+  status: ""                               # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                       # Public | Internal | Confidential | Restricted
+  created_date: ""                         # ISO 8601: YYYY-MM-DD
+  last_updated: ""                         # ISO 8601: YYYY-MM-DD
+  author: ""
+  reviewer: ""
+  approver: ""
+  project_name: ""                         # DBAD-specific: project this database belongs to
+  related_documents: []                    # List of related doc IDs (e.g., NFR-0001, PSD-0001)
+  tags: []                                 # Freeform tags for search/categorization
+  supersedes: ""                           # ID of document this replaces, if any
+
+# ============================================================
+# 1. INTRODUCTION
+# ============================================================
+introduction:
+  purpose:
+    description: >
+      State the purpose of this document. Explain what database architecture
+      decisions it captures and why this document exists.
+    content: ""
+    required: true
+
+  scope:
+    description: >
+      Define the boundaries of the database architecture covered. Identify the
+      system or application, the database instances involved, and any modules
+      or services explicitly excluded.
+    content: ""
+    required: true
+
+  definitions_and_acronyms:
+    description: >
+      List domain-specific terms, abbreviations, and acronyms used throughout
+      this document with their definitions.
+    content: []
+    # Example:
+    #   - term: "OLTP"
+    #     definition: "Online Transaction Processing"
+    required: false
+
+  references:
+    description: >
+      List all referenced documents, standards, and external resources
+      (e.g., NFR, PSD, IEEE 1016, vendor documentation).
+    content: []
+    # Example:
+    #   - id: "NFR-0001"
+    #     title: "Non-Functional Requirements"
+    #   - id: "IEEE 1016"
+    #     title: "IEEE Standard for Software Design Descriptions"
+    required: true
+
+# ============================================================
+# 2. ARCHITECTURE OVERVIEW
+# ============================================================
+architecture_overview:
+  summary:
+    description: >
+      Provide a high-level description of the database architecture.
+      Include a context diagram showing how databases fit within the
+      overall system architecture.
+    content: ""
+    required: true
+
+  technology_stack:
+    description: >
+      List all database technologies, versions, and supporting tools
+      (e.g., RDBMS, NoSQL, caching layers, message queues with persistence).
+    content: []
+    # Example:
+    #   - component: "Primary Database"
+    #     technology: "PostgreSQL 16"
+    #     purpose: "Transactional data store"
+    #   - component: "Cache Layer"
+    #     technology: "Redis 7.2"
+    #     purpose: "Session and query result caching"
+    required: true
+
+  architecture_pattern:
+    description: >
+      Describe the architectural pattern(s) used (e.g., single-instance,
+      primary-replica, multi-master, sharded, polyglot persistence,
+      CQRS, event sourcing). Justify the chosen pattern(s).
+    content: ""
+    required: true
+
+  deployment_topology:
+    description: >
+      Describe how database instances are deployed across environments
+      (dev, staging, production). Include region/zone placement, cloud
+      provider details, and infrastructure-as-code references if applicable.
+    content: ""
+    required: true
+
+# ============================================================
+# 3. LOGICAL DATA MODEL
+# ============================================================
+logical_data_model:
+  entity_relationship_diagram:
+    description: >
+      Include or reference the Entity-Relationship Diagram (ERD) showing
+      all entities, their attributes, and relationships. Use standard
+      notation (Chen, Crow's Foot, or UML). Attach the diagram file or
+      embed the image reference.
+    content: ""
+    diagram_reference: ""                  # Path or link to ERD file
+    required: true
+
+  entity_descriptions:
+    description: >
+      For each entity in the ERD, provide a detailed description including
+      its purpose, key attributes, business rules, and constraints at the
+      logical level.
+    content: []
+    # Example:
+    #   - entity: "Customer"
+    #     description: "Represents a registered end-user of the platform"
+    #     key_attributes:
+    #       - name: "customer_id"
+    #         type: "UUID"
+    #         description: "Unique identifier"
+    #       - name: "email"
+    #         type: "String"
+    #         description: "Unique email address"
+    #     business_rules:
+    #       - "Email must be unique across all customers"
+    #       - "A customer must have at least one associated address"
+    required: true
+
+  relationships:
+    description: >
+      Document all relationships between entities including cardinality
+      (1:1, 1:N, M:N), participation constraints (total/partial),
+      and relationship semantics.
+    content: []
+    # Example:
+    #   - parent: "Customer"
+    #     child: "Order"
+    #     cardinality: "1:N"
+    #     description: "A customer can place zero or more orders"
+    required: true
+
+# ============================================================
+# 4. PHYSICAL DATA MODEL
+# ============================================================
+physical_data_model:
+  schema_organization:
+    description: >
+      Describe how schemas/databases are organized (e.g., schema-per-module,
+      single schema, multi-tenant schema strategy). Include naming conventions
+      for schemas.
+    content: ""
+    required: true
+
+  table_definitions:
+    description: >
+      Provide detailed table definitions including column names, data types,
+      nullability, default values, primary keys, foreign keys, unique
+      constraints, and check constraints. Reference DDL scripts if available.
+    content: []
+    # Example:
+    #   - table: "customers"
+    #     schema: "public"
+    #     description: "Stores customer profile information"
+    #     columns:
+    #       - name: "id"
+    #         type: "UUID"
+    #         nullable: false
+    #         default: "gen_random_uuid()"
+    #         primary_key: true
+    #       - name: "email"
+    #         type: "VARCHAR(255)"
+    #         nullable: false
+    #         unique: true
+    #     foreign_keys: []
+    #     check_constraints: []
+    ddl_script_reference: ""               # Path to DDL scripts
+    required: true
+
+  naming_conventions:
+    description: >
+      Define naming conventions for tables, columns, indexes, constraints,
+      sequences, and other database objects. Provide examples for each.
+    content: ""
+    # Recommended areas:
+    #   - Table names: lowercase, plural, snake_case (e.g., order_items)
+    #   - Column names: lowercase, snake_case (e.g., created_at)
+    #   - Primary keys: id or <table_singular>_id
+    #   - Foreign keys: fk_<child>_<parent> or <parent_singular>_id
+    #   - Indexes: idx_<table>_<columns>
+    #   - Unique constraints: uq_<table>_<columns>
+    required: true
+
+  data_types_and_standards:
+    description: >
+      Document standardized data type usage across the database (e.g.,
+      always use TIMESTAMPTZ for timestamps, UUID for identifiers,
+      NUMERIC(19,4) for monetary values). Include rationale.
+    content: ""
+    required: true
+
+# ============================================================
+# 5. INDEXING STRATEGY
+# ============================================================
+indexing_strategy:
+  index_design:
+    description: >
+      Document all indexes including type (B-tree, hash, GIN, GiST,
+      partial, covering), the columns involved, and the query patterns
+      they optimize. Include rationale for each index.
+    content: []
+    # Example:
+    #   - table: "orders"
+    #     index_name: "idx_orders_customer_id_created_at"
+    #     type: "B-tree"
+    #     columns: ["customer_id", "created_at DESC"]
+    #     purpose: "Optimizes customer order history lookups"
+    #     partial_condition: ""
+    required: true
+
+  indexing_guidelines:
+    description: >
+      Define guidelines for when and how to create new indexes, including
+      analysis tools to use (e.g., EXPLAIN ANALYZE), thresholds for
+      deciding when an index is warranted, and anti-patterns to avoid.
+    content: ""
+    required: false
+
+# ============================================================
+# 6. DATA ACCESS PATTERNS
+# ============================================================
+data_access_patterns:
+  query_patterns:
+    description: >
+      Document the primary read/write access patterns including estimated
+      frequency, latency requirements, and the tables/indexes involved.
+      This drives index and partitioning decisions.
+    content: []
+    # Example:
+    #   - pattern: "Get customer recent orders"
+    #     type: "READ"
+    #     frequency: "~500 req/sec peak"
+    #     latency_target: "<50ms p99"
+    #     tables: ["customers", "orders", "order_items"]
+    #     notes: "Uses covering index on orders"
+    required: true
+
+  connection_management:
+    description: >
+      Document connection pooling strategy, pool sizing, timeout
+      configurations, and connection lifecycle management. Include
+      tool/library details (e.g., PgBouncer, HikariCP).
+    content: ""
+    required: true
+
+  orm_and_data_access_layer:
+    description: >
+      If an ORM or data access framework is used, document which one,
+      version, configuration, and any custom mappings or conventions.
+      Note any known ORM limitations or N+1 mitigation strategies.
+    content: ""
+    required: false
+
+# ============================================================
+# 7. PARTITIONING & SHARDING
+# ============================================================
+partitioning_and_sharding:
+  partitioning_strategy:
+    description: >
+      Document table partitioning strategies (range, list, hash),
+      partition key selection rationale, partition maintenance
+      procedures, and retention policies.
+    content: []
+    # Example:
+    #   - table: "events"
+    #     strategy: "Range partitioning by created_at (monthly)"
+    #     partition_key: "created_at"
+    #     retention: "24 months active, then archived"
+    required: false
+
+  sharding_strategy:
+    description: >
+      If horizontal sharding is used, document the shard key selection
+      rationale, shard topology, routing mechanism, cross-shard query
+      handling, and rebalancing procedures.
+    content: ""
+    required: false
+
+# ============================================================
+# 8. SECURITY & ACCESS CONTROL
+# ============================================================
+security_and_access_control:
+  authentication:
+    description: >
+      Document how applications and users authenticate to the database
+      (e.g., password, certificate, IAM-based auth, Kerberos).
+    content: ""
+    required: true
+
+  authorization:
+    description: >
+      Document the role-based or attribute-based access control model.
+      List database roles, their privileges, and the principle of
+      least privilege implementation.
+    content: []
+    # Example:
+    #   - role: "app_read"
+    #     privileges: "SELECT on all tables in public schema"
+    #     assigned_to: "Application read replicas"
+    #   - role: "app_write"
+    #     privileges: "SELECT, INSERT, UPDATE, DELETE on all tables"
+    #     assigned_to: "Application primary connection"
+    required: true
+
+  encryption:
+    description: >
+      Document encryption strategies for data at rest and in transit.
+      Include TLS configuration, transparent data encryption (TDE),
+      column-level encryption for sensitive fields, and key management.
+    content: ""
+    required: true
+
+  data_masking_and_anonymization:
+    description: >
+      Document strategies for masking or anonymizing sensitive data
+      in non-production environments. Include tools and procedures.
+    content: ""
+    required: false
+
+  audit_logging:
+    description: >
+      Document database-level audit logging configuration including
+      what events are logged, retention policy, and review procedures.
+    content: ""
+    required: true
+
+# ============================================================
+# 9. BACKUP & RECOVERY
+# ============================================================
+backup_and_recovery:
+  backup_strategy:
+    description: >
+      Document the backup approach including full, incremental, and
+      continuous archiving (WAL archiving). Specify schedule, retention,
+      and storage location.
+    content: ""
+    # Recommended details:
+    #   - Full backup frequency and timing
+    #   - Incremental/differential schedule
+    #   - WAL/binlog archiving configuration
+    #   - Backup storage location and encryption
+    #   - Cross-region backup replication
+    required: true
+
+  recovery_objectives:
+    description: >
+      Define the Recovery Point Objective (RPO) and Recovery Time
+      Objective (RTO) for each database. Document how the backup
+      strategy meets these objectives.
+    content: ""
+    # Example:
+    #   rpo: "< 1 hour"
+    #   rto: "< 4 hours"
+    required: true
+
+  recovery_procedures:
+    description: >
+      Document step-by-step recovery procedures for common failure
+      scenarios (single table restore, full database restore, point-in-time
+      recovery, failover to replica).
+    content: []
+    required: true
+
+  disaster_recovery:
+    description: >
+      Document the disaster recovery strategy including cross-region
+      replication, failover procedures, and DR testing schedule.
+    content: ""
+    required: true
+
+# ============================================================
+# 10. PERFORMANCE & OPTIMIZATION
+# ============================================================
+performance_and_optimization:
+  capacity_planning:
+    description: >
+      Document current and projected data volumes, growth rates,
+      storage requirements, and compute/memory sizing. Include
+      the methodology used for projections.
+    content: ""
+    required: true
+
+  performance_baselines:
+    description: >
+      Document baseline performance metrics for key queries and
+      operations. These serve as benchmarks for detecting degradation.
+    content: []
+    # Example:
+    #   - query: "Customer order history"
+    #     baseline_p50: "12ms"
+    #     baseline_p99: "45ms"
+    #     measured_date: "2026-01-15"
+    required: false
+
+  optimization_techniques:
+    description: >
+      Document applied or planned optimization techniques (e.g.,
+      materialized views, query rewriting, denormalization decisions,
+      caching strategies, read replica routing).
+    content: ""
+    required: false
+
+  configuration_tuning:
+    description: >
+      Document non-default database configuration parameters and
+      the rationale for each change (e.g., shared_buffers,
+      work_mem, max_connections, innodb_buffer_pool_size).
+    content: []
+    # Example:
+    #   - parameter: "shared_buffers"
+    #     value: "8GB"
+    #     rationale: "Set to 25% of 32GB RAM per PostgreSQL guidelines"
+    required: true
+
+# ============================================================
+# 11. MIGRATION & VERSIONING
+# ============================================================
+migration_and_versioning:
+  migration_tool:
+    description: >
+      Document the database migration tool used (e.g., Flyway,
+      Liquibase, Alembic, Django migrations, custom scripts) and
+      its configuration.
+    content: ""
+    required: true
+
+  migration_strategy:
+    description: >
+      Document the migration workflow including naming conventions,
+      review process, rollback procedures, and zero-downtime
+      migration techniques (e.g., expand-contract pattern).
+    content: ""
+    required: true
+
+  seed_and_reference_data:
+    description: >
+      Document how reference/lookup data and seed data are managed,
+      versioned, and deployed across environments.
+    content: ""
+    required: false
+
+# ============================================================
+# 12. MONITORING & ALERTING
+# ============================================================
+monitoring_and_alerting:
+  monitoring_tools:
+    description: >
+      Document the monitoring stack used for database observability
+      (e.g., Prometheus + Grafana, Datadog, CloudWatch, pg_stat_statements).
+    content: ""
+    required: true
+
+  key_metrics:
+    description: >
+      List the key database metrics monitored and their alert thresholds.
+    content: []
+    # Example:
+    #   - metric: "Connection utilization"
+    #     threshold: "> 80%"
+    #     severity: "Warning"
+    #   - metric: "Replication lag"
+    #     threshold: "> 30 seconds"
+    #     severity: "Critical"
+    required: true
+
+  alerting_and_escalation:
+    description: >
+      Document the alerting channels, escalation procedures, and
+      on-call responsibilities for database incidents.
+    content: ""
+    required: true
+
+# ============================================================
+# 13. HIGH AVAILABILITY & REPLICATION
+# ============================================================
+high_availability:
+  replication_topology:
+    description: >
+      Document the replication setup including synchronous vs.
+      asynchronous replication, number of replicas, read routing
+      strategy, and failover mechanism.
+    content: ""
+    required: true
+
+  failover_procedures:
+    description: >
+      Document automatic and manual failover procedures, including
+      health check configurations, promotion steps, and DNS/connection
+      string update mechanisms.
+    content: ""
+    required: true
+
+  maintenance_windows:
+    description: >
+      Define scheduled maintenance windows for patching, upgrades,
+      and vacuum/analyze operations. Document the process for
+      zero-downtime maintenance where applicable.
+    content: ""
+    required: false
+
+# ============================================================
+# 14. DATA LIFECYCLE MANAGEMENT
+# ============================================================
+data_lifecycle_management:
+  data_retention:
+    description: >
+      Document data retention policies per table or data category.
+      Include legal/regulatory requirements driving retention periods.
+    content: []
+    # Example:
+    #   - data_category: "Transaction records"
+    #     retention_period: "7 years"
+    #     regulation: "Financial compliance"
+    #     archival_strategy: "Move to cold storage after 2 years"
+    required: true
+
+  archival_strategy:
+    description: >
+      Document how data is archived (e.g., partitioned table drop,
+      export to object storage, move to data warehouse). Include
+      retrieval procedures for archived data.
+    content: ""
+    required: false
+
+  data_purging:
+    description: >
+      Document procedures for permanent data deletion including
+      soft-delete vs hard-delete strategies, GDPR right-to-erasure
+      compliance, and cascade deletion rules.
+    content: ""
+    required: false
+
+# ============================================================
+# ATTACHMENTS
+# ============================================================
+attachments:
+  description: >
+    List all supporting files attached to this document (ERDs,
+    DDL scripts, configuration files, benchmark results, etc.).
+  content: []
+  # Example:
+  #   - filename: "erd_v1.2.png"
+  #     description: "Entity-Relationship Diagram"
+  #   - filename: "ddl_schema_public.sql"
+  #     description: "DDL script for public schema"
+
+# ============================================================
+# CHANGE LOG
+# ============================================================
+change_log:
+  description: >
+    Track all changes made to this document across versions.
+  entries: []
+  # Example:
+  #   - version: "1.0"
+  #     date: "2026-02-23"
+  #     author: "Jane Doe"
+  #     changes: "Initial document creation"

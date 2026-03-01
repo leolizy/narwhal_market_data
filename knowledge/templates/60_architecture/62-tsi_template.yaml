@@ -1,0 +1,250 @@
+# ============================================================
+# Technology Stack Inventory (TSI) Template
+# Version: 1.0
+# Framework: TOGAF / ITIL aligned — General Best Practice
+# Scope: Per System / Application
+# ============================================================
+
+metadata:
+  document_id: "TSI-[NNNN]"              # e.g., TSI-0001
+  title: ""                               # e.g., "Technology Stack Inventory — Order Management System"
+  version: ""                             # Semantic: Major.Minor (e.g., 1.0)
+  status: ""                              # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                      # Public | Internal | Confidential | Restricted
+  created_date: ""                        # YYYY-MM-DD
+  last_updated: ""                        # YYYY-MM-DD
+  author: ""
+  reviewer: ""
+  approver: ""
+  system_name: ""                         # Name of the system/application this inventory covers
+  system_id: ""                           # Internal system identifier (e.g., from CMDB)
+  related_documents: []                   # List of related doc IDs (e.g., PSD-0001, DD-0001)
+  tags: []                                # Freeform tags for search/categorization
+  supersedes: ""                          # ID of document this replaces, if any
+
+# ============================================================
+# Section 1: Executive Summary
+# ============================================================
+executive_summary:
+  description: >
+    A brief overview (2–4 paragraphs) of the system's technology landscape.
+    State the system purpose, its architectural style (monolith, microservices,
+    serverless, etc.), and a high-level summary of the key technology choices.
+  content: ""
+  required: true
+
+# ============================================================
+# Section 2: System Context
+# ============================================================
+system_context:
+  description: >
+    Define the boundaries of the system this inventory covers. Include a
+    context diagram reference if available. List upstream/downstream systems
+    and integration points so readers understand what is in-scope vs.
+    out-of-scope.
+  content: ""
+  system_boundary: ""                     # Brief description of what is in-scope
+  architecture_style: ""                  # e.g., Microservices, Monolith, Event-Driven, Serverless
+  context_diagram_ref: ""                 # Link or document ID for architecture context diagram
+  upstream_systems: []                    # Systems that feed data into this system
+  downstream_systems: []                  # Systems that consume data from this system
+  required: true
+
+# ============================================================
+# Section 3: Technology Stack Summary
+# ============================================================
+technology_stack_summary:
+  description: >
+    A categorized summary table of every technology component in the system.
+    Group by layer (Presentation, Application, Data, Infrastructure, etc.).
+    This section provides a quick-reference overview before the detailed
+    breakdown in subsequent sections.
+  categories:
+    - category_name: "Presentation Layer"
+      technologies: []
+    - category_name: "Application Layer"
+      technologies: []
+    - category_name: "Data Layer"
+      technologies: []
+    - category_name: "Infrastructure & Platform"
+      technologies: []
+    - category_name: "DevOps & CI/CD"
+      technologies: []
+    - category_name: "Monitoring & Observability"
+      technologies: []
+    - category_name: "Security"
+      technologies: []
+    - category_name: "Third-Party Services & APIs"
+      technologies: []
+  required: true
+
+# ============================================================
+# Section 4: Detailed Technology Registry
+# ============================================================
+technology_registry:
+  description: >
+    The core of the inventory. For each technology component, capture all
+    relevant attributes. Each entry represents a single technology, library,
+    framework, platform, or service used by the system.
+  entries:
+    - technology_name: ""
+      category: ""                        # Must match a category from Section 3
+      component_type: ""                  # Language | Framework | Library | Database | Platform | Service | Tool
+      version_in_use: ""                  # Currently deployed version
+      latest_stable_version: ""           # Latest available stable version
+      version_gap_status: ""              # Current | Minor Behind | Major Behind | EOL
+      license_type: ""                    # e.g., MIT, Apache 2.0, GPL-3.0, Commercial, Proprietary
+      license_compliance_status: ""       # Compliant | Review Needed | Non-Compliant
+      vendor_or_maintainer: ""            # Organization or community maintaining this technology
+      support_model: ""                   # Community | Commercial Support | Vendor SLA | Internal
+      end_of_life_date: ""               # YYYY-MM-DD or "N/A" or "TBD"
+      purpose: ""                         # Why this technology is used in this system
+      dependencies: []                    # Other technologies in this registry it depends on
+      integration_points: []              # APIs, protocols, or mechanisms used to integrate
+      environment_usage:                  # Which environments use this technology
+        development: false
+        staging: false
+        production: false
+      owner_team: ""                      # Team responsible for this technology within the system
+      risk_rating: ""                     # Low | Medium | High | Critical
+      risk_notes: ""                      # Explanation of risk rating
+      migration_plan_ref: ""             # Link to migration/upgrade plan if applicable
+      notes: ""                           # Any additional context
+  required: true
+
+# ============================================================
+# Section 5: Version & Compatibility Matrix
+# ============================================================
+version_compatibility_matrix:
+  description: >
+    A matrix showing compatibility relationships between key technologies.
+    Useful for upgrade planning — identifies which components must be
+    upgraded together and which can be upgraded independently.
+  content: ""
+  matrix_entries:
+    - technology_a: ""
+      technology_b: ""
+      compatible_versions: ""             # e.g., "React 18.x requires Node >= 16"
+      notes: ""
+  required: false
+
+# ============================================================
+# Section 6: Licensing Summary
+# ============================================================
+licensing_summary:
+  description: >
+    Consolidated view of all license types in use. Flag any copyleft,
+    proprietary, or restrictive licenses that require legal review.
+    Include cost information for commercial licenses.
+  content: ""
+  license_entries:
+    - technology_name: ""
+      license_type: ""
+      license_cost: ""                    # e.g., "$0 (OSS)", "$5,000/year", "Per-seat"
+      renewal_date: ""                    # YYYY-MM-DD or "N/A"
+      legal_review_status: ""             # Approved | Pending Review | Flagged
+      restrictions: ""                    # Notable restrictions (e.g., "GPL — must open-source derivatives")
+  required: true
+
+# ============================================================
+# Section 7: End-of-Life & Deprecation Tracker
+# ============================================================
+eol_deprecation_tracker:
+  description: >
+    Track technologies approaching or past end-of-life. Include planned
+    actions (upgrade, replace, decommission) and timelines. This section
+    drives proactive lifecycle management.
+  content: ""
+  entries:
+    - technology_name: ""
+      current_version: ""
+      eol_date: ""                        # YYYY-MM-DD
+      eol_status: ""                      # Active | Approaching EOL | EOL | Deprecated
+      planned_action: ""                  # Upgrade | Replace | Decommission | Accept Risk
+      target_version_or_replacement: ""
+      action_deadline: ""                 # YYYY-MM-DD
+      owner: ""
+      status: ""                          # Not Started | In Progress | Completed
+  required: true
+
+# ============================================================
+# Section 8: Security Considerations
+# ============================================================
+security_considerations:
+  description: >
+    Document known vulnerabilities, security posture of each technology,
+    and any security-specific configurations. Reference CVE databases
+    and vulnerability scanning results where applicable.
+  content: ""
+  vulnerability_scanning_tool: ""         # e.g., Snyk, Dependabot, OWASP Dependency-Check
+  last_scan_date: ""                      # YYYY-MM-DD
+  critical_vulnerabilities: []            # List of unresolved critical CVEs
+  security_notes: ""
+  required: true
+
+# ============================================================
+# Section 9: Architecture Decision References
+# ============================================================
+architecture_decision_references:
+  description: >
+    Link to Design Decision records (DDs) or design documents that
+    explain WHY specific technologies were chosen. This provides traceability
+    from technology choices back to architectural rationale.
+  entries:
+    - dd_id: ""                           # e.g., DD-0001
+      title: ""
+      decision_date: ""                   # YYYY-MM-DD
+      technologies_affected: []
+      summary: ""
+      link: ""
+  required: false
+
+# ============================================================
+# Section 10: Dependency Map
+# ============================================================
+dependency_map:
+  description: >
+    A visual or tabular representation of how technologies in this
+    inventory depend on one another. Helps identify blast radius for
+    upgrades and single points of failure.
+  content: ""
+  diagram_ref: ""                         # Link to dependency diagram (e.g., Mermaid, draw.io)
+  critical_dependencies: []               # Technologies that, if they fail, impact multiple others
+  required: false
+
+# ============================================================
+# Section 11: Operational Notes
+# ============================================================
+operational_notes:
+  description: >
+    Capture any operational considerations: known performance constraints,
+    scaling limits, configuration quirks, or tribal knowledge about
+    technologies in this stack.
+  content: ""
+  required: false
+
+# ============================================================
+# Section 12: Attachments
+# ============================================================
+attachments:
+  description: >
+    Supporting files such as architecture diagrams, license certificates,
+    scan reports, or vendor contracts.
+  files:
+    - filename: ""
+      description: ""
+      type: ""                            # Diagram | Report | Contract | Certificate | Other
+  required: false
+
+# ============================================================
+# Change Log
+# ============================================================
+change_log:
+  description: >
+    Version history of this document. Every update to the inventory
+    must be recorded here with a summary of what changed and why.
+  entries:
+    - version: ""
+      date: ""                            # YYYY-MM-DD
+      author: ""
+      changes: ""

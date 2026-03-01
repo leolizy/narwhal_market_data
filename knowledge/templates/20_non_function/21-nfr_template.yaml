@@ -1,0 +1,382 @@
+# ----------------------------------------------------------
+# Non-Functional Requirements (NFR) Document Template
+# Pattern: Flat metadata structure
+# Version: 2.0
+# Aligned to: ISO 25010 Quality Model, ISO 27001 Annex A, SOC2 Trust Service Criteria
+# Scope: Per System
+# ----------------------------------------------------------
+
+metadata:
+  document_id: "NFR-[NNNN]"               # e.g., NFR-0001
+  title: ""                                # e.g., "NFR — Order Management System"
+  system_name: ""                          # Target system or application name
+  version: ""                              # Semantic versioning: Major.Minor (e.g., 1.0)
+  status: ""                               # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                       # Public | Internal | Confidential | Restricted
+  created_date: ""                         # ISO 8601: YYYY-MM-DD
+  last_updated: ""                         # ISO 8601: YYYY-MM-DD
+  author: ""                               # Name and role
+  reviewer: ""                             # Name and role
+  approver: ""                             # Name and role
+  parent_pc: ""                           # ID of the parent PC (e.g. PC-NPH-0001)
+  related_documents: []                    # List of related document IDs (e.g. FRD-NPH-0001, RTM-0001)
+  tags: []                                 # Freeform tags for search/categorization
+  supersedes: ""                           # ID of document this replaces, if any
+
+# ----------------------------------------------------------
+# SECTION 1: Document Control
+# ----------------------------------------------------------
+document_control:
+  description: >
+    Captures version, status, scope, and links to related upstream/downstream
+    documents (PC, FRD, RTM). Establishes the governance envelope for this NFR
+    document instance.
+  required: true
+  scope: ""                                # System or process scope statement
+  related_documents_note: >
+    List all parent (PC), sibling (FRD), and traceability (RTM) documents.
+    Use absolute paths or repository URLs for reliable linking.
+
+# ----------------------------------------------------------
+# SECTION 2: Traceability Model
+# ----------------------------------------------------------
+traceability_model:
+  description: >
+    Defines the business drivers (BD) that justify each NFR and the verification
+    evidence types (VE) used to prove compliance. Every NFR in the catalog must
+    trace back to at least one BD and one VE.
+  required: true
+
+  business_drivers:
+    description: >
+      High-level business motivations that generate non-functional needs.
+      Examples: regulatory obligation, SLA commitment, user experience target,
+      competitive benchmark, cost constraint.
+    items:
+      - id: "BD-01"
+        statement: ""                      # e.g., "99.9% uptime SLA commitment to enterprise clients"
+      - id: "BD-02"
+        statement: ""
+      - id: "BD-03"
+        statement: ""
+
+  verification_evidence_types:
+    description: >
+      Categories of evidence that prove an NFR has been met. Each VE maps to
+      a concrete artifact type (report, dashboard, drill record, scan output).
+    items:
+      - id: "VE-01"
+        type: ""                           # e.g., "Load/Performance Test Report"
+        description: ""
+      - id: "VE-02"
+        type: ""                           # e.g., "Availability/SLO Dashboard"
+        description: ""
+      - id: "VE-03"
+        type: ""                           # e.g., "DR/Restore Drill Record"
+        description: ""
+      - id: "VE-04"
+        type: ""                           # e.g., "Security Scan & Vulnerability SLA Report"
+        description: ""
+      - id: "VE-05"
+        type: ""                           # e.g., "Usability/Accessibility Audit Evidence"
+        description: ""
+      - id: "VE-06"
+        type: ""                           # e.g., "CI/CD and Release Logs"
+        description: ""
+      - id: "VE-07"
+        type: ""                           # e.g., "Observability Dashboards & PIR Records"
+        description: ""
+
+# ----------------------------------------------------------
+# SECTION 3: NFR Catalog
+# ----------------------------------------------------------
+nfr_catalog:
+  description: >
+    The authoritative register of all non-functional requirements for this system.
+    Each NFR must be uniquely identified, categorised per ISO 25010 quality
+    characteristics, linked to business drivers and verification evidence, and
+    include quantified, measurable acceptance criteria.
+  required: true
+  id_format: "NFR-[NNNN]"                 # Sequential: NFR-0001, NFR-0002, ...
+  categories:                              # ISO 25010 aligned categories
+    - Performance
+    - Reliability
+    - Usability
+    - Maintainability
+    - Security
+    - Observability
+    - Portability                          # Optional — include if relevant
+    - Compatibility                        # Optional — include if relevant
+  items:
+    - id: "NFR-001"
+      category: "Performance"
+      requirement_statement: ""            # Clear, testable requirement
+      rationale: ""                        # Why this matters to the business
+      measurable_acceptance_criteria: ""   # Quantified threshold + test method
+      traceability:
+        business_drivers: []               # e.g., [BD-01, BD-02]
+        verification_evidence: []          # e.g., [VE-01]
+      priority: ""                         # Critical | High | Medium | Low
+      compliance_tags: []                  # e.g., [ISO27001-A.12, SOC2-CC6]
+    - id: "NFR-002"
+      category: "Reliability"
+      requirement_statement: ""
+      rationale: ""
+      measurable_acceptance_criteria: ""
+      traceability:
+        business_drivers: []
+        verification_evidence: []
+      priority: ""
+      compliance_tags: []
+    - id: "NFR-003"
+      category: "Usability"
+      requirement_statement: ""
+      rationale: ""
+      measurable_acceptance_criteria: ""
+      traceability:
+        business_drivers: []
+        verification_evidence: []
+      priority: ""
+      compliance_tags: []
+    - id: "NFR-004"
+      category: "Maintainability"
+      requirement_statement: ""
+      rationale: ""
+      measurable_acceptance_criteria: ""
+      traceability:
+        business_drivers: []
+        verification_evidence: []
+      priority: ""
+      compliance_tags: []
+    - id: "NFR-005"
+      category: "Security"
+      requirement_statement: ""
+      rationale: ""
+      measurable_acceptance_criteria: ""
+      traceability:
+        business_drivers: []
+        verification_evidence: []
+      priority: ""
+      compliance_tags: []
+    - id: "NFR-006"
+      category: "Observability"
+      requirement_statement: ""
+      rationale: ""
+      measurable_acceptance_criteria: ""
+      traceability:
+        business_drivers: []
+        verification_evidence: []
+      priority: ""
+      compliance_tags: []
+
+# ----------------------------------------------------------
+# SECTION 4: NFR Baseline Checklist
+# ----------------------------------------------------------
+nfr_baseline_checklist:
+  description: >
+    A quick-reference checklist ensuring that each ISO 25010 quality category
+    has been adequately addressed. Authors must confirm all applicable sub-areas
+    are covered before submitting for review.
+  required: true
+  categories:
+    - category: "Performance"
+      sub_areas:
+        - "Response time targets defined"
+        - "Throughput targets defined"
+        - "Scalability requirements defined (horizontal/vertical)"
+        - "Concurrency limits defined"
+        - "Resource utilisation thresholds defined"
+    - category: "Reliability"
+      sub_areas:
+        - "Availability target defined (e.g., 99.9%)"
+        - "RTO (Recovery Time Objective) defined"
+        - "RPO (Recovery Point Objective) defined"
+        - "Failure handling and graceful degradation defined"
+        - "Backup and restore strategy defined"
+        - "Disaster recovery plan referenced"
+    - category: "Usability"
+      sub_areas:
+        - "Accessibility standard defined (e.g., WCAG 2.1 AA)"
+        - "Onboarding/learning expectations defined"
+        - "UI responsiveness targets defined"
+        - "Internationalisation/localisation requirements defined"
+    - category: "Maintainability"
+      sub_areas:
+        - "Coding standards and linting rules defined"
+        - "CI/CD pipeline requirements defined"
+        - "Deployment frequency targets defined"
+        - "Modularity and coupling constraints defined"
+        - "Documentation requirements defined"
+        - "Technical debt management approach defined"
+    - category: "Security"
+      sub_areas:
+        - "Authentication and authorisation model defined"
+        - "Encryption in transit and at rest requirements defined"
+        - "Privacy and compliance obligations defined (GDPR, SOC2, ISO 27001)"
+        - "Vulnerability management SLA defined"
+        - "Secrets management approach defined"
+        - "Audit logging requirements defined"
+        - "Penetration testing cadence defined"
+    - category: "Observability"
+      sub_areas:
+        - "Logging standards and retention defined"
+        - "Metrics and dashboards defined"
+        - "Alerting thresholds and escalation paths defined"
+        - "Distributed tracing requirements defined"
+        - "Incident response process referenced"
+        - "Post-incident review (PIR) cadence defined"
+
+# ----------------------------------------------------------
+# SECTION 5: Compliance Mapping (ISO 27001 / SOC2)
+# ----------------------------------------------------------
+compliance_mapping:
+  description: >
+    Maps each NFR to relevant ISO 27001 Annex A controls and/or SOC2 Trust
+    Service Criteria. Required when the system is in scope for ISO 27001
+    certification or SOC2 audit. Optional otherwise.
+  required: false
+  items:
+    - nfr_id: ""                           # e.g., NFR-005
+      iso27001_controls: []                # e.g., [A.8.24, A.8.25]
+      soc2_criteria: []                    # e.g., [CC6.1, CC6.6]
+      evidence_reference: ""               # e.g., VE-04
+
+# ----------------------------------------------------------
+# SECTION 6: Open Items
+# ----------------------------------------------------------
+open_items:
+  description: >
+    Tracks unresolved questions, pending decisions, or gaps that must be
+    closed before the NFR document can achieve full Approved status. Each
+    open item must have an owner, a target date, and defined closure evidence.
+  required: true
+  items:
+    - id: "OI-001"
+      description: ""
+      impacted_nfr_ids: []                 # e.g., [NFR-001, NFR-002]
+      owner: ""                            # Role or name
+      raised_date: ""                      # ISO 8601: YYYY-MM-DD
+      target_resolution_date: ""           # ISO 8601: YYYY-MM-DD
+      status: ""                           # Open | In Progress | Closed
+      closure_evidence: ""                 # What artifact proves closure
+      resolution: ""                       # Summary of how the item was resolved
+
+# ----------------------------------------------------------
+# SECTION 7: Stakeholder Sign-Off
+# ----------------------------------------------------------
+stakeholder_signoff:
+  description: >
+    Records formal approval from each required stakeholder group. The document
+    cannot reach Approved status until all open items are Closed and all
+    stakeholders have signed off.
+  required: true
+
+  required_stakeholders:
+    - "Product Owner"
+    - "Engineering Lead"
+    - "SRE/DevOps Lead"
+    - "Security Lead"
+    - "Compliance Lead"
+    - "Operations/Support Lead"
+
+  conditional_approval_rules:
+    description: >
+      Defines the decision states and their criteria.
+    statuses:
+      - status: "Blocked"
+        criteria: "Open items unresolved with no clear owner or target date."
+      - status: "Conditionally Approved"
+        criteria: "Reviewed and accepted, but open items pending with assigned owners and target dates."
+      - status: "Approved"
+        criteria: "All open items closed and verified with linked closure evidence."
+
+  signoff_tracker:
+    - stakeholder_group: "Product"
+      reviewer: ""
+      decision: ""                         # Pending | Approved | Conditionally Approved | Rejected
+      signature: ""
+      decision_date: ""                    # ISO 8601: YYYY-MM-DD
+      conditions_notes: ""
+    - stakeholder_group: "Engineering"
+      reviewer: ""
+      decision: ""
+      signature: ""
+      decision_date: ""
+      conditions_notes: ""
+    - stakeholder_group: "SRE/DevOps"
+      reviewer: ""
+      decision: ""
+      signature: ""
+      decision_date: ""
+      conditions_notes: ""
+    - stakeholder_group: "Security"
+      reviewer: ""
+      decision: ""
+      signature: ""
+      decision_date: ""
+      conditions_notes: ""
+    - stakeholder_group: "Compliance"
+      reviewer: ""
+      decision: ""
+      signature: ""
+      decision_date: ""
+      conditions_notes: ""
+    - stakeholder_group: "Operations/Support"
+      reviewer: ""
+      decision: ""
+      signature: ""
+      decision_date: ""
+      conditions_notes: ""
+
+# ----------------------------------------------------------
+# SECTION 8: Appendix — RTM Mapping Guidance
+# ----------------------------------------------------------
+appendix_rtm_mapping:
+  description: >
+    Defines the minimum required columns for the Requirements Traceability
+    Matrix (RTM) CSV that accompanies this NFR document. The RTM provides
+    bidirectional traceability from business requirements through NFRs to
+    verification evidence.
+  required: true
+  rtm_columns:
+    - "NFR_ID"
+    - "Category"
+    - "PC_Section"
+    - "PC_Requirement_IDs"
+    - "FRD_File"
+    - "Requirement_Summary"
+    - "Business_Drivers"
+    - "Owner_Role"
+    - "Verification_Method"
+    - "Primary_Artifact"
+    - "Review_Cadence"
+    - "KPI_or_SLO"
+    - "Status"
+    - "ISO27001_Control"
+    - "SOC2_Criteria"
+
+# ----------------------------------------------------------
+# ATTACHMENTS
+# ----------------------------------------------------------
+attachments:
+  description: >
+    Supporting files referenced by this document (test reports, dashboards,
+    scan outputs, DR drill records, etc.).
+  required: false
+  items:
+    - filename: ""
+      description: ""
+      location: ""                         # Relative path or URL
+
+# ----------------------------------------------------------
+# CHANGE LOG
+# ----------------------------------------------------------
+change_log:
+  description: >
+    Tracks all changes to this document. Every version increment must have
+    a corresponding change log entry.
+  entries:
+    - version: ""
+      date: ""                             # ISO 8601: YYYY-MM-DD
+      author: ""
+      summary: ""

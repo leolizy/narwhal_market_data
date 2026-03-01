@@ -1,0 +1,150 @@
+# =============================================================================
+# Shared Schemas — Cross-FRD Reusable Components
+# =============================================================================
+# Purpose : Central repository for schemas referenced by multiple FRD contracts.
+# Usage   : $ref: './_shared_schemas.yaml#/components/schemas/<SchemaName>'
+# Owner   : Platform / Architecture Team
+# =============================================================================
+
+components:
+  schemas:
+    # -------------------------------------------------------------------------
+    # Standard Error Response
+    # -------------------------------------------------------------------------
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+        - traceId
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code (e.g., "ORDER_NOT_FOUND").
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: Human-readable error description.
+          example: "The request body failed validation."
+        traceId:
+          type: string
+          format: uuid
+          description: Correlation ID for distributed tracing.
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+          description: Optional list of field-level errors.
+
+    ErrorDetail:
+      type: object
+      properties:
+        field:
+          type: string
+          example: "email"
+        reason:
+          type: string
+          example: "must be a valid email address"
+
+    # -------------------------------------------------------------------------
+    # Pagination Envelope
+    # -------------------------------------------------------------------------
+    PaginationMeta:
+      type: object
+      required:
+        - page
+        - pageSize
+        - totalItems
+        - totalPages
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          example: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+          example: 20
+        totalItems:
+          type: integer
+          example: 142
+        totalPages:
+          type: integer
+          example: 8
+
+    # -------------------------------------------------------------------------
+    # Audit Fields (embedded in domain schemas)
+    # -------------------------------------------------------------------------
+    AuditFields:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-01-15T08:30:00Z"
+        createdBy:
+          type: string
+          readOnly: true
+          example: "user-abc-123"
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-02-20T14:00:00Z"
+        updatedBy:
+          type: string
+          readOnly: true
+          example: "user-xyz-789"
+
+  # ---------------------------------------------------------------------------
+  # Reusable Parameters
+  # ---------------------------------------------------------------------------
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number (1-indexed).
+
+    PageSizeParam:
+      name: pageSize
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Number of items per page.
+
+    CorrelationIdHeader:
+      name: X-Correlation-Id
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+      description: Caller-supplied correlation ID for tracing. Auto-generated if omitted.
+
+  # ---------------------------------------------------------------------------
+  # Reusable Security Schemes
+  # ---------------------------------------------------------------------------
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: OAuth 2.0 JWT Bearer token.
+
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for service-to-service calls.

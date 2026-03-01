@@ -1,0 +1,617 @@
+# ============================================================
+# Deployment Guide Template
+# Version: 1.0
+# Framework: ITIL / SRE / DevOps Best Practices
+# Scope: Per system or service
+# ============================================================
+
+metadata:
+  document_id: "DG-[NNNN]"               # e.g., DG-0001
+  title: ""
+  version: ""
+  status: ""                              # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                      # Public | Internal | Confidential | Restricted
+  created_date: ""
+  last_updated: ""
+  author: ""
+  reviewer: ""
+  approver: ""
+  related_documents: []                   # e.g., [CICD-0001, AEC-0003, PSD-0012, API-0005]
+  tags: []                                # Freeform tags for search/categorization
+  supersedes: ""                          # ID of document this replaces, if any
+
+# ============================================================
+# 1. INTRODUCTION
+# ============================================================
+introduction:
+  purpose:
+    description: >
+      State the purpose of this deployment guide — which system or service
+      it covers, why a dedicated deployment procedure is needed, and what
+      outcomes following this guide ensures (e.g., repeatable deployments,
+      reduced human error, consistent environments).
+    content: ""
+    required: true
+
+  system_overview:
+    description: >
+      Provide a brief overview of the system being deployed: what it does,
+      which business capabilities it supports, and its criticality tier.
+      Keep this concise — reference the PSD or SAD for full architecture.
+    system_name: ""
+    business_capability: ""
+    criticality_tier: ""                  # Tier 1 (Critical) | Tier 2 (Important) | Tier 3 (Standard)
+    architecture_ref: ""                  # Reference to PSD or SAD document ID
+    required: true
+
+  scope:
+    description: >
+      Define what this guide covers: which components, environments, and
+      deployment scenarios are in scope. Explicitly state any exclusions
+      (e.g., database-only migrations, infrastructure provisioning).
+    in_scope: []
+    out_of_scope: []
+    required: true
+
+  target_audience:
+    description: >
+      Identify who will execute this guide: DevOps engineers, SREs,
+      release managers, on-call engineers. Specify prerequisite knowledge
+      or access requirements.
+    primary_audience: []
+    prerequisite_knowledge: []
+    required_access: []
+    required: true
+
+  definitions_and_acronyms:
+    description: >
+      Define key terms and acronyms specific to this system's deployment
+      process (e.g., component names, internal tooling names, environment
+      shortcodes).
+    content: []
+    required: false
+
+  references:
+    description: >
+      List all referenced documents: parent CICD handbook, architecture
+      docs, runbooks, monitoring dashboards, and external vendor docs.
+    content: []
+    required: true
+
+# ============================================================
+# 2. DEPLOYMENT ARCHITECTURE
+# ============================================================
+deployment_architecture:
+  topology:
+    description: >
+      Describe the deployment topology: how the system is structured
+      across infrastructure (e.g., microservices on Kubernetes, monolith
+      on VMs, serverless functions, hybrid). Include a high-level
+      deployment diagram reference.
+    deployment_model: ""                  # Kubernetes | VM-based | Serverless | Container (non-K8s) | Hybrid
+    infrastructure_platform: ""           # AWS | GCP | Azure | On-Prem | Multi-Cloud
+    orchestration_tool: ""                # Kubernetes | Docker Compose | ECS | Nomad | N/A
+    diagram_ref: ""                       # Reference to deployment diagram in attachments
+    content: ""
+    required: true
+
+  component_inventory:
+    description: >
+      List every deployable component of the system with its artifact
+      type, repository, and deployment target. This is the authoritative
+      registry of what gets deployed and where.
+    components:
+      - component_name: ""
+        artifact_type: ""                 # Docker image | JAR | WAR | npm package | Lambda ZIP | Helm chart | Binary
+        source_repository: ""
+        deployment_target: ""             # e.g., "EKS cluster: prod-us-east-1", "Lambda: order-processor"
+        port: ""                          # Primary service port (if applicable)
+        health_endpoint: ""               # e.g., "/health", "/actuator/health"
+        notes: ""
+    required: true
+
+  dependency_map:
+    description: >
+      Document all external dependencies this system requires at
+      deployment time: databases, message queues, caches, third-party
+      APIs, shared services. For each, specify whether it must be
+      available before deployment begins.
+    dependencies:
+      - dependency_name: ""
+        type: ""                          # Database | Message Queue | Cache | External API | Internal Service | Object Storage
+        required_at_deploy_time: true     # Must be available before deployment starts
+        connection_ref: ""                # Reference to configuration key or secret name (not the value)
+        health_check: ""                  # How to verify this dependency is available
+        fallback_behaviour: ""            # What happens if this dependency is unavailable
+    required: true
+
+# ============================================================
+# 3. ENVIRONMENT CONFIGURATION
+# ============================================================
+environment_configuration:
+  environment_matrix:
+    description: >
+      Define each environment where this system is deployed. Specify
+      the purpose, infrastructure details, access controls, and
+      promotion path between environments.
+    environments:
+      - name: ""                          # e.g., dev, qa, staging, pre-prod, production
+        purpose: ""
+        infrastructure_details: ""        # Cluster name, region, account ID (non-sensitive)
+        access_control: ""                # Who can deploy to this environment
+        promotion_from: ""                # Which environment feeds into this one
+        approval_required: false
+        approvers: []
+    required: true
+
+  configuration_management:
+    description: >
+      Define how configuration is managed across environments: where
+      config files live, how environment-specific values are injected,
+      and the hierarchy of config sources.
+    config_source: ""                     # e.g., "Kubernetes ConfigMaps", "AWS Parameter Store", "Consul", "env files"
+    config_hierarchy: []                  # e.g., ["defaults.yaml", "env-specific.yaml", "env vars", "secrets"]
+    environment_variable_ref: ""          # Link to full env var documentation
+    content: ""
+    required: true
+
+  secrets_management:
+    description: >
+      Define how secrets are managed for this system: where they are
+      stored, how they are injected into the deployment, and rotation
+      policies. Never include actual secret values.
+    secrets_store: ""                     # e.g., "AWS Secrets Manager", "HashiCorp Vault", "K8s Secrets"
+    injection_method: ""                  # e.g., "Sidecar agent", "Init container", "Env var from secret ref"
+    rotation_policy: ""
+    secrets_inventory:
+      - secret_name: ""                   # Logical name (NOT the value)
+        purpose: ""
+        rotation_frequency: ""
+    required: true
+
+  infrastructure_as_code:
+    description: >
+      Reference the IaC definitions for this system's infrastructure.
+      Specify the tool, repository, and how infrastructure changes
+      are applied.
+    iac_tool: ""                          # Terraform | Pulumi | CloudFormation | CDK | Ansible | None
+    iac_repository: ""
+    apply_process: ""                     # e.g., "Via CI/CD pipeline on merge to main", "Manual with approval"
+    content: ""
+    required: false
+
+# ============================================================
+# 4. PRE-DEPLOYMENT CHECKLIST
+# ============================================================
+pre_deployment_checklist:
+  description: >
+    A comprehensive checklist that must be completed before initiating
+    any deployment. Each item should be verifiable. This checklist is
+    the gate between "ready to deploy" and "deploying."
+  required: true
+
+  artifact_validation:
+    description: >
+      Verify the deployment artifact is correct, complete, and has
+      passed all required quality gates.
+    checks:
+      - check: "Artifact version matches the approved release"
+        verification_method: ""
+      - check: "All CI quality gates passed (tests, scans, linting)"
+        verification_method: ""
+      - check: "Artifact signature/checksum verified"
+        verification_method: ""
+      - check: "Release notes reviewed and approved"
+        verification_method: ""
+
+  environment_readiness:
+    description: >
+      Verify the target environment is ready to receive the deployment.
+    checks:
+      - check: "Target environment is healthy and accepting deployments"
+        verification_method: ""
+      - check: "No conflicting deployments in progress"
+        verification_method: ""
+      - check: "Required infrastructure changes applied"
+        verification_method: ""
+      - check: "Database migrations prepared and reviewed (if applicable)"
+        verification_method: ""
+
+  dependency_readiness:
+    description: >
+      Verify all upstream and downstream dependencies are available.
+    checks:
+      - check: "All required external dependencies are healthy"
+        verification_method: ""
+      - check: "Downstream consumers notified of deployment window"
+        verification_method: ""
+      - check: "Feature flags configured for new features (if applicable)"
+        verification_method: ""
+
+  approval_and_communication:
+    description: >
+      Verify all required approvals are obtained and stakeholders
+      are informed.
+    checks:
+      - check: "Deployment approval obtained from required approvers"
+        verification_method: ""
+      - check: "Deployment window communicated to stakeholders"
+        verification_method: ""
+      - check: "On-call team aware of deployment"
+        verification_method: ""
+      - check: "Rollback plan reviewed and confirmed"
+        verification_method: ""
+
+# ============================================================
+# 5. DEPLOYMENT PROCEDURE
+# ============================================================
+deployment_procedure:
+  deployment_strategy:
+    description: >
+      Specify the deployment strategy used for this system and why
+      it was chosen. Reference the parent CICD handbook for strategy
+      definitions.
+    strategy: ""                          # Rolling Update | Blue-Green | Canary | Recreate | Feature Flag
+    rationale: ""
+    cicd_handbook_ref: ""                 # e.g., CICD-0001, Section 5.3
+    required: true
+
+  automated_deployment:
+    description: >
+      Document the standard automated deployment process. This is the
+      primary deployment path — most deployments should follow this
+      procedure.
+    required: true
+
+    trigger:
+      description: >
+        How the deployment pipeline is triggered.
+      trigger_method: ""                  # e.g., "Merge to main branch", "Manual pipeline trigger", "Tag push"
+      pipeline_location: ""               # e.g., ".github/workflows/deploy.yml", "Jenkins job: deploy-service-x"
+      required_parameters: []             # Parameters the deployer must provide (e.g., version, environment)
+
+    steps:
+      - step_number: 1
+        action: ""
+        description: ""
+        executor: ""                      # automated | manual
+        expected_duration: ""
+        success_criteria: ""
+        failure_action: ""                # abort | retry | escalate | continue with warning
+        notes: ""
+
+  manual_deployment:
+    description: >
+      Document the manual deployment fallback procedure. This is used
+      when the automated pipeline is unavailable or for emergency
+      deployments that cannot wait for pipeline fixes.
+    required: false
+
+    prerequisites: []
+    steps:
+      - step_number: 1
+        action: ""
+        command: ""                       # Exact command to execute (if applicable)
+        description: ""
+        expected_duration: ""
+        success_criteria: ""
+        failure_action: ""
+        notes: ""
+
+  database_migration:
+    description: >
+      Document the database migration procedure if this deployment
+      involves schema changes, data migrations, or seed data updates.
+      Specify whether migrations run before, during, or after the
+      application deployment.
+    required: false
+
+    migration_tool: ""                    # e.g., Flyway, Liquibase, Alembic, Django migrations, Prisma
+    migration_timing: ""                  # pre-deploy | during-deploy | post-deploy
+    backward_compatible: false            # Can the previous app version work with the new schema?
+    steps:
+      - step_number: 1
+        action: ""
+        command: ""
+        description: ""
+        rollback_command: ""              # Command to reverse this specific migration step
+        success_criteria: ""
+        notes: ""
+
+# ============================================================
+# 6. POST-DEPLOYMENT VERIFICATION
+# ============================================================
+post_deployment_verification:
+  description: >
+    Define the verification steps that must be completed after every
+    deployment before it is considered successful. These checks confirm
+    the deployment is healthy and the system is functioning correctly.
+  required: true
+
+  smoke_tests:
+    description: >
+      Quick, automated tests that verify core functionality is working
+      after deployment. These should complete within minutes.
+    test_suite_location: ""
+    execution_method: ""                  # e.g., "Automated via pipeline", "Manual: run script X"
+    tests:
+      - test_name: ""
+        description: ""
+        expected_result: ""
+        timeout: ""
+
+  health_checks:
+    description: >
+      System health verification points that confirm all components
+      are running and reachable.
+    checks:
+      - component: ""
+        endpoint: ""
+        expected_response: ""
+        timeout: ""
+
+  monitoring_verification:
+    description: >
+      Verify that monitoring and alerting are active and receiving
+      data from the newly deployed version.
+    checks:
+      - check: "Application metrics flowing to monitoring system"
+        dashboard_url: ""
+        verification_method: ""
+      - check: "Log aggregation receiving logs from new version"
+        log_query: ""
+        verification_method: ""
+      - check: "Error rate within acceptable threshold"
+        threshold: ""
+        verification_method: ""
+
+  traffic_validation:
+    description: >
+      For canary or blue-green deployments, verify that traffic is
+      routing correctly to the new version.
+    validation_steps: []
+    required: false
+
+  signoff:
+    description: >
+      Define who must sign off that the deployment is successful and
+      the system is stable. Specify the observation period before
+      declaring the deployment complete.
+    observation_period: ""                # e.g., "30 minutes", "2 hours", "24 hours"
+    signoff_authority: ""
+    signoff_criteria: []
+
+# ============================================================
+# 7. ROLLBACK PROCEDURE
+# ============================================================
+rollback_procedure:
+  description: >
+    Define the complete rollback procedure for this system. A rollback
+    reverts the deployment to the previous known-good state. Every
+    deployment must have a tested rollback plan.
+  required: true
+
+  rollback_decision_criteria:
+    description: >
+      Define the criteria that trigger a rollback decision. Include
+      both automated triggers and manual decision thresholds.
+    automated_triggers:
+      - trigger: ""
+        threshold: ""                     # e.g., "Error rate > 5% for 5 minutes"
+        action: ""                        # auto-rollback | alert-and-wait
+    manual_triggers:
+      - scenario: ""
+        decision_authority: ""            # Who can authorize a manual rollback
+
+  rollback_steps:
+    description: >
+      Step-by-step rollback procedure. Must be executable under
+      pressure — keep steps clear, unambiguous, and tested.
+    steps:
+      - step_number: 1
+        action: ""
+        command: ""                       # Exact command if applicable
+        description: ""
+        expected_duration: ""
+        success_criteria: ""
+        notes: ""
+
+  database_rollback:
+    description: >
+      Procedure for rolling back database changes. This is often the
+      most complex part of a rollback. Specify whether rollback scripts
+      exist and any data loss implications.
+    rollback_possible: true
+    rollback_method: ""                   # e.g., "Run down-migration", "Restore from backup", "Forward-fix only"
+    data_loss_risk: ""                    # None | Minimal (describe) | Significant (describe)
+    steps: []
+    required: false
+
+  post_rollback_verification:
+    description: >
+      Verification steps after a rollback to confirm the system is
+      back to its previous healthy state.
+    checks:
+      - check: ""
+        verification_method: ""
+
+  rollback_communication:
+    description: >
+      Define who must be notified when a rollback occurs, what
+      information to include, and through which channels.
+    notification_recipients: []
+    notification_template: ""
+    channels: []
+
+# ============================================================
+# 8. TROUBLESHOOTING GUIDE
+# ============================================================
+troubleshooting_guide:
+  description: >
+    Common deployment issues and their resolutions. This section
+    captures tribal knowledge and past incident learnings to help
+    operators resolve problems quickly during deployment.
+  required: true
+
+  common_issues:
+    - issue_id: ""                        # e.g., DG-ISSUE-001
+      symptom: ""
+      probable_cause: ""
+      resolution: ""
+      prevention: ""
+      related_incident: ""                # Link to incident postmortem if this came from one
+
+  diagnostic_commands:
+    description: >
+      Useful commands for diagnosing deployment issues. Organized by
+      category (e.g., pod status, log inspection, network checks).
+    commands:
+      - category: ""
+        command: ""
+        description: ""
+        expected_output: ""
+
+  log_locations:
+    description: >
+      Where to find logs relevant to deployment and the deployed
+      system. Include both real-time and historical log access.
+    logs:
+      - log_name: ""
+        location: ""                      # e.g., "CloudWatch: /aws/eks/prod/service-x"
+        access_method: ""
+        useful_queries: []
+
+# ============================================================
+# 9. COMMUNICATION PLAN
+# ============================================================
+communication_plan:
+  description: >
+    Define the communication protocol for deployments: who to notify,
+    when, through which channels, and what information to include.
+    Covers both routine deployments and incident scenarios.
+  required: true
+
+  routine_deployment:
+    pre_deployment_notification:
+      recipients: []
+      channel: ""                         # e.g., "#deployments Slack channel"
+      template: ""
+      timing: ""                          # e.g., "30 minutes before deployment window"
+
+    deployment_in_progress:
+      channel: ""
+      update_frequency: ""
+
+    post_deployment_notification:
+      recipients: []
+      channel: ""
+      template: ""
+
+  incident_during_deployment:
+    escalation_path:
+      - level: 1
+        role: ""
+        contact_method: ""
+        response_sla: ""
+      - level: 2
+        role: ""
+        contact_method: ""
+        response_sla: ""
+      - level: 3
+        role: ""
+        contact_method: ""
+        response_sla: ""
+
+    stakeholder_notification:
+      recipients: []
+      channel: ""
+      template: ""
+
+# ============================================================
+# 10. MAINTENANCE WINDOWS & SCHEDULING
+# ============================================================
+maintenance_windows:
+  description: >
+    Define deployment windows, maintenance schedules, and any
+    time-based constraints on when deployments can occur.
+  required: false
+
+  standard_deployment_windows:
+    - window_name: ""
+      days: []                            # e.g., ["Monday", "Tuesday", "Wednesday", "Thursday"]
+      time_start: ""                      # e.g., "10:00 UTC"
+      time_end: ""                        # e.g., "16:00 UTC"
+      environment: ""
+
+  blackout_periods:
+    description: >
+      Periods during which deployments are prohibited (e.g., end-of-
+      quarter freeze, holiday periods, major events).
+    periods:
+      - name: ""
+        start_date: ""
+        end_date: ""
+        exception_process: ""             # How to get an exception during a blackout
+
+  emergency_deployment:
+    description: >
+      Conditions under which deployments can occur outside standard
+      windows. Define the approval process and post-hoc documentation
+      requirements.
+    approval_authority: ""
+    approval_process: ""
+    post_hoc_documentation: ""
+
+# ============================================================
+# 11. DISASTER RECOVERY
+# ============================================================
+disaster_recovery:
+  description: >
+    Procedures for recovering from catastrophic deployment failures
+    that go beyond a simple rollback — complete environment rebuild,
+    data recovery, or failover to a disaster recovery site.
+  required: false
+
+  recovery_objectives:
+    rto: ""                               # Recovery Time Objective
+    rpo: ""                               # Recovery Point Objective
+    content: ""
+
+  recovery_procedures:
+    - scenario: ""
+      procedure: ""
+      estimated_duration: ""
+      data_loss_impact: ""
+
+  backup_references:
+    - backup_type: ""                     # e.g., "Database snapshot", "Configuration backup", "Full environment snapshot"
+      location: ""
+      retention: ""
+      restore_procedure_ref: ""           # Reference to detailed restore runbook
+
+# ============================================================
+# ATTACHMENTS
+# ============================================================
+attachments:
+  description: >
+    Supporting files: deployment diagrams, architecture diagrams,
+    pipeline configuration references, runbook links, monitoring
+    dashboard URLs.
+  required: false
+  files: []
+    # - filename: ""
+    #   description: ""
+    #   location: ""
+
+# ============================================================
+# CHANGE LOG
+# ============================================================
+change_log:
+  description: >
+    Version history of this deployment guide.
+  required: true
+  entries:
+    - version: ""
+      date: ""
+      author: ""
+      changes: ""

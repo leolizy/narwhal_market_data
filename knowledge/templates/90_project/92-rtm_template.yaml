@@ -1,0 +1,254 @@
+# ============================================================
+# Requirements Traceability Matrix (RTM) Template
+# Version: 1.0
+# Framework: IEEE 830 / IEEE 829 General Best Practice
+# Granularity: Per System
+# Trace Direction: Full Bidirectional
+# ============================================================
+
+metadata:
+  document_id: "RTM-[NNNN]"              # e.g., RTM-0001
+  title: ""
+  version: ""                             # Semantic: Major.Minor (e.g., 1.0)
+  status: ""                              # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                      # Public | Internal | Confidential | Restricted
+  created_date: ""                        # ISO 8601: YYYY-MM-DD
+  last_updated: ""                        # ISO 8601: YYYY-MM-DD
+  author: ""
+  reviewer: ""
+  approver: ""
+  system_name: ""                         # Target system this RTM covers
+  related_documents: []                   # List of related doc IDs (e.g., PC-0001, FRD-0001)
+  tags: []                                # Freeform tags for search/categorization
+  supersedes: ""                          # ID of document this replaces, if any
+
+# ============================================================
+# Section 1: Purpose & Scope
+# ============================================================
+purpose_and_scope:
+  description: >
+    Define the objective of this traceability matrix, the system it covers,
+    and the boundaries of traceability (which artifact types are traced
+    and which are excluded).
+  content: ""
+  required: true
+
+  system_boundary:
+    description: >
+      Identify the system or subsystem boundary. All requirements within
+      this boundary are in scope for tracing.
+    content: ""
+    required: true
+
+  trace_coverage_goal:
+    description: >
+      State the target coverage percentage and any exceptions.
+      Example: "100% of approved functional requirements must have at least
+      one linked test case and one linked design element."
+    content: ""
+    required: true
+
+# ============================================================
+# Section 2: Artifact Registry
+# ============================================================
+artifact_registry:
+  description: >
+    Enumerate all source and target artifact types included in this matrix.
+    Each artifact type should reference its document prefix and repository
+    location.
+  required: true
+  artifacts:
+    - artifact_type: "Platform Canon"
+      prefix: "PC"
+      source_location: ""
+      owner_role: ""
+
+    - artifact_type: "Functional Requirement"
+      prefix: "FRD"
+      source_location: ""
+      owner_role: ""
+
+    - artifact_type: "Non-Functional Requirement"
+      prefix: "NFR"
+      source_location: ""
+      owner_role: ""
+
+    - artifact_type: "Product Specification"
+      prefix: "PSD"
+      source_location: ""
+      owner_role: ""
+
+    - artifact_type: "Async Event Contract"
+      prefix: "AEC"
+      source_location: ""
+      owner_role: ""
+
+    - artifact_type: "API Specification"
+      prefix: "API"
+      source_location: ""
+      owner_role: ""
+
+    - artifact_type: "Data Contract"
+      prefix: "DC"
+      source_location: ""
+      owner_role: ""
+
+    - artifact_type: "Database Contract"
+      prefix: "DBC"
+      source_location: ""
+      owner_role: ""
+
+    - artifact_type: "Unit Test Specification"
+      prefix: "UT"
+      source_location: ""
+      owner_role: ""
+
+    - artifact_type: "Non-Functional Test Specification"
+      prefix: "NFTS"
+      source_location: ""
+      owner_role: ""
+
+    - artifact_type: "NFR Acceptance Report"
+      prefix: "NFRAR"
+      source_location: ""
+      owner_role: ""
+
+# ============================================================
+# Section 3: Traceability Matrix
+# ============================================================
+traceability_matrix:
+  description: >
+    The core matrix. Each row represents a single business or functional
+    requirement and traces it forward to design, test, defect, and release
+    artifacts, and backward to its originating business requirement.
+  required: true
+  columns:
+    - name: "req_id"
+      description: "Unique requirement identifier (e.g., FRD-0023)"
+    - name: "req_description"
+      description: "Brief description of the requirement"
+    - name: "req_priority"
+      description: "Priority: Critical | High | Medium | Low"
+    - name: "req_status"
+      description: "Status: Proposed | Approved | Implemented | Verified | Deferred | Deleted"
+    - name: "source_pc_id"
+      description: "Backward trace — originating PC requirement ID"
+    - name: "psd_ref"
+      description: "Forward trace — linked PSD section or component ID"
+    - name: "contract_ref"
+      description: "Forward trace — linked contract document ID (AEC, API, DC, DBC)"
+    - name: "test_case_ids"
+      description: "Forward trace — list of linked test case IDs (e.g., UT-0001)"
+    - name: "test_status"
+      description: "Aggregate test result: Not Run | Pass | Fail | Blocked"
+    - name: "defect_ids"
+      description: "Linked defect IDs discovered during testing"
+    - name: "release_id"
+      description: "Release version in which this requirement is delivered"
+    - name: "verification_method"
+      description: "How verified: Test | Inspection | Demonstration | Analysis"
+    - name: "comments"
+      description: "Additional notes, risks, or dependencies"
+  rows: []
+
+# ============================================================
+# Section 4: Coverage Summary
+# ============================================================
+coverage_summary:
+  description: >
+    Provide quantitative traceability coverage metrics. This section
+    is used for go/no-go decisions and audit evidence.
+  required: true
+  metrics:
+    total_requirements: 0
+    requirements_with_design_link: 0
+    requirements_with_test_link: 0
+    requirements_fully_traced: 0          # Linked to design AND test AND release
+    requirements_with_no_trace: 0
+    forward_coverage_pct: 0.0             # (requirements_with_test_link / total) * 100
+    backward_coverage_pct: 0.0            # (requirements_with_source_pc / total) * 100
+    overall_coverage_pct: 0.0             # (fully_traced / total) * 100
+
+# ============================================================
+# Section 5: Gap Analysis
+# ============================================================
+gap_analysis:
+  description: >
+    Identify requirements with incomplete trace links. List each gap,
+    its risk level, and the planned remediation action.
+  required: true
+  gaps:
+    - req_id: ""
+      missing_link_type: ""               # e.g., "Test Case", "PSD", "Release"
+      risk_level: ""                      # Critical | High | Medium | Low
+      remediation_action: ""
+      owner: ""
+      target_date: ""
+
+# ============================================================
+# Section 6: Bidirectional Trace Verification
+# ============================================================
+bidirectional_verification:
+  description: >
+    Confirm that traceability works in both directions. Forward trace
+    ensures every requirement leads to a verifiable outcome. Backward
+    trace ensures every test case and design element links to an
+    approved requirement (no gold-plating).
+  required: true
+
+  forward_trace_check:
+    description: >
+      Verify: Every approved requirement has at least one test case
+      and one design reference.
+    status: ""                            # Complete | In Progress | Not Started
+    exceptions: []
+
+  backward_trace_check:
+    description: >
+      Verify: Every test case traces back to an approved requirement.
+      Every design element traces back to an approved requirement.
+      Flag orphaned artifacts.
+    status: ""
+    orphaned_test_cases: []
+    orphaned_design_elements: []
+
+# ============================================================
+# Section 7: Sign-Off
+# ============================================================
+sign_off:
+  description: >
+    Formal sign-off confirming traceability coverage meets the
+    agreed threshold and all critical gaps are remediated.
+  required: true
+  approvals:
+    - role: "Business Analyst"
+      name: ""
+      date: ""
+      signature: ""
+    - role: "QA Lead"
+      name: ""
+      date: ""
+      signature: ""
+    - role: "Project Manager"
+      name: ""
+      date: ""
+      signature: ""
+
+# ============================================================
+# Section 8: Attachments
+# ============================================================
+attachments:
+  description: >
+    Supporting files such as exported matrix spreadsheets, coverage
+    reports, or tool-generated traceability reports.
+  required: false
+  files: []
+
+# ============================================================
+# Change Log
+# ============================================================
+change_log:
+  - version: ""
+    date: ""
+    author: ""
+    changes: ""

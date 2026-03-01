@@ -1,0 +1,464 @@
+# ============================================================
+# Product Specification Document (PSD) Template
+# Version: 1.0
+# Framework: General Best Practice
+# Scope: One PSD per testable function
+# ============================================================
+
+metadata:
+  document_id: "PSD-[NNNN]"              # e.g., PSD-0001
+  title: ""
+  version: ""
+  status: ""                              # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                      # Public | Internal | Confidential | Restricted
+  created_date: ""
+  last_updated: ""
+  author: ""
+  reviewer: ""
+  approver: ""
+  parent_document: ""                     # e.g., FRD-0012 or EPIC-045
+  related_documents: []                   # List of related doc IDs (AEC, API, DC, DBC, etc.)
+  tags: []                                # Freeform tags for search/categorization
+  supersedes: ""                          # ID of document this replaces, if any
+
+# ============================================================
+# 1. Function Overview
+# ============================================================
+function_overview:
+  description: >
+    High-level summary of what this function does, why it exists,
+    and which user problem it solves. Write in 2-3 sentences.
+  content: ""
+  required: true
+
+  function_type:
+    description: >
+      The archetype of this function. Determines which specification
+      sections are applicable. Select exactly one.
+    value: ""                             # DATA_PAGE | PROCESS_FLOW | STATUS_GROUP
+    required: true
+
+  module:
+    description: "The system module or service this function belongs to."
+    content: ""
+    required: true
+
+  triggering_actor:
+    description: >
+      Who or what initiates this function (e.g., End User, System Scheduler,
+      API Consumer, Admin).
+    content: ""
+    required: true
+
+# ============================================================
+# 2. User Roles & Permissions
+# ============================================================
+user_roles_and_permissions:
+  description: >
+    Define every role that interacts with this function and what
+    operations each role is permitted to perform.
+  required: true
+  roles:
+    - role_name: ""
+      description: ""
+      permissions: []                     # e.g., [Create, Read, Update, Delete, Execute, Approve]
+
+# ============================================================
+# 3. Preconditions & Dependencies
+# ============================================================
+preconditions_and_dependencies:
+  description: >
+    Conditions that must be true before this function can execute.
+    Include upstream data, system states, and external dependencies.
+  required: true
+  preconditions:
+    - id: "PRE-001"
+      description: ""
+      type: ""                            # Data | System State | User State | External
+  dependencies:
+    - id: "DEP-001"
+      system_or_service: ""
+      description: ""
+
+# ============================================================
+# 4. Specification — DATA PAGE (CRUD)
+#    Complete this section when function_type = DATA_PAGE
+# ============================================================
+data_page_spec:
+  description: >
+    Full specification for a data page function, covering entity
+    definition, field catalog, CRUD operations, and UI behavior.
+  required_when: "function_type == DATA_PAGE"
+
+  entity_definition:
+    description: "The data entity this page manages."
+    entity_name: ""
+    entity_description: ""
+    primary_key: ""
+
+  field_catalog:
+    description: >
+      Complete list of fields displayed and/or managed on this page.
+      Each field must specify data type, constraints, and CRUD visibility.
+    fields:
+      - field_name: ""
+        data_type: ""                     # String | Integer | Decimal | Boolean | Date | DateTime | Enum | Reference
+        max_length: null
+        required: false                   # true | false
+        default_value: null
+        validation_rules: ""              # e.g., "Email format", "Range 1-100", "Regex: ^[A-Z]{3}$"
+        on_create: ""                     # Editable | Auto-generated | Hidden | Read-only
+        on_read: ""                       # Visible | Hidden | Masked
+        on_update: ""                     # Editable | Read-only | Hidden
+        on_delete: ""                     # Cascade | Restrict | Set Null | No Effect
+        display_order: null
+        help_text: ""
+
+  list_view:
+    description: "Behavior of the data listing / table view."
+    default_sort_field: ""
+    default_sort_direction: ""            # ASC | DESC
+    searchable_fields: []
+    filterable_fields: []
+    columns_displayed: []                 # Subset of field_catalog
+    pagination:
+      type: ""                            # Offset | Cursor | Infinite Scroll
+      default_page_size: null
+    bulk_actions: []                      # e.g., [Delete, Export, Status Change]
+
+  detail_view:
+    description: "Behavior of the single-record detail / edit view."
+    layout: ""                            # Single Column | Two Column | Tabbed | Wizard
+    sections:
+      - section_name: ""
+        fields: []                        # Field names from field_catalog
+    inline_editing: false                 # true | false
+
+  crud_operations:
+    description: "Detailed behavior for each CRUD operation."
+    create:
+      trigger: ""                         # e.g., "User clicks 'Add New' button"
+      required_fields: []
+      auto_populated_fields: []           # e.g., [created_date, created_by]
+      confirmation_required: false
+      success_action: ""                  # e.g., "Redirect to detail view, show toast"
+      failure_action: ""                  # e.g., "Show inline validation errors"
+    read:
+      access_scope: ""                    # e.g., "Own records only", "All records", "Team records"
+      includes_soft_deleted: false
+    update:
+      trigger: ""
+      editable_fields: []
+      version_conflict_strategy: ""       # Optimistic Lock | Last Write Wins | Merge
+      audit_trail: false                  # true | false
+      confirmation_required: false
+      success_action: ""
+      failure_action: ""
+    delete:
+      type: ""                            # Soft Delete | Hard Delete | Archive
+      trigger: ""
+      confirmation_required: true
+      cascade_effects: ""                 # Describe downstream effects
+      recovery_option: ""                 # e.g., "Restore from Trash within 30 days"
+
+# ============================================================
+# 5. Specification — PROCESS FLOW
+#    Complete this section when function_type = PROCESS_FLOW
+# ============================================================
+process_flow_spec:
+  description: >
+    Full specification for a process flow function, covering trigger,
+    inputs, processing steps, decision points, outputs, and error handling.
+  required_when: "function_type == PROCESS_FLOW"
+
+  trigger:
+    description: "What event initiates this process."
+    trigger_type: ""                      # User Action | Scheduled | Event-Driven | API Call
+    trigger_detail: ""
+    frequency: ""                         # e.g., "On demand", "Daily at 02:00 UTC", "On event X"
+
+  inputs:
+    description: "All inputs required to start the process."
+    items:
+      - input_name: ""
+        source: ""                        # User Input | System | External API | Database
+        data_type: ""
+        required: true
+        validation_rules: ""
+
+  processing_steps:
+    description: >
+      Ordered sequence of steps the system performs. Include decision
+      points, branches, and parallel paths.
+    steps:
+      - step_number: 1
+        step_name: ""
+        description: ""
+        actor: ""                         # System | User | External Service
+        step_type: ""                     # Action | Decision | Validation | Wait | Notification
+        input: ""
+        output: ""
+        decision_branches: []             # For Decision type: [{condition: "", next_step: ""}]
+        timeout: null                     # e.g., "30s", "24h"
+        retry_policy: ""                  # e.g., "3 retries with exponential backoff"
+
+  outputs:
+    description: "All outputs produced upon process completion."
+    items:
+      - output_name: ""
+        destination: ""                   # UI | Database | External API | Notification | File
+        data_type: ""
+        description: ""
+
+  error_handling:
+    description: "How the process handles failures at each step."
+    error_scenarios:
+      - scenario: ""
+        trigger_condition: ""
+        system_behavior: ""               # e.g., "Rollback to step 2", "Notify admin", "Retry"
+        user_notification: ""
+        recovery_action: ""
+
+  sla:
+    description: "Performance expectations for this process."
+    expected_duration: ""                 # e.g., "< 5 seconds for synchronous, < 1 hour for async"
+    timeout_threshold: ""
+    timeout_action: ""
+
+# ============================================================
+# 6. Specification — STATUS GROUP
+#    Complete this section when function_type = STATUS_GROUP
+# ============================================================
+status_group_spec:
+  description: >
+    Full specification for a status group function, covering all
+    mutually exclusive statuses, valid transitions, and per-status processing.
+  required_when: "function_type == STATUS_GROUP"
+
+  entity_context:
+    description: "The entity whose lifecycle this status group governs."
+    entity_name: ""
+    status_field_name: ""                 # e.g., "account_status", "order_status"
+    initial_status: ""                    # The status assigned on creation
+
+  statuses:
+    description: "Complete list of mutually exclusive statuses."
+    items:
+      - status_code: ""                   # e.g., "ACTIVE", "SUSPENDED", "CLOSED"
+        display_name: ""
+        description: ""
+        is_terminal: false                # true if no further transitions are possible
+        auto_expire: null                 # e.g., "30 days" — auto-transition after duration
+        visual_indicator: ""              # e.g., "Green badge", "Red warning banner"
+        allowed_actions: []               # Actions the user can perform while in this status
+        restrictions: []                  # Actions blocked while in this status
+        processing_rules:
+          on_enter: ""                    # Logic executed when entering this status
+          while_active: ""                # Ongoing behavior while in this status
+          on_exit: ""                     # Cleanup or validation when leaving this status
+
+  transitions:
+    description: >
+      All valid status transitions. Any transition not listed here is
+      implicitly forbidden.
+    items:
+      - from_status: ""
+        to_status: ""
+        trigger: ""                       # e.g., "User clicks Activate", "System auto-expire"
+        authorized_roles: []
+        preconditions: ""                 # Conditions that must be met for this transition
+        validation_rules: ""              # Checks performed before transition executes
+        side_effects: ""                  # e.g., "Send notification", "Update audit log"
+        confirmation_required: false
+        reversible: false                 # Can this transition be undone?
+        reverse_transition: ""            # If reversible, which transition reverses it
+
+  transition_matrix:
+    description: >
+      A quick-reference matrix showing which transitions are valid.
+      Mark valid transitions with 'Y', forbidden with '-'.
+    matrix: []
+    # Example:
+    # - [" ", "ACTIVE", "SUSPENDED", "CLOSED"]
+    # - ["ACTIVE", "-", "Y", "Y"]
+    # - ["SUSPENDED", "Y", "-", "Y"]
+    # - ["CLOSED", "-", "-", "-"]
+
+# ============================================================
+# 7. Business Rules
+# ============================================================
+business_rules:
+  description: >
+    Discrete, testable business rules that govern this function.
+    Each rule should be atomic and independently verifiable.
+  required: true
+  rules:
+    - rule_id: "BR-001"
+      rule_name: ""
+      description: ""
+      condition: ""                       # When this condition is true...
+      action: ""                          # ...then this action applies
+      exception: ""                       # Unless this exception applies
+      priority: null                      # Execution order if rules conflict (1 = highest)
+      source: ""                          # e.g., "Regulatory requirement", "Business decision"
+
+# ============================================================
+# 8. Validation Rules
+# ============================================================
+validation_rules:
+  description: >
+    All input validation, cross-field validation, and business
+    constraint validations. Each rule must specify the error
+    message returned on failure.
+  required: true
+  rules:
+    - validation_id: "VR-001"
+      field_or_context: ""                # Which field or cross-field context
+      rule_type: ""                       # Format | Range | Required | Unique | Cross-field | Custom
+      rule_definition: ""                 # e.g., "Must be >= 0 and <= 100"
+      error_message: ""                   # Exact message shown to user
+      error_code: ""                      # Machine-readable code, e.g., "ERR_INVALID_RANGE"
+
+# ============================================================
+# 9. UI / UX Behavior
+# ============================================================
+ui_ux_behavior:
+  description: >
+    Describe user-facing interaction details: navigation, feedback,
+    loading states, and edge case behavior.
+  required: false
+
+  entry_point:
+    description: "How does the user navigate to this function?"
+    content: ""                           # e.g., "Main menu > Accounts > Account Details"
+
+  loading_behavior:
+    description: "What the user sees while the function is loading."
+    content: ""                           # e.g., "Skeleton loader for table, spinner for save"
+
+  success_feedback:
+    description: "How the user is informed of a successful action."
+    content: ""                           # e.g., "Toast notification: 'Record saved successfully'"
+
+  error_feedback:
+    description: "How errors are communicated to the user."
+    content: ""                           # e.g., "Inline field errors + summary banner at top"
+
+  empty_state:
+    description: "What the user sees when there is no data."
+    content: ""                           # e.g., "'No records found. Click + to create one.'"
+
+  responsive_behavior:
+    description: "How the function adapts to different screen sizes."
+    content: ""
+
+# ============================================================
+# 10. Integration Points
+# ============================================================
+integration_points:
+  description: >
+    External systems, APIs, or internal services this function
+    interacts with.
+  required: false
+  integrations:
+    - integration_id: "INT-001"
+      system_name: ""
+      direction: ""                       # Inbound | Outbound | Bidirectional
+      protocol: ""                        # REST | gRPC | Message Queue | Database | File
+      data_exchanged: ""
+      error_handling: ""
+      sla: ""
+
+# ============================================================
+# 11. Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  description: >
+    Testable acceptance criteria written in Given-When-Then format.
+    These directly drive QA test case creation.
+  required: true
+  criteria:
+    - ac_id: "AC-001"
+      title: ""
+      given: ""                           # Precondition / setup
+      when: ""                            # Action performed
+      then: ""                            # Expected outcome
+      priority: ""                        # Must Have | Should Have | Nice to Have
+      linked_business_rule: ""            # e.g., "BR-001"
+
+# ============================================================
+# 12. Non-Functional Requirements
+# ============================================================
+non_functional_requirements:
+  description: >
+    Performance, security, and operational requirements specific
+    to this function.
+  required: false
+  performance:
+    response_time: ""                     # e.g., "Page load < 2s at P95"
+    throughput: ""                        # e.g., "Support 100 concurrent users"
+    data_volume: ""                       # e.g., "Up to 1M records"
+  security:
+    authentication: ""                    # e.g., "JWT with role-based access"
+    authorization: ""                     # e.g., "Row-level security by tenant"
+    data_sensitivity: ""                  # e.g., "Contains PII — encrypted at rest"
+    audit_logging: ""                     # e.g., "Log all CRUD operations"
+  availability:
+    uptime_target: ""                     # e.g., "99.9%"
+    degradation_behavior: ""              # e.g., "Read-only mode if write DB unavailable"
+
+# ============================================================
+# 13. Assumptions & Constraints
+# ============================================================
+assumptions_and_constraints:
+  description: >
+    Assumptions made during specification and constraints that
+    limit design choices.
+  required: true
+  assumptions:
+    - id: "ASM-001"
+      description: ""
+  constraints:
+    - id: "CON-001"
+      description: ""
+      type: ""                            # Technical | Business | Regulatory | Resource
+
+# ============================================================
+# 14. Open Questions
+# ============================================================
+open_questions:
+  description: >
+    Unresolved questions that require stakeholder input before
+    the specification can be finalized.
+  required: false
+  questions:
+    - id: "OQ-001"
+      question: ""
+      raised_by: ""
+      raised_date: ""
+      assigned_to: ""
+      status: ""                          # Open | Answered | Deferred
+      answer: ""
+
+# ============================================================
+# 15. Attachments
+# ============================================================
+attachments:
+  description: "Supporting files such as wireframes, diagrams, or data samples."
+  required: false
+  items:
+    - filename: ""
+      description: ""
+      type: ""                            # Wireframe | Flow Diagram | Data Sample | ERD | Sequence Diagram
+
+# ============================================================
+# 16. Change Log
+# ============================================================
+change_log:
+  description: "Version history for this document."
+  required: true
+  entries:
+    - version: ""
+      date: ""
+      author: ""
+      changes: ""

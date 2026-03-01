@@ -1,0 +1,417 @@
+# ============================================================
+# Functional Requirements Document (FRD) Template
+# Pattern: Flat metadata structure
+# Version: 2.0
+# Aligned to: IEEE 830-1998 adapted / ISO/IEC/IEEE 29148:2018, BABOK 3.0
+# Granularity: Per module or per feature group
+#
+# Section structure (20 sections):
+#   Context   : metadata, overview, scope, definitions, business_context
+#   Actors    : actors, functional_overview
+#   Spec      : event_triggers, functional_requirements, business_rules,
+#               exception_scenarios
+#   Interface : module_interface, cross_module_interactions, data_requirements
+#   NFR       : nonfunctional_requirements
+#   Assurance : traceability, acceptance_criteria
+#   Management: assumptions_and_constraints, dependencies, open_issues
+#   Governance: approvals, change_log, attachments
+# ============================================================
+
+# ----------------------------------------------------------
+# DOCUMENT METADATA
+# ----------------------------------------------------------
+metadata:
+  document_id: "FRD-[PROJECT]-[NNNN]"            # e.g., FRD-NPH-0001
+  module_code: ""                                 # e.g., ING  (2-5 uppercase chars)
+  title: ""
+  version: ""                             # Semantic: Major.Minor (e.g. 1.0, 2.3)
+  status: ""                              # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                      # Public | Internal | Confidential | Restricted
+  created_date: ""                        # ISO 8601: YYYY-MM-DD
+  last_updated: ""                        # ISO 8601: YYYY-MM-DD
+  author: ""
+  reviewer: ""
+  approver: ""
+  parent_brd: ""                          # ID of the parent BRD (e.g. BRD-NPH-0001)
+  related_documents: []                   # PSD, AEC, API, DC, DBC, UT IDs
+  tags: []                                # Freeform tags for search/categorization
+  supersedes: ""                          # ID of document this replaces, if any
+
+# ----------------------------------------------------------
+# 1. OVERVIEW
+# ----------------------------------------------------------
+overview:
+  description: >
+    Introduce the module and state this document's purpose in one place.
+    Identify the module's role within the broader system, reference the parent
+    BRD, and clarify who should use this document and for what decisions.
+    Replaces the separate Introduction and Purpose sections from prior versions.
+    Reference: IEEE 830 Section 1.1 — Purpose.
+  summary: ""                             # 3-5 sentence module context paragraph
+  purpose: ""                             # Why this document exists; decisions it supports
+  audience: ""                            # Primary readers: architects, developers, QA, PO
+  required: true
+
+# ----------------------------------------------------------
+# 2. SCOPE
+# ----------------------------------------------------------
+scope:
+  description: >
+    Define the boundary of this FRD — what is covered and what is explicitly
+    excluded. This prevents scope creep and clarifies ownership between
+    modules. Scope defines the boundary; requirements define what happens
+    within it. Reference: IEEE 830 Section 1.2 — Scope.
+  in_scope:
+    - ""
+  out_of_scope:
+    - ""
+  required: true
+
+# ----------------------------------------------------------
+# 3. DEFINITIONS & ACRONYMS
+# ----------------------------------------------------------
+definitions:
+  description: >
+    Define domain-specific terms, acronyms, and abbreviations used in this
+    document. Include terms from the parent BRD only if their meaning is
+    refined or extended at the module level. Common industry terms (API,
+    HTTP) do not need definition unless used with module-specific meaning.
+    Reference: IEEE 830 Section 1.4 — Definitions.
+  items:
+    - term: ""
+      definition: ""
+  required: false
+
+# ----------------------------------------------------------
+# 4. BUSINESS CONTEXT
+# ----------------------------------------------------------
+business_context:
+  description: >
+    Bridge business intent to functional behavior. Describe the value this
+    module delivers and which parent BRD business objectives (BO-NNN) it
+    supports. Developers should understand *why* the module exists, not just
+    *what* it does. Keep this focused on the module's contribution to business
+    goals — the full business case lives in the BRD.
+  content: ""
+  parent_objectives: []                   # List of BO-NNN IDs from the parent BRD
+  required: true
+
+# ----------------------------------------------------------
+# 5. ACTORS & STAKEHOLDERS
+# ----------------------------------------------------------
+actors:
+  description: >
+    Identify all human actors, system actors, and external actors that interact
+    with or are affected by this module. Distinguish primary actors (who
+    initiate actions) from secondary actors (who support or are notified).
+    Focus only on actors relevant to this module — the full stakeholder map
+    lives in the BRD. Reference: IEEE 830 Section 2.2 — User Characteristics.
+  items:
+    - actor: ""
+      type: ""                            # Human | System | External
+      role: ""
+      responsibility: ""
+  required: true
+
+# ----------------------------------------------------------
+# 6. FUNCTIONAL OVERVIEW
+# ----------------------------------------------------------
+functional_overview:
+  description: >
+    Provide a mental model of the module before diving into detailed
+    requirements. Summarize major capabilities and process flows. Reference
+    or embed diagrams (context, flow, state) where they add clarity. This is
+    a map, not the territory — no implementation specifics here.
+    Reference: IEEE 830 Section 2 — Overall Description.
+  content: ""
+  diagrams: []                            # List of diagram references (filename or URL)
+  required: true
+
+# ----------------------------------------------------------
+# 7. EVENT TRIGGERS
+# ----------------------------------------------------------
+event_triggers:
+  description: >
+    List all events that initiate processing within this module: user actions,
+    system events, scheduled triggers, or external signals. Each trigger
+    maps to one or more functional requirements. This section defines *what
+    starts things*; Section 9 defines *what happens next*.
+  items:
+    - trigger_id: "ET-001"
+      event: ""
+      source: ""                          # User | System | Scheduler | External
+      triggered_requirements: []          # List of FR-NNN IDs
+  required: true
+
+# ----------------------------------------------------------
+# 8. FUNCTIONAL REQUIREMENTS
+# ----------------------------------------------------------
+functional_requirements:
+  description: >
+    The core of the FRD. Each requirement must be uniquely identified,
+    prioritized (MoSCoW), and traceable to a parent BRD requirement. Group
+    related requirements under a functional area heading. Each requirement
+    should be testable and unambiguous. Describe *what* the system does, not
+    *how* — technology choices belong in HLD/LLD.
+    Reference: IEEE 830 Section 3 — Specific Requirements; BABOK Section 7.
+  functional_areas:
+    - area_id: "FA-1"
+      area_name: ""
+      requirements:
+        - id: "FR-001"
+          statement: ""
+          priority: ""                    # Must | Should | Could | Won't
+          traces_to_brd: []               # Parent BRD requirement IDs (e.g. BR-001)
+          acceptance_criteria:
+            - id: "AC-FR-001-01"
+              statement: ""
+          sub_requirements:
+            - id: "FR-001.1"
+              statement: ""
+  required: true
+
+# ----------------------------------------------------------
+# 9. BUSINESS RULES
+# ----------------------------------------------------------
+business_rules:
+  description: >
+    Capture business logic that constrains or governs functional behavior.
+    Business rules are often implicit in stakeholder conversations — this
+    section makes them explicit and traceable. Each rule should be uniquely
+    identified (BRL-NNN) and linked to the requirements it affects.
+    Technical implementation rules belong in HLD/LLD, not here.
+  items:
+    - id: "BRL-001"
+      rule: ""
+      applies_to: []                      # List of FR-NNN IDs this rule affects
+  required: true
+
+# ----------------------------------------------------------
+# 10. EXCEPTION SCENARIOS
+# ----------------------------------------------------------
+exception_scenarios:
+  description: >
+    Define the system's behavior for known failure and edge-case conditions —
+    not just the happy path. Each scenario specifies the trigger condition,
+    expected system behavior, and user-visible outcome. This section directly
+    informs QA negative testing. Minimum 3 exception scenarios per module.
+  items:
+    - id: "EX-001"
+      scenario: ""
+      trigger_condition: ""
+      expected_behavior: ""
+      user_outcome: ""
+  required: true
+
+# ----------------------------------------------------------
+# 11. MODULE INTERFACE
+# ----------------------------------------------------------
+module_interface:
+  description: >
+    Define what this module *exposes* to the rest of the system. This
+    complements Section 12 (Cross-Module Interactions) which captures what
+    this module *consumes*. Together, the two sections fully describe the
+    module's integration surface. Document APIs provided, events published,
+    and data entities this module owns as source of truth.
+  apis_provided:
+    - interface_id: "IF-001"
+      interface_name: ""
+      type: ""                            # REST | GraphQL | gRPC | Async
+      consumers: []                       # Modules or systems that call this API
+      api_spec_reference: ""              # API doc ID (e.g. API-0001)
+      description: ""
+  events_published:
+    - event_id: "EVT-001"
+      event_name: ""
+      trigger: ""                         # What causes this event to be emitted
+      consumers: []                       # Modules or systems that subscribe
+      schema_reference: ""               # AEC doc ID (e.g. AEC-0001)
+  data_owned:
+    - entity: ""
+      ownership: ""                       # SourceOfTruth | ReplicaFrom:[module] | Cache
+      consumers: []                       # Which modules read this data
+  required: false
+
+# ----------------------------------------------------------
+# 12. CROSS-MODULE INTERACTIONS
+# ----------------------------------------------------------
+cross_module_interactions:
+  description: >
+    Map the integration surface this module *consumes* — other modules and
+    external systems it calls, reads from, subscribes to, or depends on.
+    See Section 11 for what this module exposes. This section is critical
+    for impact analysis: when this module changes, which consumers are affected,
+    and vice versa.
+  items:
+    - module: ""
+      interaction_type: ""                # Read | Write | Call | Subscribe | Publish
+      direction: ""                       # Inbound | Outbound | Bidirectional
+      description: ""
+      interface_reference: ""             # API spec ID, AEC ID, or interface doc reference
+  required: true
+
+# ----------------------------------------------------------
+# 13. DATA REQUIREMENTS
+# ----------------------------------------------------------
+data_requirements:
+  description: >
+    Define the data entities this module creates, reads, updates, or deletes
+    at a high level. This is a functional view — detailed schema and field
+    definitions belong in DC/DBC documents. Include data ownership and
+    sensitivity classification to guide data stewardship decisions.
+    Reference: IEEE 830 Section 3.2 — Functions.
+  entities:
+    - entity_name: ""
+      description: ""
+      crud: ""                            # Create | Read | Update | Delete (list applicable)
+      ownership: ""                       # SourceOfTruth | Consumer | Cache
+      sensitivity: ""                     # Public | Internal | Confidential | Restricted
+  data_retention: ""                      # Retention policy statement if applicable
+  required: true
+
+# ----------------------------------------------------------
+# 14. NON-FUNCTIONAL REQUIREMENTS (Functional Impact)
+# ----------------------------------------------------------
+nonfunctional_requirements:
+  description: >
+    Capture only the NFRs that require specific functional accommodations
+    within this module. System-wide NFRs live in the parent BRD or a
+    dedicated NFR document. Include here only those where the NFR changes
+    how a function must be designed (e.g., a 30-second limit that forces
+    streaming rather than batch, an audit requirement that adds a log step).
+    Reference: IEEE 830 Section 3.3 — Performance Requirements.
+  items:
+    - id: "NFR-FM-001"
+      category: ""                        # Performance | Security | Auditability | Availability
+      statement: ""
+      target_metric: ""
+      functional_impact: ""               # How this NFR changes functional design
+  required: true
+
+# ----------------------------------------------------------
+# 15. TRACEABILITY MATRIX
+# ----------------------------------------------------------
+traceability:
+  description: >
+    Cross-reference map from parent BRD requirements to FRD requirements
+    and downstream artifacts (PSD sections, contract documents, test cases).
+    Enables impact analysis when scope changes occur. Required before the
+    FRD moves to Approved status; may be partially populated during Draft.
+  matrix:
+    - brd_requirement: ""                 # Parent BRD requirement ID (e.g. BR-001)
+      frd_requirements: []                # List of FR-NNN IDs derived from this BRD req
+      downstream_artifacts: []            # PSD, AEC, API, DC, DBC, UT references
+      notes: ""
+  required: true
+
+# ----------------------------------------------------------
+# 16. ACCEPTANCE CRITERIA (Module-Level)
+# ----------------------------------------------------------
+acceptance_criteria:
+  description: >
+    High-level conditions under which this module is considered complete and
+    ready for handover to QA or UAT. These are broader than individual
+    requirement acceptance criteria — they address cross-cutting concerns
+    such as integration readiness, performance benchmarks, and deployment
+    readiness. Individual requirement acceptance criteria live in Section 8.
+  items:
+    - id: "MAC-001"
+      criteria: ""
+      verification_method: ""             # Test | Demo | Inspection | Analysis
+  required: true
+
+# ----------------------------------------------------------
+# 17. ASSUMPTIONS & CONSTRAINTS
+# ----------------------------------------------------------
+assumptions_and_constraints:
+  description: >
+    Assumptions: conditions believed to be true but not yet confirmed.
+    Documenting them creates accountability for validation — if an assumption
+    proves false, assess the impact on related requirements.
+    Constraints: hard boundaries that limit solution design choices — technical
+    mandates, regulatory requirements, budget or timeline restrictions.
+    Constraints are non-negotiable; preferences belong in HLD.
+    Reference: BABOK Section 6.3; IEEE 830 Section 2.5.
+  assumptions:
+    - id: "ASM-001"
+      assumption: ""
+      validation_method: ""
+      impact_if_false: ""
+  constraints:
+    - id: "CON-001"
+      constraint: ""
+      type: ""                            # Technical | Regulatory | Budget | Timeline | Org
+      rationale: ""
+  required: true
+
+# ----------------------------------------------------------
+# 18. DEPENDENCIES
+# ----------------------------------------------------------
+dependencies:
+  description: >
+    Identify anything outside the module team's direct control that could
+    block or delay delivery or affect runtime behavior. Include system
+    dependencies, team dependencies, data dependencies, and third-party
+    service dependencies. Internal sprint task dependencies belong in the
+    project plan, not here.
+  items:
+    - id: "DEP-001"
+      dependency: ""
+      type: ""                            # System | Team | Data | Third-Party | Infrastructure
+      owner: ""
+      impact_if_unavailable: ""
+  required: true
+
+# ----------------------------------------------------------
+# 19. OPEN ISSUES
+# ----------------------------------------------------------
+open_issues:
+  description: >
+    Track unresolved questions, pending decisions, or ambiguities. This
+    section provides transparency about what is known and unknown at the
+    current version. The FRD should not move to Approved status with
+    unresolved Open issues.
+  items:
+    - id: "OI-001"
+      issue: ""
+      owner: ""
+      raised_date: ""                     # ISO 8601: YYYY-MM-DD
+      target_resolution_date: ""          # ISO 8601: YYYY-MM-DD
+      status: ""                          # Open | InProgress | Resolved | Deferred
+      resolution: ""
+  required: false
+
+# ----------------------------------------------------------
+# 20. APPROVAL
+# ----------------------------------------------------------
+approvals:
+  description: >
+    Formal sign-off from accountable stakeholders. The FRD cannot move to
+    Approved status without this section completed. All approvals must be
+    explicitly recorded — informal agreements are not sufficient.
+  items:
+    - role: ""
+      name: ""
+      decision: ""                        # Approved | ApprovedWithConditions | Rejected
+      signature: ""
+      date: ""                            # ISO 8601: YYYY-MM-DD
+  required: true
+
+# ----------------------------------------------------------
+# CHANGE LOG
+# ----------------------------------------------------------
+change_log:
+  entries:
+    - version: ""
+      date: ""                            # ISO 8601: YYYY-MM-DD
+      author: ""
+      summary: ""
+
+# ----------------------------------------------------------
+# ATTACHMENTS
+# ----------------------------------------------------------
+attachments:
+  items:
+    - filename: ""
+      description: ""
+      location: ""                        # Relative path or URL

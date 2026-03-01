@@ -1,0 +1,255 @@
+# ============================================================
+# Data Dictionary & Glossary Template
+# Version: 1.0
+# Framework: ISO/IEC 11179 (Metadata Registry), IEEE Std 610
+# ============================================================
+
+metadata:
+  document_id: "DD-[NNNN]"               # e.g., DD-0001
+  title: ""                               # e.g., "Customer Management Platform Data Dictionary"
+  version: ""                             # Semantic: Major.Minor (e.g., 1.0)
+  status: ""                              # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                      # Public | Internal | Confidential | Restricted
+  created_date: ""                        # YYYY-MM-DD
+  last_updated: ""                        # YYYY-MM-DD
+  author: ""                              # Name and role of the primary author
+  reviewer: ""                            # Name and role of the designated reviewer
+  approver: ""                            # Name and role of the designated approver
+  system_name: ""                         # Name of the system/platform this dictionary covers
+  system_version: ""                      # Version of the system this dictionary applies to
+  related_documents: []                   # List of related doc IDs (e.g., SRS-0001, HLD-0001, ERD-0001)
+
+# ============================================================
+# Section 1: Introduction
+# ============================================================
+introduction:
+  description: >
+    Provides the purpose, scope, and intended audience of this
+    Data Dictionary & Glossary. Sets the context for how this
+    document should be used across the delivery lifecycle.
+  required: true
+
+  purpose:
+    description: >
+      Explains why this data dictionary exists and what problem
+      it solves (e.g., ensuring consistent data terminology,
+      enabling cross-team alignment, supporting data governance).
+    content: ""
+    required: true
+
+  scope:
+    description: >
+      Defines the boundaries of this data dictionary — which
+      system(s), modules, or data domains are covered and which
+      are explicitly excluded.
+    content: ""
+    required: true
+
+  audience:
+    description: >
+      Lists the intended consumers of this document and how each
+      role is expected to use it (e.g., developers for schema
+      design, BAs for requirements validation, QA for test data).
+    content: ""
+    required: true
+
+  how_to_use:
+    description: >
+      Provides practical guidance on navigating and using this
+      document, including how to look up terms, request additions,
+      and report inconsistencies.
+    content: ""
+    required: true
+
+# ============================================================
+# Section 2: Data Domains
+# ============================================================
+data_domains:
+  description: >
+    Organizes data elements into logical domains or subject areas
+    (e.g., Customer, Order, Payment, Product). Each domain groups
+    related data elements together for easier navigation and
+    ownership assignment.
+  required: true
+
+  domains:
+    - domain_id: ""                       # e.g., DOM-01
+      domain_name: ""                     # e.g., "Customer"
+      description: ""                     # Brief description of the domain
+      owner: ""                           # Team or individual responsible
+      related_modules: []                 # System modules that use this domain
+
+# ============================================================
+# Section 3: Data Elements Catalog
+# ============================================================
+data_elements_catalog:
+  description: >
+    The core of the data dictionary. Each data element is defined
+    with its attributes, constraints, lineage, and usage context.
+    This catalog serves as the single source of truth for all
+    data fields across the system.
+  required: true
+
+  elements:
+    - element_id: ""                      # Unique ID, e.g., DE-0001
+      element_name: ""                    # Logical name (e.g., customer_email)
+      display_name: ""                    # Human-friendly name (e.g., "Customer Email Address")
+      domain: ""                          # Domain this element belongs to (e.g., DOM-01)
+      definition: ""                      # Clear, unambiguous business definition
+      data_type: ""                       # e.g., VARCHAR(255), INTEGER, BOOLEAN, DATE, DECIMAL(10,2)
+      format: ""                          # Expected format/pattern (e.g., "YYYY-MM-DD", "^[a-z]+@[a-z]+\\.[a-z]{2,}$")
+      length: ""                          # Max length or precision (e.g., 255, "10,2")
+      allowed_values: []                  # Enumerated values if applicable (e.g., ["Active", "Inactive", "Suspended"])
+      default_value: ""                   # Default value if any
+      nullable: ""                        # Yes | No
+      unique: ""                          # Yes | No
+      primary_key: ""                     # Yes | No
+      foreign_key: ""                     # Reference if FK (e.g., "customer.customer_id")
+      source_system: ""                   # System of record or origin
+      derivation_logic: ""               # Calculation or transformation logic if derived
+      business_rules: []                  # Business rules governing this element
+      aliases: []                         # Alternative names in other systems or contexts
+      sensitivity: ""                     # None | Low | Medium | High | PII | PHI
+      example_values: []                  # Sample values for clarity (e.g., ["john@example.com"])
+      notes: ""                           # Additional context or caveats
+
+# ============================================================
+# Section 4: Entity Relationship Summary
+# ============================================================
+entity_relationship_summary:
+  description: >
+    Provides a high-level overview of how data entities (tables,
+    objects) relate to each other. This section supplements the
+    ERD with textual descriptions of key relationships, cardinality,
+    and referential integrity rules.
+  required: false
+
+  relationships:
+    - relationship_id: ""                 # e.g., REL-001
+      parent_entity: ""                   # Parent table/entity
+      child_entity: ""                    # Child table/entity
+      relationship_type: ""              # One-to-One | One-to-Many | Many-to-Many
+      foreign_key_column: ""             # FK column in the child entity
+      on_delete: ""                       # CASCADE | SET NULL | RESTRICT | NO ACTION
+      on_update: ""                       # CASCADE | SET NULL | RESTRICT | NO ACTION
+      description: ""                     # Business meaning of this relationship
+
+# ============================================================
+# Section 5: Code Tables & Reference Data
+# ============================================================
+code_tables:
+  description: >
+    Documents all lookup tables, reference codes, and enumerated
+    value sets used across the system. Centralizing these prevents
+    inconsistent code values and makes it easier to manage
+    reference data changes.
+  required: true
+
+  tables:
+    - code_table_id: ""                   # e.g., CT-001
+      code_table_name: ""                 # e.g., "Order Status Codes"
+      description: ""                     # What this code table represents
+      owner: ""                           # Team responsible for maintenance
+      values:
+        - code: ""                        # e.g., "ACT"
+          display_value: ""               # e.g., "Active"
+          description: ""                 # e.g., "Record is currently active and in use"
+          effective_date: ""              # When this value became valid
+          expiry_date: ""                 # When this value expires (blank if current)
+          sort_order: ""                  # Display sort order
+
+# ============================================================
+# Section 6: Data Glossary
+# ============================================================
+data_glossary:
+  description: >
+    An alphabetical glossary of business and technical terms used
+    across the system and its documentation. This section bridges
+    the gap between business language and technical implementation,
+    ensuring all stakeholders share a common vocabulary.
+  required: true
+
+  terms:
+    - term_id: ""                         # e.g., GL-001
+      term: ""                            # The term being defined (e.g., "Churn Rate")
+      definition: ""                      # Clear, concise definition
+      context: ""                         # Where/how this term is used (e.g., "Reporting", "Billing", "API")
+      synonyms: []                        # Alternative terms (e.g., ["Attrition Rate"])
+      related_terms: []                   # Links to related glossary entries (e.g., ["GL-005", "GL-012"])
+      related_data_elements: []           # Links to data elements (e.g., ["DE-0045"])
+      source: ""                          # Origin of the definition (e.g., "ISO 8000", "Internal")
+      category: ""                        # Business | Technical | Regulatory | Operational
+      notes: ""                           # Additional context
+
+# ============================================================
+# Section 7: Data Lineage & Mapping
+# ============================================================
+data_lineage:
+  description: >
+    Traces data elements from their source through transformations
+    to their target destination. This section is critical for
+    impact analysis, data quality, and regulatory compliance.
+  required: false
+
+  mappings:
+    - mapping_id: ""                      # e.g., MAP-001
+      source_system: ""                   # Source system name
+      source_field: ""                    # Field name in source
+      transformation: ""                  # Transformation logic applied
+      target_system: ""                   # Target system name
+      target_field: ""                    # Field name in target
+      target_element_id: ""              # Link to data element (e.g., DE-0001)
+      frequency: ""                       # Real-time | Batch (daily) | On-demand
+      notes: ""                           # Additional context
+
+# ============================================================
+# Section 8: Data Quality Rules
+# ============================================================
+data_quality_rules:
+  description: >
+    Defines validation, completeness, and consistency rules applied
+    to data elements. These rules feed into automated data quality
+    checks and monitoring dashboards.
+  required: false
+
+  rules:
+    - rule_id: ""                         # e.g., DQR-001
+      rule_name: ""                       # e.g., "Email Format Validation"
+      description: ""                     # What this rule checks
+      target_elements: []                 # Data elements this rule applies to (e.g., ["DE-0001"])
+      rule_type: ""                       # Validity | Completeness | Consistency | Timeliness | Uniqueness
+      rule_expression: ""                # Logical expression or regex
+      severity: ""                        # Critical | Major | Minor | Warning
+      action_on_failure: ""              # Reject | Flag | Auto-correct | Notify
+
+# ============================================================
+# Section 9: Attachments
+# ============================================================
+attachments:
+  description: >
+    Supporting files such as ERD diagrams, data flow diagrams,
+    schema exports, or mapping spreadsheets referenced by this
+    data dictionary.
+  required: false
+
+  files:
+    - attachment_id: ""                   # e.g., ATT-001
+      file_name: ""                       # e.g., "customer_erd_v2.png"
+      description: ""                     # What this attachment contains
+      file_type: ""                       # PNG | PDF | XLSX | SQL | CSV
+      version: ""                         # Version of the attachment
+
+# ============================================================
+# Change Log
+# ============================================================
+change_log:
+  description: >
+    Tracks all changes made to this data dictionary over time.
+    Every update must have a corresponding change log entry.
+  required: true
+
+  entries:
+    - version: ""                         # e.g., "1.0"
+      date: ""                            # YYYY-MM-DD
+      author: ""                          # Who made the change
+      changes: ""                         # Description of what changed

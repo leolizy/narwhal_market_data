@@ -1,0 +1,106 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \":*)",
+      "Bash(python3 -c \":*)",
+      "Bash(python3 knowledge/sdlc_chain/cli.py:*)",
+      "Bash(wc -l knowledge/sdlc_chain/*.py knowledge/sdlc_chain/generators/*.py)",
+      "Bash(find knowledge -name \"__pycache__\" -type d -exec rm -rf {} +)",
+      "Bash(find knowledge -name \".DS_Store\" -delete)",
+      "Bash(python3 knowledge/market_search/search.py list-exchanges)",
+      "Bash(python3 scaffold/build_chain/cli.py:*)",
+      "Bash(echo \"knowledge\" > .claude/.branch_lock)",
+      "Bash(echo \"scaffold\" > .claude/.branch_lock)",
+      "Bash(python3 -c \"import json; json.load\\(open\\(''.claude/settings.json''\\)\\); print\\(''settings.json: valid JSON''\\)\")"
+    ],
+    "additionalDirectories": [
+      "/Users/project/narwhal/repository_sample/.claude"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport sys, json, os\n\ntool_input = os.environ.get('TOOL_INPUT', '{}')\ntry:\n    data = json.loads(tool_input)\nexcept Exception:\n    sys.exit(0)\n\nfile_path = data.get('file_path', '') or data.get('path', '')\nif not file_path:\n    sys.exit(0)\n\nbase = os.path.realpath('.')\nresolved = os.path.realpath(file_path)\n\n# Allow: project dir (temp files now live in knowledge/.tmp/)\nallowed_prefixes = [\n    base\n]\n\nif any(resolved.startswith(a) for a in allowed_prefixes):\n    sys.exit(0)\n\nprint('BLOCKED: Edit/Write outside project directory: ' + file_path, file=sys.stderr)\nsys.exit(2)\n\""
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport sys, json, os\n\ntool_input = os.environ.get('TOOL_INPUT', '{}')\ntry:\n    data = json.loads(tool_input)\nexcept Exception:\n    sys.exit(0)\n\nfile_path = data.get('file_path', '') or data.get('path', '')\nif not file_path:\n    sys.exit(0)\n\nbase = os.path.realpath('.')\nresolved = os.path.realpath(file_path)\n\nscaffold_prefix = os.path.join(base, 'scaffold') + os.sep\nknowledge_prefix = os.path.join(base, 'knowledge') + os.sep\n\n# Read branch lock file\nlock_file = os.path.join(base, '.claude', '.branch_lock')\nactive_branch = None\nif os.path.exists(lock_file):\n    with open(lock_file) as f:\n        active_branch = f.read().strip()\n\n# Enforce write isolation\nif active_branch == 'knowledge' and resolved.startswith(scaffold_prefix):\n    print('BLOCKED: Knowledge branch cannot write to scaffold/. Use /switch-scaffold first.', file=sys.stderr)\n    sys.exit(2)\n\nif active_branch == 'scaffold' and resolved.startswith(knowledge_prefix):\n    print('BLOCKED: Scaffold branch cannot write to knowledge/. Use /switch-knowledge first.', file=sys.stderr)\n    sys.exit(2)\n\nsys.exit(0)\n\""
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport sys, json, os\n\ntool_input = os.environ.get('TOOL_INPUT', '{}')\ntry:\n    data = json.loads(tool_input)\nexcept Exception:\n    sys.exit(0)\n\nfile_path = data.get('file_path', '') or ''\n\n# Only check artifact overwrites\nif '/knowledge/artifact/' not in file_path or not file_path.endswith('.json'):\n    sys.exit(0)\n\n# If the file already exists, warn that it should be archived first\nif os.path.exists(file_path):\n    basename = os.path.basename(file_path)\n    archive_dir = file_path.replace('/knowledge/artifact/', '/knowledge/archive/')\n    archive_parent = os.path.dirname(archive_dir)\n    # Check if this file was already archived this session\n    if os.path.exists(archive_parent):\n        archived_files = os.listdir(archive_parent)\n        if basename in archived_files:\n            sys.exit(0)  # Already archived, safe to overwrite\n    print('WARNING: Overwriting existing artifact: ' + basename, file=sys.stderr)\n    print('  Ensure you ran: python3 knowledge/sdlc_chain/cli.py archive ' + file_path, file=sys.stderr)\n    # Warning only (exit 0), not blocking — the workflow handles archiving\n\nsys.exit(0)\n\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport glob, os\ntmp_dir = os.path.join(os.path.realpath('.'), 'knowledge', '.tmp')\nif os.path.isdir(tmp_dir):\n    files = os.listdir(tmp_dir)\n    for f in files:\n        try:\n            os.remove(os.path.join(tmp_dir, f))\n        except Exception:\n            pass\n    if files:\n        print('Cleaned up ' + str(len(files)) + ' temp file(s) from knowledge/.tmp/', flush=True)\n\""
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport os\ntmp_dir = os.path.join(os.path.realpath('.'), 'scaffold', '.tmp')\nif os.path.isdir(tmp_dir):\n    files = [f for f in os.listdir(tmp_dir) if not f.startswith('.')]\n    for f in files:\n        try:\n            os.remove(os.path.join(tmp_dir, f))\n        except Exception:\n            pass\n    if files:\n        print('Cleaned up ' + str(len(files)) + ' temp file(s) from scaffold/.tmp/', flush=True)\n\""
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport os\nlock_file = os.path.join(os.path.realpath('.'), '.claude', '.branch_lock')\nif os.path.exists(lock_file):\n    os.remove(lock_file)\n    print('Cleared branch lock (.claude/.branch_lock)', flush=True)\n\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport sys, json, os\n\ntool_input = os.environ.get('TOOL_INPUT', '{}')\ntry:\n    data = json.loads(tool_input)\nexcept Exception:\n    sys.exit(0)\n\nfile_path = data.get('file_path', '') or ''\n\n# Only validate artifact JSON files\nif '/knowledge/artifact/' not in file_path or not file_path.endswith('.json'):\n    sys.exit(0)\n\n# Extract doc type from filename prefix\nimport re\nbasename = os.path.basename(file_path)\nmatch = re.match(r'^([A-Z]+)-', basename)\nif not match:\n    sys.exit(0)\n\ndoc_type = match.group(1)\nbase_dir = os.path.realpath('.')\n\nimport subprocess\nresult = subprocess.run(\n    ['python3', 'knowledge/sdlc_chain/cli.py', 'validate', doc_type, file_path],\n    capture_output=True, text=True, cwd=base_dir, timeout=15\n)\n\nif result.returncode != 0:\n    print('Validation error: ' + result.stderr.strip(), file=sys.stderr)\nelse:\n    try:\n        out = json.loads(result.stdout)\n        if out.get('status') == 'invalid':\n            errors = out.get('errors', [])\n            print('VALIDATION FAILED for ' + doc_type + ':', file=sys.stderr)\n            for e in errors:\n                print('  - ' + e, file=sys.stderr)\n        elif out.get('warnings'):\n            for w in out.get('warnings', []):\n                print('  warning: ' + w, file=sys.stderr)\n    except Exception:\n        pass\n\nsys.exit(0)\n\""
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport sys, json, os, glob\n\ntool_input = os.environ.get('TOOL_INPUT', '{}')\ntry:\n    data = json.loads(tool_input)\nexcept Exception:\n    sys.exit(0)\n\nfile_path = data.get('file_path', '') or ''\n\n# Only check after writing to doc/html/ (last step in the triple-write)\nif '/knowledge/req_doc/html/' not in file_path or not file_path.endswith('.html'):\n    sys.exit(0)\n\n# Extract the base filename pattern to check if JSON and MD siblings exist\nimport re\nbasename = os.path.basename(file_path)\nname_without_ext = os.path.splitext(basename)[0]\n\n# Derive expected sibling paths\nhtml_dir = os.path.dirname(file_path)\nsubdir = os.path.basename(html_dir)\nbase_dir = os.path.realpath('.')\n\njson_path = os.path.join(base_dir, 'knowledge', 'artifact', subdir, name_without_ext + '.json')\nmd_path = os.path.join(base_dir, 'knowledge', 'req_doc', 'md', subdir, name_without_ext + '.md')\n\nmissing = []\nif not os.path.exists(json_path):\n    missing.append('JSON artifact: ' + os.path.relpath(json_path, base_dir))\nif not os.path.exists(md_path):\n    missing.append('Markdown: ' + os.path.relpath(md_path, base_dir))\n\nif missing:\n    print('FILE SYNC WARNING — HTML written but missing siblings:', file=sys.stderr)\n    for m in missing:\n        print('  - ' + m, file=sys.stderr)\n\nsys.exit(0)\n\""
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport sys, json, os\n\ntool_input = os.environ.get('TOOL_INPUT', '{}')\ntry:\n    data = json.loads(tool_input)\nexcept Exception:\n    sys.exit(0)\n\nfile_path = data.get('file_path', '') or ''\ncontent = data.get('content', '') or ''\n\nbase = os.path.realpath('.')\nresolved = os.path.realpath(file_path)\n\n# Only check files in scaffold output dirs\nscaffold_dirs = [\n    os.path.join(base, 'scaffold', 'src') + os.sep,\n    os.path.join(base, 'scaffold', 'ci') + os.sep,\n    os.path.join(base, 'scaffold', 'db') + os.sep,\n    os.path.join(base, 'scaffold', 'config') + os.sep,\n    os.path.join(base, 'scaffold', 'tests') + os.sep,\n]\n\nif not any(resolved.startswith(d) for d in scaffold_dirs):\n    sys.exit(0)\n\n# Check for source traceability header in first 500 chars\nif 'Source:' not in content[:500]:\n    print('WARNING: Generated file missing Source traceability header: ' + os.path.basename(file_path), file=sys.stderr)\n    print('  Expected: // Source: [DOC_ID] v[X.Y]', file=sys.stderr)\n\nsys.exit(0)\n\""
+          }
+        ]
+      }
+    ]
+  }
+}

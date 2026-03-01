@@ -1,0 +1,505 @@
+# ============================================================
+# Market Data Contract Template
+# Version: 3.1
+# Framework: Open Data Contract Standard (ODCS) / Data Mesh
+# Scope: Per external market data source or source group
+# Parent: DC (Data Layer Contract) — specialised for external
+#         market data extraction and canonical entity resolution
+# ============================================================
+
+metadata:
+  document_id: "MDC-[NNNN]"              # e.g., MDC-0001
+  title: ""
+  version: ""
+  status: ""                              # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                      # Public | Internal | Confidential | Restricted
+  created_date: ""
+  last_updated: ""
+  author: ""
+  reviewer: ""
+  approver: ""
+  related_documents: []                   # List of related doc IDs (e.g., FRD-NPH-0002, DC-0001, PSD-0002)
+  tags: []                                # Freeform tags for search/categorization
+  supersedes: ""                          # ID of document this replaces, if any
+
+# ============================================================
+# 1. CONTRACT OVERVIEW
+# ============================================================
+contract_overview:
+  description: >
+    High-level summary of this market data contract — which external
+    data sources it governs, the business context for ingesting this
+    data, and the canonical entity model it feeds into.
+  content: ""
+  required: true
+
+# ============================================================
+# 2. DATA PRODUCT IDENTIFICATION
+# ============================================================
+data_product_identification:
+  description: >
+    Uniquely identifies the market data product covered by this contract.
+    Includes ownership, domain classification, tier, and searchable tags.
+  required: true
+
+  product_name: ""                        # Logical name (e.g., "Market Data Extraction")
+  product_id: ""                          # Unique identifier in the data catalog
+  domain: ""                              # Business domain (e.g., "market-data-feed")
+  subdomain: ""                           # Optional subdomain (e.g., "reference-data / settlement-data")
+  owner_team: ""                          # Team accountable for this data product
+  owner_contact: ""                       # Email or channel for the owning team
+  data_steward: ""                        # Individual responsible for data quality
+  tier: ""                                # Tier 1 (Critical) | Tier 2 (Important) | Tier 3 (Informational)
+  tags: []                                # Searchable tags (e.g., ["reference-data", "settlement-data", "inbound"])
+
+# ============================================================
+# 3. INPUT & SOURCE LOCATION
+# ============================================================
+input_and_source_location:
+  description: >
+    Documents where market data originates — the external authoritative
+    sources (exchanges, clearing houses, vendors), how data is delivered,
+    in what format, and authentication requirements. Each source should
+    have its own entry in source_systems[].
+  required: true
+
+  source_systems:
+    - source_id: ""                       # Stable identifier, e.g. SOURCE-CME-SPAN, SOURCE-ICE-SETTLE
+      description: ""                     # What this source provides
+      delivery_mechanism: ""              # SFTP | website-download | datafeed-subscription | API | manual-download
+      input_formats: []                   # CSV, JSON, XML, FIX, Parquet, PDF, etc.
+      delivery_schedule: ""               # When data is available (e.g., "EOD 17:30 ET", "T+1 by 08:00 UTC")
+      authentication: ""                  # SSH key (SFTP) | API key (REST) | mTLS | OAuth | etc.
+      public_url: ""                      # Public-facing URL for data download or documentation
+      exchange: ""                        # Exchange or clearing house name
+      data_categories: []                 # Which data types: product-list, product-detail, daily-price, contract-dates, margin-rates, exchange-fees
+
+  transformation_summary: ""              # High-level description of how raw data is parsed and normalised
+
+# ============================================================
+# 4. EXTRACTION PIPELINE — 5-LAYER MODEL
+# ============================================================
+# The extraction pipeline uses a layered approach to document
+# every step from "what data is available" to "how each field
+# value is obtained." All extracted data ultimately lands in
+# the DC-0004 Ingestion Snapshot table.
+#
+#   L1  Source Data Catalog       — what data families does this source offer?
+#   L2  Dataset Extraction Plan   — which datasets do we extract, at what cadence?
+#   L3  Canonical Key Resolution  — how do we derive the DC-0004 composite key?
+#   L4  Field Extraction Spec     — how to get each attribute value?
+#   L5  End Result (DC-0004)      — what does the final snapshot row look like?
+#
+# All five layers are defined contiguously in this section.
+# ============================================================
+
+# ────────────────────────────────────────────────
+# L1 — SOURCE DATA CATALOG
+# ────────────────────────────────────────────────
+source_data_catalog:
+  description: >
+    High-level inventory of all data families / record groups that
+    the external source provides. This is the "menu" — not every
+    item needs to be extracted. The purpose is to document what is
+    available so that extraction scope decisions are explicit.
+  required: true
+
+  source_format: ""                       # Overall format: Fixed-width | CSV | JSON | XML | API | PDF | etc.
+  source_format_version: ""               # Version / standard (e.g., "SPAN PA2 positional", "FpML 5.12")
+  source_documentation_url: ""            # Link to the official format specification
+
+  data_families:
+    - family_id: ""                       # Stable identifier, e.g. FAM-HEADER, FAM-SETTLE, FAM-RISK
+      name: ""                            # Human-readable name (e.g., "Settlement Prices")
+      description: ""                     # What this family contains
+      source_record_types: []             # Which raw record types / sections carry this data
+                                          #   e.g., ["Type B", "Type 81", "Type 82"] for SPAN PA2
+      update_frequency: ""                # How often this data changes: static | daily | intraday | event-driven
+      volume_estimate: ""                 # Approximate record count per delivery (e.g., "~50,000 rows/day")
+      business_relevance: ""              # Why this data matters (e.g., "Required for margin calculation")
+
+# ────────────────────────────────────────────────
+# L2 — DATASET EXTRACTION PLAN
+# ────────────────────────────────────────────────
+dataset_extraction_plan:
+  description: >
+    Defines which datasets are actually extracted from the source
+    data families listed in L1. Each dataset becomes a distinct
+    record_type in the DC-0004 snapshot table (FRD-NPH-0002 BRL-008:
+    records with different update cadences must be segregated into
+    separate datasets). A single source family may produce one or
+    more datasets; conversely, a dataset may combine multiple
+    source families.
+    Write path behaviour (batch atomicity, idempotency, and
+    write mode) is specified per dataset.
+  required: true
+
+  datasets:
+    - dataset_id: ""                      # Stable identifier, e.g. DS-SETTLE, DS-RISK-ARRAY
+      name: ""                            # Human-readable name
+      record_type: ""                     # The value written to DC-0004 snapshot.record_type
+                                          #   e.g., "settlement_price", "risk_array", "contract_spec"
+      source_families: []                 # Which L1 family_ids feed this dataset
+      update_frequency: ""                # Inherited or overridden from source family
+      extraction_trigger: ""              # What triggers extraction: schedule | event | manual
+      description: ""                     # What this dataset represents in the canonical model
+      row_granularity: ""                 # What one row represents (e.g., "one contract x one business date")
+      expected_volume: ""                 # Approximate rows per extraction run
+      retention_class: ""                 # live | archive — per FRD-NPH-0002 FR-011 retention policy
+
+      # ── Write path behaviour (per dataset) ──
+      write_mode: ""                      # append | reprocess — how records are written per extraction run
+      batch_atomicity: ""                 # all-or-nothing | partial — failure handling per batch
+      idempotency_key: ""                 # e.g., "entity_hash_key + record_type + business_date"
+      duplicate_run_guard: ""             # How duplicate runs for same (source, record_type, business_date) are handled
+
+# ────────────────────────────────────────────────
+# L3 — CANONICAL KEY RESOLUTION
+# ────────────────────────────────────────────────
+canonical_key_resolution:
+  description: >
+    Defines how each extracted dataset resolves to the DC-0004
+    snapshot composite key (source_code, entity_hash_key, record_type)
+    and how the 6 canonical entity key columns (per PSD-0002) are
+    derived from source data to compute the entity_hash_key.
+    Also documents entity resolution mechanics — search mode
+    expectations and partial-key hashing behaviour per granularity tier.
+  required: true
+
+  target_contract_ref: "DC-0004"          # Ingestion Snapshot Data Contract
+  canonical_entity_ref: "PSD-0002"        # Canonical Entity Search specification
+
+  # ── DC-0004 composite key derivation ──
+  snapshot_key_derivation:
+    source_code: ""                       # How source_code is determined (e.g., "MDC document_id + exchange_code")
+    record_type: ""                       # How record_type is determined (e.g., "from dataset_extraction_plan.datasets[].record_type")
+    entity_hash_key: ""                   # How entity_hash_key is computed (always = deterministic hash of the 6 canonical key columns below)
+
+  # ── PSD-0002 canonical entity key columns ──
+  # For each of the 6 key columns, document where in the source the
+  # value comes from. This is the bridge between external source
+  # identity and internal canonical entity identity.
+  canonical_key_columns:
+    - column: "clearing_house"
+      data_type: "String"
+      constraints: "Non-blank"
+      description: "Clearing house code (e.g., CME, ICE, EUREX)"
+      source_derivation: ""              # How to obtain this value from the source
+                                          #   e.g., "File-level: Type 0/1 header, fixed per PA2 file publisher"
+
+    - column: "exchange"
+      data_type: "String"
+      constraints: "Non-blank"
+      description: "Exchange code (e.g., XCME, IFEU)"
+      source_derivation: ""
+
+    - column: "commodity"
+      data_type: "String"
+      constraints: "Non-blank"
+      description: "Commodity or product group identifier"
+      source_derivation: ""
+
+    - column: "product_type"
+      data_type: "Enum"
+      constraints: "enum: [PHY, FUT, CMB, OOP, OOF, OOC]"
+      description: "Product type classification"
+      source_derivation: ""
+
+    - column: "product_code"
+      data_type: "String"
+      constraints: "Non-blank"
+      description: "Source-specific product code"
+      source_derivation: ""
+
+    - column: "contract"
+      data_type: "String"
+      constraints: "YYYYMM or YYYYMMDD; supports LIKE pattern matching (%) in blurring search when filter mode=EXACT"
+      description: "Contract period identifier"
+      source_derivation: ""
+
+  hash_key:
+    computation: "Deterministic hash of the 6 canonical key columns (PSD-0002 v0.2 BR-004). Null values are normalised to empty string ('') before hash computation (PSD-0002 ASM-003)."
+    determinism_rule: >
+      Same 6-column input must always produce the same hash_key.
+      Null and '' are the same identity (PSD-0002 ASM-003).
+      Source adapters must normalise values (trim, uppercase, null-to-empty)
+      before hashing to guarantee determinism.
+
+  # ── Per-dataset key resolution summary ──
+  # Documents which of the 6 canonical key columns are populated
+  # per dataset, based on the dataset's granularity tier. Datasets
+  # at coarser granularity (e.g., exchange-level) hash only a
+  # subset of the 6 columns; finer granularity (e.g., contract-level)
+  # populates all 6.
+  per_dataset_key_resolution:
+    - dataset_id: ""                      # Must match an L2 dataset_id
+      granularity_tier: ""                # exchange-level | product-level | contract-level
+      populated_columns: []               # Which of the 6 columns are populated (e.g., ["clearing_house", "exchange"])
+      null_columns: []                    # Which columns are null/wildcard at this granularity
+      hash_key_note: ""                   # How partial keys affect hash computation
+
+  # ── Entity resolution mechanics ──
+  entity_resolution:
+    canonical_key_ref: "PSD-0002 v0.2"    # Reference to the canonical entity search spec
+    search_modes:
+      exact: "O(1) hash key lookup — used by ING, MCE, DQM modules during processing. Null values normalised to '' before hash computation (PSD-0002 ASM-003)."
+      blurring: "Per-column filter matching with explicit modes: WILDCARD (match any, default), BLANK (match null/empty only), EXACT (match value). Used for ad-hoc queries and QRY module (PSD-0002 v0.2 BR-002)."
+    hash_determinism: >
+      Same 6-column input must always produce the same hash_key (PSD-0002 v0.2 BR-004).
+      Null and '' are the same identity (ASM-003).
+      Source adapters must normalise values (including null-to-empty) before hashing.
+      For datasets at coarser granularity, unpopulated columns are set to a
+      deterministic sentinel value before hashing to ensure consistency.
+
+# ────────────────────────────────────────────────
+# L4 — FIELD EXTRACTION SPECIFICATION
+# ────────────────────────────────────────────────
+field_extraction_spec:
+  description: >
+    Per-dataset, per-field specification of how to obtain each
+    attribute value from the source data. This is the most granular
+    layer — it tells a developer exactly where to read the value,
+    how to transform it, and where it lands in the DC-0004
+    snapshot.content JSON payload. Each dataset defined in L2
+    should have a corresponding entry here.
+  required: true
+
+  # One entry per dataset from L2
+  dataset_field_maps:
+    - dataset_id: ""                      # Must match an L2 dataset_id
+      dataset_name: ""                    # Human-readable (for readability)
+      record_type: ""                     # Must match L2 record_type -> DC-0004 snapshot.record_type
+      source_record_types: []             # Which raw source record types are parsed
+                                          #   e.g., ["Type B"] or ["Type 81", "Type 82"]
+
+      # ── Field mapping table ──
+      # Each entry maps one source location to one target field
+      # in the DC-0004 snapshot.content JSON.
+      fields:
+        - target_field: ""                # Field name in snapshot.content JSON (e.g., "settlement_price")
+          target_type: ""                 # Data type in content JSON: String | Integer | Float | Boolean | Date | Enum | JSON
+          required: false                 # Is this field mandatory in the content payload?
+          source_location: ""             # Where to find the raw value in the source
+                                          #   Fixed-width: "Type B pos 108-121" or "Type 2 pos 7-10"
+                                          #   CSV: "column 5" or "header: SETTLE_PX"
+                                          #   JSON/XML: JSONPath / XPath (e.g., "$.trades[*].price")
+                                          #   API: "response.body.settlement_price"
+          extraction_logic: ""            # How to read the raw value
+                                          #   e.g., "Read 14 chars, right-justified, zero-padded"
+          transformation_rule: ""         # How to convert raw -> target
+                                          #   e.g., "Divide by 10^decimal_locator (from Type 2 pos 38)"
+                                          #   e.g., "Map 'F'->'FUT', 'O'->'OOF' per lookup table"
+                                          #   e.g., "Pass through (no transformation)"
+          default_value: ""               # Default if source value is missing or blank (null if no default)
+          validation_rule: ""             # Validation applied after transformation
+                                          #   e.g., "Must be > 0", "Must match YYYYMM pattern"
+          description: ""                 # Business meaning of this field
+          pii: false                      # true if personally identifiable information
+
+# ────────────────────────────────────────────────
+# L5 — END RESULT: DC-0004 SNAPSHOT TARGET
+# ────────────────────────────────────────────────
+end_result:
+  description: >
+    Layer 5 of the extraction pipeline. Shows the complete DC-0004
+    snapshot row that the extraction pipeline produces — including
+    the composite key columns (source_code, entity_hash_key,
+    record_type), temporal columns (effective_date, expiry_date),
+    and the content JSON payload populated by L4 field mappings.
+    One mockup per dataset defined in L2.
+  required: true
+
+  target_contract_ref: "DC-0004"          # Ingestion Snapshot Data Contract
+  snapshot_schema_version: ""             # DC-0004 schema version this mockup targets
+
+  # ── Per-dataset snapshot mockups ──
+  # Each entry shows what a complete DC-0004 snapshot row looks like
+  # for one dataset. Use angle-bracket placeholders for variable values.
+  dataset_mockups:
+    - dataset_id: ""                      # Must match an L2 dataset_id
+      record_type: ""                     # Must match L2 record_type
+      description: ""                     # What this mockup illustrates
+
+      # The full DC-0004 snapshot row structure
+      snapshot_row:
+        snapshot_id: "<auto-generated>"
+        source_code: ""                   # e.g., "MDC-0001-HKEX"
+        entity_hash_key: "<hash of 6 canonical key columns>"
+        record_type: ""                   # e.g., "settlement_price"
+        effective_date: "<business_date>"
+        expiry_date: null                 # null = active snapshot
+        content: {}                       # The content JSON — fields as defined in L4
+        batch_id: "<ingestion_run.batch_id>"
+        status: "active"
+
+# ============================================================
+# 5. SEMANTIC DEFINITIONS & BUSINESS RULES
+# ============================================================
+semantic_definitions:
+  description: >
+    Business-level definitions and rules governing how market data
+    should be interpreted, validated, and mapped. Entity resolution
+    mechanics (canonical key derivation, hash computation, search
+    modes) are defined in Section 4 Layer L3; this section captures
+    the business glossary and business rules only.
+  required: true
+
+  business_glossary:
+    - term: ""
+      definition: ""
+
+  business_rules:
+    - id: ""                              # e.g., BR-MDC-001
+      rule: ""                            # The business rule statement
+      ref: ""                             # Reference to upstream requirement (e.g., FRD, PSD, PSD-0002)
+
+# ============================================================
+# 6. DATA QUALITY STANDARDS
+# ============================================================
+data_quality_standards:
+  description: >
+    Measurable quality expectations for extracted market data.
+    Covers completeness, conformity, uniqueness, and timeliness
+    of canonical entity resolution output.
+  required: true
+
+  quality_dimensions:
+    - dimension: ""                       # Completeness | Conformity | Uniqueness | Timeliness | Accuracy
+      definition: ""                      # What this dimension means for this dataset
+      target: ""                          # Measurable target (e.g., "100% of resolved records")
+
+  custom_checks:
+    - check_id: ""                        # e.g., QC-MDC-001
+      description: ""                     # What the check validates
+      applies_to: ""                      # Which field or process
+
+# ============================================================
+# 7. SERVICE LEVEL AGREEMENTS (SLAs)
+# ============================================================
+service_level_agreements:
+  description: >
+    Operational commitments regarding availability, data readiness,
+    throughput, and incident response for market data extraction.
+  required: true
+
+  availability: ""                        # e.g., "99.99%"
+  latency: ""                             # Max time from source availability to data readiness
+  delivery_schedule: ""                   # Frequency and expected delivery time
+  throughput: ""                          # Expected and peak volume
+  incident_response: ""                   # Notification and response time commitments
+
+# ============================================================
+# 8. ACCESS & SECURITY
+# ============================================================
+access_and_security:
+  description: >
+    Defines who can access the extracted market data, how access is
+    granted, and what security controls are in place.
+  required: true
+
+  access_mechanism: ""                    # e.g., "Internal pipeline only"
+  connection_details: ""                  # Endpoint, topic, table path (non-sensitive)
+  authentication_method: ""               # OAuth2 | IAM Role | Service Account | API Key
+  authorization_model: ""                 # RBAC | ABAC | Role-based
+  approved_consumers: []                  # List of consuming modules or teams
+  data_masking: ""                        # Masking rules if applicable
+  retention_policy: ""                    # Retention period and archival strategy
+
+# ============================================================
+# 9. LINEAGE & DEPENDENCIES
+# ============================================================
+lineage_and_dependencies:
+  description: >
+    Documents where market data comes from (upstream external sources)
+    and where it flows to (downstream internal consumers). Critical
+    for impact analysis when sources change.
+  required: true
+
+  source_systems:
+    - system: ""                          # Source system name
+      type: ""                            # External | Internal
+      delivery: ""                        # Delivery mechanism
+
+  upstream_datasets: []                   # Upstream DC references (if any)
+
+  downstream_consumers:
+    - consumer: ""                        # Consuming module or team (e.g., ING, MCE, QRY, DQM per PSD-0002)
+      usage: ""                           # What they use the data for
+      search_mode: ""                     # EXACT | BLURRING — which PSD-0002 search mode this consumer uses
+
+  canonical_entity_integration:
+    entity_search_ref: "PSD-0002"         # Canonical Entity Search specification
+    resolution_flow: >
+      Extracted records are mapped to the 6 canonical key columns, hash_key is computed,
+      and records are written to the canonical entity table. Downstream modules consume
+      via EXACT (hash key O(1) lookup) or BLURRING (partial column filter) search modes.
+
+  transformation_summary: ""              # High-level data flow description
+
+# ============================================================
+# 10. VERSIONING & COMPATIBILITY
+# ============================================================
+versioning_and_compatibility:
+  description: >
+    Rules governing how this contract and its schema evolve over time.
+    Defines what constitutes a breaking vs. non-breaking change for
+    the canonical entity model.
+  required: true
+
+  versioning_strategy: ""                 # Semantic Versioning (MAJOR.MINOR)
+  breaking_changes: []                    # List of changes that require MAJOR version increment
+  non_breaking_changes: []                # List of backward-compatible changes
+  deprecation_policy: ""                  # Notice period and sunset process
+
+# ============================================================
+# 11. SAMPLE FIXTURE
+# ============================================================
+sample_fixture:
+  description: >
+    A concrete synthetic test fixture with representative placeholder
+    values. Intended for unit test reference, QA test case writing,
+    and new team member onboarding. Do not use fixture values in
+    production configuration.
+  required: false
+
+  fixture: {}                             # The actual fixture (JSON object)
+
+# ============================================================
+# 12. SUPPORT & COMMUNICATION
+# ============================================================
+support_and_communication:
+  description: >
+    How consumers can get help, report issues, and stay informed
+    about changes to this market data product.
+  required: false
+
+  support_channel: ""                     # e.g., "#team-market-data", JIRA queue
+  documentation_url: ""                   # Link to data catalog or wiki page
+  announcement_channel: ""                # Where changes are communicated
+  feedback_mechanism: ""                  # How consumers submit enhancement requests
+
+# ============================================================
+# 13. ATTACHMENTS
+# ============================================================
+attachments:
+  description: >
+    Supporting files such as sample data files, source adapter
+    specifications, mapping tables, or data flow diagrams.
+  required: false
+  files: []
+    # - filename: ""
+    #   description: ""
+    #   location: ""
+
+# ============================================================
+# 14. CHANGE LOG
+# ============================================================
+change_log:
+  description: >
+    Version history of this contract document itself.
+  required: true
+  entries:
+    - version: ""
+      date: ""
+      author: ""
+      summary: ""

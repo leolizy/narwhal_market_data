@@ -1,0 +1,401 @@
+# ============================================================
+# High-Level Design (HLD) Document Template
+# Version: 1.0
+# Framework: IEEE 1016 adapted, Agile/SAFe aligned
+# Granularity: Per system or per subsystem
+# Audience: Architects, tech leads, senior developers
+# ============================================================
+
+metadata:
+  document_id: "HLD-[NNNN]"                # Sequential ID, e.g., HLD-0001
+  title: ""
+  version: ""                               # Semantic: Major.Minor (e.g., 1.0, 1.1, 2.0)
+  status: ""                                # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                        # Public | Internal | Confidential | Restricted
+  created_date: ""                          # ISO 8601: YYYY-MM-DD
+  last_updated: ""                          # ISO 8601: YYYY-MM-DD
+  author: ""
+  reviewer: ""
+  approver: ""
+  project_name: ""
+  system_name: ""
+  related_documents: []                     # List of related doc IDs (e.g., SRS-0001, NFR-0001, LLD-0003)
+  tags: []                                   # Freeform tags for search/categorization
+  supersedes: ""                             # ID of document this replaces, if any
+
+# -------------------------------------------------------------------
+# Section 1: Introduction
+# -------------------------------------------------------------------
+introduction:
+  description: >
+    Provides the context and purpose of this HLD. Establishes the scope
+    of the system or subsystem being designed and sets expectations for
+    the reader. Should reference the upstream requirements documents.
+  required: true
+  purpose:
+    description: >
+      Why this document exists and what design problem it addresses.
+    content: ""
+  scope:
+    description: >
+      Defines the system/subsystem boundary this HLD covers. Clarify
+      what is in scope and explicitly state what is out of scope.
+    content: ""
+  intended_audience:
+    description: >
+      Identifies who should read this document and what prior knowledge
+      is assumed (e.g., familiarity with cloud-native patterns).
+    content: ""
+  references:
+    description: >
+      Links to upstream requirements (SRS, FRD, NFR), related HLDs,
+      and any external standards or specifications referenced.
+    content: []
+
+# -------------------------------------------------------------------
+# Section 2: Design Goals & Constraints
+# -------------------------------------------------------------------
+design_goals_and_constraints:
+  description: >
+    Captures the architectural drivers: the goals the design must
+    achieve and the constraints it must operate within. These shape
+    every subsequent design decision.
+  required: true
+  design_goals:
+    description: >
+      The primary objectives the architecture must fulfil, derived
+      from NFRs and business requirements (e.g., high availability,
+      horizontal scalability, sub-200ms API response time).
+    content: []
+  design_constraints:
+    description: >
+      Fixed boundaries the design cannot change, such as mandated
+      technology choices, regulatory requirements, budget limits,
+      or legacy system dependencies.
+    content: []
+  assumptions:
+    description: >
+      Conditions assumed to be true for this design to hold. Each
+      assumption should note the impact if it proves false.
+    content: []
+
+# -------------------------------------------------------------------
+# Section 3: System Architecture Overview
+# -------------------------------------------------------------------
+system_architecture_overview:
+  description: >
+    The top-level view of the system architecture. Provides a
+    conceptual diagram and narrative that allows the reader to
+    understand the major building blocks and how they relate.
+    This is the "10,000-foot view."
+  required: true
+  architecture_style:
+    description: >
+      The architectural pattern(s) adopted (e.g., microservices,
+      event-driven, layered, hexagonal, CQRS). Justify the choice.
+    content: ""
+  architecture_diagram:
+    description: >
+      Reference or embed the top-level architecture diagram. Use
+      C4 Context or Container level, or equivalent. Specify the
+      diagramming tool and file location.
+    content: ""
+    diagram_reference: ""                   # Path or URL to diagram file
+  narrative:
+    description: >
+      A written walkthrough of the architecture diagram, explaining
+      each major block, its responsibility, and how blocks interact.
+    content: ""
+
+# -------------------------------------------------------------------
+# Section 4: Component Design
+# -------------------------------------------------------------------
+component_design:
+  description: >
+    Breaks down the system into its major components/services.
+    Each component is described with its responsibility, interfaces,
+    and dependencies. This is the heart of the HLD.
+  required: true
+  components:
+    - component_id: ""
+      component_name: ""
+      description: >
+        What this component does — its single responsibility or
+        bounded context.
+      content: ""
+      responsibilities:
+        description: >
+          Specific responsibilities assigned to this component.
+        content: []
+      interfaces:
+        description: >
+          APIs, events, or protocols this component exposes or
+          consumes. Include direction (inbound/outbound).
+        content: []
+      dependencies:
+        description: >
+          Other components, services, or external systems this
+          component depends on.
+        content: []
+      technology_stack:
+        description: >
+          Key technologies used by this component (language,
+          framework, runtime).
+        content: ""
+
+# -------------------------------------------------------------------
+# Section 5: Technology Stack
+# -------------------------------------------------------------------
+technology_stack:
+  description: >
+    Consolidated view of all technologies selected for the system.
+    Provides rationale for key technology choices and highlights
+    any technology risks.
+  required: true
+  stack_summary:
+    description: >
+      Tabular summary of technology categories and selections
+      (e.g., Language, Framework, Database, Message Broker, Cloud
+      Provider, CI/CD, Monitoring).
+    content: []
+  technology_decisions:
+    description: >
+      Key technology decisions with rationale and alternatives
+      considered. Reference ADRs if they exist.
+    content: []
+
+# -------------------------------------------------------------------
+# Section 6: Data Architecture
+# -------------------------------------------------------------------
+data_architecture:
+  description: >
+    Describes how data is stored, flows, and is governed across
+    the system. Includes data models at a conceptual level, data
+    flow diagrams, and data storage strategy.
+  required: true
+  data_model:
+    description: >
+      Conceptual or logical data model. Identify key entities,
+      relationships, and ownership boundaries per component.
+    content: ""
+    diagram_reference: ""
+  data_flow:
+    description: >
+      How data moves through the system — from ingestion to
+      processing to storage to consumption. Include sync vs
+      async flows.
+    content: ""
+    diagram_reference: ""
+  data_storage_strategy:
+    description: >
+      Database types and distribution (relational, NoSQL, cache,
+      object store). Include partitioning, replication, and
+      retention policies at a high level.
+    content: ""
+
+# -------------------------------------------------------------------
+# Section 7: Integration Architecture
+# -------------------------------------------------------------------
+integration_architecture:
+  description: >
+    Covers all integration points — internal service-to-service
+    communication and external third-party integrations. Defines
+    protocols, patterns, and contracts.
+  required: true
+  internal_integrations:
+    description: >
+      How components communicate internally (REST, gRPC, messaging,
+      event bus). Define patterns (sync request-reply, async pub/sub,
+      saga, choreography vs orchestration).
+    content: []
+  external_integrations:
+    description: >
+      Third-party systems or partner APIs the system integrates with.
+      Include protocol, authentication, SLA, and failure handling.
+    content: []
+  integration_diagram:
+    description: >
+      Diagram showing all integration flows and protocols.
+    content: ""
+    diagram_reference: ""
+
+# -------------------------------------------------------------------
+# Section 8: Security Architecture
+# -------------------------------------------------------------------
+security_architecture:
+  description: >
+    Defines the security posture of the system — authentication,
+    authorization, data protection, and threat mitigation. Should
+    align with organizational security policies and compliance
+    requirements.
+  required: true
+  authentication:
+    description: >
+      How users and services authenticate (e.g., OAuth 2.0, OIDC,
+      mTLS, API keys). Include identity provider details.
+    content: ""
+  authorization:
+    description: >
+      Access control model (RBAC, ABAC, policy-based). Define roles,
+      permissions, and enforcement points.
+    content: ""
+  data_protection:
+    description: >
+      Encryption strategy (at rest, in transit), key management,
+      PII handling, and data masking/tokenization.
+    content: ""
+  threat_model_summary:
+    description: >
+      High-level threats identified (STRIDE or similar) and
+      corresponding mitigations. Reference detailed threat model
+      document if available.
+    content: ""
+
+# -------------------------------------------------------------------
+# Section 9: Deployment Architecture
+# -------------------------------------------------------------------
+deployment_architecture:
+  description: >
+    How the system is deployed — infrastructure topology, environments,
+    and deployment strategy. Should give a clear picture of the
+    production runtime environment.
+  required: true
+  infrastructure_overview:
+    description: >
+      Cloud provider, regions, availability zones, key managed
+      services. Include infrastructure-as-code references.
+    content: ""
+  deployment_diagram:
+    description: >
+      Diagram showing the deployment topology — containers, nodes,
+      load balancers, DNS, CDN, etc.
+    content: ""
+    diagram_reference: ""
+  deployment_strategy:
+    description: >
+      Release strategy (blue-green, canary, rolling, feature flags).
+      Include CI/CD pipeline overview.
+    content: ""
+  environments:
+    description: >
+      List of environments (dev, staging, UAT, production) and
+      key differences between them.
+    content: []
+
+# -------------------------------------------------------------------
+# Section 10: Observability & Operations
+# -------------------------------------------------------------------
+observability_and_operations:
+  description: >
+    Defines how the system is monitored, alerted on, and
+    operationally supported. Covers the "day-2" operational
+    readiness of the design.
+  required: true
+  monitoring:
+    description: >
+      Metrics, dashboards, and monitoring tools. Define key
+      system health indicators.
+    content: ""
+  logging:
+    description: >
+      Logging strategy — structured logging, log aggregation,
+      correlation IDs, retention.
+    content: ""
+  alerting:
+    description: >
+      Alert definitions, thresholds, escalation paths, and
+      on-call procedures at a high level.
+    content: ""
+  sla_slo_sli:
+    description: >
+      Define Service Level Agreements, Objectives, and Indicators
+      for the system.
+    content: ""
+
+# -------------------------------------------------------------------
+# Section 11: Design Decisions & Rationale
+# -------------------------------------------------------------------
+design_decisions:
+  description: >
+    Records significant architectural decisions made during the
+    design process. Each decision should capture the context,
+    options considered, decision taken, and consequences. Follows
+    the ADR (Architecture Decision Record) pattern.
+  required: true
+  decisions:
+    - decision_id: ""
+      title: ""
+      context:
+        description: >
+          The situation or problem that necessitated a decision.
+        content: ""
+      options_considered:
+        description: >
+          Alternatives evaluated, with pros and cons.
+        content: []
+      decision:
+        description: >
+          The chosen option and rationale.
+        content: ""
+      consequences:
+        description: >
+          Trade-offs, risks, or follow-up actions resulting from
+          this decision.
+        content: ""
+
+# -------------------------------------------------------------------
+# Section 12: Risks & Mitigations
+# -------------------------------------------------------------------
+risks_and_mitigations:
+  description: >
+    Identifies architectural and technical risks inherent in the
+    design. Each risk should have a mitigation strategy and an
+    owner. This section complements the design decisions section.
+  required: true
+  risks:
+    - risk_id: ""
+      description: ""
+      likelihood: ""                        # Low | Medium | High
+      impact: ""                            # Low | Medium | High
+      mitigation: ""
+      owner: ""
+
+# -------------------------------------------------------------------
+# Section 13: Future Considerations (Optional)
+# -------------------------------------------------------------------
+future_considerations:
+  description: >
+    Documents known areas for future enhancement, anticipated
+    scaling needs, or deferred design decisions. Helps the next
+    iteration of the design start from an informed position.
+  required: false
+  content: []
+
+# -------------------------------------------------------------------
+# Section 14: Glossary (Optional)
+# -------------------------------------------------------------------
+glossary:
+  description: >
+    Defines technical terms, acronyms, and domain-specific language
+    used in this document. Ensures shared understanding across
+    the audience.
+  required: false
+  terms: []
+
+# -------------------------------------------------------------------
+# Attachments
+# -------------------------------------------------------------------
+attachments:
+  description: >
+    Supporting diagrams, models, prototypes, or reference materials
+    not embedded inline. List file names and brief descriptions.
+  items: []
+
+# -------------------------------------------------------------------
+# Change Log
+# -------------------------------------------------------------------
+change_log:
+  - version: ""
+    date: ""
+    author: ""
+    changes: ""

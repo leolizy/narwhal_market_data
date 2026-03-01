@@ -1,0 +1,168 @@
+# ============================================================
+# MVP Delivery Task List Template
+# Version: 1.0
+# Framework: Lightweight / Framework-agnostic
+# ============================================================
+
+metadata:
+  document_id: "MVP-[NNNN]"              # e.g., MVP-0001
+  title: ""                               # e.g., "MVP Task List — User Auth Module — Sprint 12"
+  version: ""                             # Semantic: Major.Minor (e.g., 1.0)
+  status: ""                              # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                      # Public | Internal | Confidential | Restricted
+  created_date: ""                        # YYYY-MM-DD
+  last_updated: ""                        # YYYY-MM-DD
+  author: ""                              # Person who created this task list
+  reviewer: ""                            # Technical reviewer
+  approver: ""                            # Approval authority
+  product_owner: ""                       # PM or PO accountable for scope decisions
+  tech_lead: ""                           # Tech lead accountable for technical delivery
+  release_target: ""                      # Target release or sprint (e.g., "Sprint 12", "v1.0-beta")
+  related_documents: []                   # List of related doc IDs (e.g., PC-0001, FRD-0003)
+  tags: []                                # Freeform tags for search/categorization
+  supersedes: ""                          # ID of document this replaces, if any
+
+# -----------------------------------------------------------
+# Section 1: MVP Objective
+# -----------------------------------------------------------
+mvp_objective:
+  description: >
+    State the single overarching goal of this MVP delivery cycle.
+    Keep it to one or two sentences. This anchors every task below.
+  content: ""
+  required: true
+
+# -----------------------------------------------------------
+# Section 2: Success Criteria
+# -----------------------------------------------------------
+success_criteria:
+  description: >
+    Define measurable outcomes that determine whether the MVP is
+    considered successful. Use quantifiable metrics where possible
+    (e.g., "95% of login attempts complete within 2 seconds").
+  items:
+    - criterion: ""
+      metric: ""
+      target: ""
+  required: true
+
+# -----------------------------------------------------------
+# Section 3: Scope Definition
+# -----------------------------------------------------------
+scope:
+  description: >
+    Clearly delineate what is IN scope and OUT of scope for this
+    MVP cycle. This prevents scope creep and aligns expectations.
+  in_scope:
+    - ""
+  out_of_scope:
+    - ""
+  assumptions:
+    - ""
+  required: true
+
+# -----------------------------------------------------------
+# Section 4: Task Breakdown
+# -----------------------------------------------------------
+tasks:
+  description: >
+    The core of the document. List every work item required to deliver
+    the MVP. Group tasks by functional area or workstream. Each task
+    must have an owner, priority, estimate, and status.
+  workstreams:
+    - workstream_name: ""
+      tasks:
+        - id: "T-001"
+          title: ""
+          description: ""
+          owner: ""
+          priority: ""                    # P0-Critical | P1-High | P2-Medium | P3-Low
+          estimate: ""                    # e.g., "2d", "4h", "1w"
+          status: ""                      # Not Started | In Progress | Blocked | Done | Deferred
+          blocked_by: ""                  # Task ID or external dependency if blocked
+          acceptance_criteria:
+            - ""
+          notes: ""
+  required: true
+
+# -----------------------------------------------------------
+# Section 5: Dependencies & Risks
+# -----------------------------------------------------------
+dependencies_and_risks:
+  description: >
+    Identify external dependencies (APIs, teams, vendors) and risks
+    that could delay or derail MVP delivery. Include mitigation plans.
+  dependencies:
+    - dependency: ""
+      owner: ""
+      expected_resolution_date: ""
+      status: ""                          # Open | Resolved | Escalated
+  risks:
+    - risk: ""
+      likelihood: ""                      # Low | Medium | High
+      impact: ""                          # Low | Medium | High
+      mitigation: ""
+  required: true
+
+# -----------------------------------------------------------
+# Section 6: Timeline & Milestones
+# -----------------------------------------------------------
+timeline:
+  description: >
+    Define key milestones and target dates for this MVP cycle.
+    Keep it lightweight — 3 to 6 milestones is typical.
+  milestones:
+    - milestone: ""
+      target_date: ""                     # YYYY-MM-DD
+      owner: ""
+      status: ""                          # On Track | At Risk | Missed | Complete
+  required: true
+
+# -----------------------------------------------------------
+# Section 7: Definition of Done
+# -----------------------------------------------------------
+definition_of_done:
+  description: >
+    A shared checklist that every task must satisfy before it can
+    be marked as "Done". This ensures consistent quality.
+  checklist:
+    - "Code reviewed and merged"
+    - "Unit tests passing"
+    - "Acceptance criteria verified"
+    - "No critical or high-severity bugs open"
+    - "Documentation updated (if applicable)"
+  required: true
+
+# -----------------------------------------------------------
+# Section 8: Communication & Reporting
+# -----------------------------------------------------------
+communication:
+  description: >
+    Define how progress is communicated. Keep it minimal —
+    standup cadence, status report frequency, escalation path.
+  standup_cadence: ""                     # e.g., "Daily at 9:30 AM"
+  status_report_frequency: ""            # e.g., "Weekly on Friday"
+  escalation_path: ""                     # e.g., "Owner → Tech Lead → PM → Sponsor"
+  required: false
+
+# -----------------------------------------------------------
+# Section 9: Attachments
+# -----------------------------------------------------------
+attachments:
+  description: >
+    Reference any supporting files — wireframes, architecture
+    diagrams, data models, or external links.
+  files:
+    - filename: ""
+      description: ""
+      link: ""
+  required: false
+
+# -----------------------------------------------------------
+# Change Log
+# -----------------------------------------------------------
+change_log:
+  - version: ""
+    date: ""
+    author: ""
+    changes: ""

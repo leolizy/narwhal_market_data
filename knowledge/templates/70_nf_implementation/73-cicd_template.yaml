@@ -1,0 +1,543 @@
+# ============================================================
+# CI/CD Framework & Handbook Template
+# Version: 1.0
+# Framework: Tool-Agnostic, Industry Best Practices
+# Scope: Organization-Wide
+# ============================================================
+
+metadata:
+  document_id: "CICD-[NNNN]"              # e.g., CICD-0001
+  title: ""
+  version: ""
+  status: ""                               # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                       # Public | Internal | Confidential | Restricted
+  created_date: ""
+  last_updated: ""
+  author: ""
+  reviewer: ""
+  approver: ""
+  related_documents: []                    # e.g., [DG-0001, NFR-0001, DBAD-0001]
+  tags: []                                 # Freeform tags for search/categorization
+  supersedes: ""                           # ID of document this replaces, if any
+
+# ============================================================
+# SECTION 1: INTRODUCTION
+# ============================================================
+introduction:
+  purpose:
+    description: >
+      State the purpose of this CI/CD handbook — why the organization
+      needs a unified CI/CD framework, what problems it solves, and
+      what outcomes it aims to achieve (e.g., faster delivery, reduced
+      defects, consistent deployments).
+    content: ""
+    required: true
+
+  scope:
+    description: >
+      Define the organizational boundary this handbook covers. Specify
+      which teams, products, platforms, and environments are in scope.
+      Clarify any exclusions (e.g., legacy systems, third-party vendor
+      pipelines).
+    content: ""
+    required: true
+
+  target_audience:
+    description: >
+      Identify the primary and secondary audiences: DevOps engineers,
+      software developers, QA engineers, SREs, tech leads, and
+      engineering managers.
+    content: ""
+    required: true
+
+  definitions_and_acronyms:
+    description: >
+      Define key terms and acronyms used throughout the handbook
+      (e.g., CI, CD, Pipeline, Artifact, Stage, Gate, Blue-Green,
+      Canary, Feature Flag, Trunk-Based Development).
+    content: []
+    required: true
+
+  references:
+    description: >
+      List all referenced documents, standards, and external resources
+      (e.g., related design decisions, architecture docs, security policies,
+      compliance frameworks).
+    content: []
+    required: false
+
+# ============================================================
+# SECTION 2: CI/CD PRINCIPLES & STRATEGY
+# ============================================================
+principles_and_strategy:
+  core_principles:
+    description: >
+      Enumerate the foundational principles that govern CI/CD within
+      the organization. Examples: automate everything, fail fast,
+      shift-left testing, infrastructure as code, immutable artifacts,
+      single source of truth for config.
+    content: []
+    required: true
+
+  ci_cd_maturity_model:
+    description: >
+      Define the maturity levels the organization recognizes for CI/CD
+      adoption. Provide criteria for each level so teams can self-assess.
+      Typical levels: Level 1 (Manual/Ad-hoc), Level 2 (Basic CI),
+      Level 3 (Full CI/CD), Level 4 (Continuous Deployment),
+      Level 5 (Optimized/Self-Healing).
+    levels:
+      - level: 1
+        name: ""
+        criteria: []
+      - level: 2
+        name: ""
+        criteria: []
+      - level: 3
+        name: ""
+        criteria: []
+      - level: 4
+        name: ""
+        criteria: []
+      - level: 5
+        name: ""
+        criteria: []
+    required: true
+
+  strategic_goals:
+    description: >
+      Define measurable strategic goals for CI/CD adoption. Align with
+      DORA metrics where applicable: Deployment Frequency, Lead Time
+      for Changes, Mean Time to Restore (MTTR), Change Failure Rate.
+    content: []
+    required: true
+
+# ============================================================
+# SECTION 3: SOURCE CONTROL STRATEGY
+# ============================================================
+source_control_strategy:
+  branching_strategy:
+    description: >
+      Define the organization's standard branching model. Common options:
+      Trunk-Based Development, GitFlow, GitHub Flow, GitLab Flow.
+      Specify branch naming conventions, branch protection rules,
+      and merge policies.
+    branching_model: ""
+    branch_naming_convention: ""
+    branch_protection_rules: []
+    merge_policy: ""                       # e.g., squash-merge, merge commit, rebase
+    content: ""
+    required: true
+
+  commit_standards:
+    description: >
+      Define commit message conventions (e.g., Conventional Commits),
+      commit signing requirements, and atomic commit guidelines.
+    commit_message_format: ""
+    commit_signing: ""                     # required | recommended | not required
+    content: ""
+    required: true
+
+  code_review_policy:
+    description: >
+      Define code review requirements: minimum approvals, review
+      turnaround SLA, reviewer assignment strategy, automated checks
+      that must pass before review.
+    minimum_approvals: ""
+    review_sla: ""
+    automated_checks_required: []
+    content: ""
+    required: true
+
+# ============================================================
+# SECTION 4: CONTINUOUS INTEGRATION (CI)
+# ============================================================
+continuous_integration:
+  build_pipeline:
+    description: >
+      Define the standard CI build pipeline stages, their order, and
+      what each stage must accomplish. Typical stages: Checkout,
+      Dependency Install, Compile/Build, Unit Test, Static Analysis,
+      Security Scan, Artifact Publish.
+    stages:
+      - stage_name: ""
+        description: ""
+        required: true
+        failure_action: ""                 # block | warn | notify
+    content: ""
+    required: true
+
+  build_standards:
+    description: >
+      Define build reproducibility requirements, build caching strategy,
+      build timeout limits, and artifact versioning scheme.
+    reproducibility_requirement: ""
+    caching_strategy: ""
+    build_timeout: ""
+    artifact_versioning: ""                # e.g., semantic versioning, git SHA, build number
+    content: ""
+    required: true
+
+  automated_testing_in_ci:
+    description: >
+      Specify which testing types run during CI, minimum coverage
+      thresholds, test execution time budgets, and flaky test policies.
+    test_types:
+      - type: "unit"
+        coverage_threshold: ""
+        time_budget: ""
+        required: true
+      - type: "integration"
+        coverage_threshold: ""
+        time_budget: ""
+        required: true
+      - type: "static_analysis"
+        rules: ""
+        required: true
+      - type: "security_scan"
+        scan_type: ""                      # SAST | SCA | secrets detection
+        required: true
+    flaky_test_policy: ""
+    content: ""
+    required: true
+
+  artifact_management:
+    description: >
+      Define how build artifacts are stored, versioned, promoted, and
+      retained. Specify artifact repository strategy, retention policies,
+      and artifact signing/verification requirements.
+    artifact_repository: ""
+    retention_policy: ""
+    artifact_signing: ""                   # required | recommended | not required
+    promotion_strategy: ""                 # e.g., promote through environments, immutable tag
+    content: ""
+    required: true
+
+# ============================================================
+# SECTION 5: CONTINUOUS DELIVERY / DEPLOYMENT (CD)
+# ============================================================
+continuous_delivery:
+  deployment_pipeline:
+    description: >
+      Define the standard CD pipeline stages from artifact promotion
+      through production deployment. Typical stages: Deploy to Dev,
+      Integration Testing, Deploy to Staging, Performance Testing,
+      Approval Gate, Deploy to Production, Smoke Tests.
+    stages:
+      - stage_name: ""
+        environment: ""
+        approval_required: false           # true for manual gates
+        automated_tests: []
+        rollback_trigger: ""
+    content: ""
+    required: true
+
+  environment_strategy:
+    description: >
+      Define the standard environment tiers (Dev, QA, Staging, Pre-Prod,
+      Production), their purpose, configuration management approach,
+      and parity requirements with production.
+    environments:
+      - name: ""
+        purpose: ""
+        parity_level: ""                   # full | partial | minimal
+        access_control: ""
+    infrastructure_as_code: ""             # required | recommended
+    content: ""
+    required: true
+
+  deployment_strategies:
+    description: >
+      Document approved deployment strategies and when to use each.
+      Common strategies: Rolling Update, Blue-Green, Canary, Feature
+      Flags, A/B Testing, Recreate.
+    strategies:
+      - name: ""
+        description: ""
+        use_when: ""
+        risk_level: ""                     # low | medium | high
+    content: ""
+    required: true
+
+  release_management:
+    description: >
+      Define the release process: release cadence, release versioning,
+      release notes generation, release approval workflow, and
+      communication plan.
+    release_cadence: ""
+    versioning_scheme: ""
+    release_approval_workflow: ""
+    release_notes_process: ""
+    content: ""
+    required: true
+
+  rollback_and_recovery:
+    description: >
+      Define rollback procedures, rollback triggers, automated vs
+      manual rollback criteria, data migration rollback considerations,
+      and recovery time objectives.
+    rollback_triggers: []
+    automated_rollback_criteria: ""
+    manual_rollback_procedure: ""
+    data_rollback_strategy: ""
+    recovery_time_objective: ""
+    content: ""
+    required: true
+
+# ============================================================
+# SECTION 6: QUALITY GATES & GOVERNANCE
+# ============================================================
+quality_gates:
+  gate_definitions:
+    description: >
+      Define each quality gate in the pipeline, what criteria must be
+      met to pass, who can override a failed gate, and escalation
+      procedures.
+    gates:
+      - gate_name: ""
+        stage: ""                          # e.g., pre-merge, post-build, pre-deploy
+        criteria: []
+        override_authority: ""
+        escalation: ""
+    content: ""
+    required: true
+
+  approval_workflows:
+    description: >
+      Define approval workflows for different deployment targets.
+      Specify who approves, SLA for approval, and auto-approval
+      conditions (e.g., auto-approve to Dev, manual approve to Prod).
+    workflows:
+      - environment: ""
+        approvers: []
+        approval_sla: ""
+        auto_approve_conditions: ""
+    content: ""
+    required: true
+
+  compliance_and_audit:
+    description: >
+      Define audit trail requirements for pipeline executions,
+      deployment logs, approval records, and artifact provenance.
+      Specify retention periods for audit data.
+    audit_trail_requirements: []
+    log_retention_period: ""
+    artifact_provenance: ""                # e.g., SLSA level, signed attestations
+    content: ""
+    required: false
+
+# ============================================================
+# SECTION 7: SECURITY IN CI/CD (DevSecOps)
+# ============================================================
+security:
+  pipeline_security:
+    description: >
+      Define security controls for the CI/CD pipeline itself: secret
+      management, pipeline-as-code security, least-privilege access,
+      runner/agent hardening, network segmentation.
+    secret_management_tool: ""
+    secret_rotation_policy: ""
+    pipeline_access_control: ""
+    runner_hardening: []
+    content: ""
+    required: true
+
+  application_security_scanning:
+    description: >
+      Define when and how application security scans run in the
+      pipeline: SAST, DAST, SCA (dependency scanning), container
+      image scanning, IaC scanning, secrets detection.
+    scan_types:
+      - type: ""
+        stage: ""                          # when in pipeline
+        blocking: true                     # blocks pipeline on failure
+        exception_process: ""
+    content: ""
+    required: true
+
+  supply_chain_security:
+    description: >
+      Define software supply chain security practices: dependency
+      pinning, lockfile enforcement, provenance verification,
+      SBOM generation, trusted registries.
+    dependency_pinning: ""
+    sbom_generation: ""                    # required | recommended
+    trusted_registries: []
+    content: ""
+    required: true
+
+# ============================================================
+# SECTION 8: MONITORING, OBSERVABILITY & FEEDBACK LOOPS
+# ============================================================
+monitoring_and_feedback:
+  pipeline_monitoring:
+    description: >
+      Define how pipeline health is monitored: build success rates,
+      pipeline duration trends, queue times, resource utilization.
+      Specify alerting thresholds and escalation.
+    metrics:
+      - metric_name: ""
+        threshold: ""
+        alert_channel: ""
+    content: ""
+    required: true
+
+  deployment_monitoring:
+    description: >
+      Define post-deployment monitoring requirements: health checks,
+      error rate monitoring, performance baselines, automated rollback
+      triggers based on observability signals.
+    health_check_requirements: []
+    error_rate_threshold: ""
+    performance_baseline: ""
+    automated_rollback_signals: []
+    content: ""
+    required: true
+
+  dora_metrics:
+    description: >
+      Define how the organization tracks DORA metrics: Deployment
+      Frequency, Lead Time for Changes, Mean Time to Restore (MTTR),
+      Change Failure Rate. Specify targets and measurement methods.
+    metrics:
+      - name: "deployment_frequency"
+        target: ""
+        measurement_method: ""
+      - name: "lead_time_for_changes"
+        target: ""
+        measurement_method: ""
+      - name: "mean_time_to_restore"
+        target: ""
+        measurement_method: ""
+      - name: "change_failure_rate"
+        target: ""
+        measurement_method: ""
+    content: ""
+    required: true
+
+  feedback_loops:
+    description: >
+      Define mechanisms for continuous improvement: retrospectives on
+      pipeline failures, post-incident reviews, developer experience
+      surveys, pipeline optimization sprints.
+    mechanisms: []
+    review_cadence: ""
+    content: ""
+    required: false
+
+# ============================================================
+# SECTION 9: PIPELINE TEMPLATES & STANDARDS
+# ============================================================
+pipeline_templates:
+  standard_pipeline_definitions:
+    description: >
+      Provide or reference standard pipeline templates for common
+      application types (e.g., microservice, monolith, library,
+      static site, mobile app, data pipeline). Define which template
+      to use for which application type.
+    templates:
+      - application_type: ""
+        template_reference: ""
+        required_stages: []
+        optional_stages: []
+    content: ""
+    required: true
+
+  shared_libraries_and_reusable_components:
+    description: >
+      Define reusable pipeline components, shared CI/CD libraries,
+      and custom actions/plugins. Specify versioning and consumption
+      guidelines.
+    shared_library_location: ""
+    versioning_policy: ""
+    contribution_guidelines: ""
+    content: ""
+    required: false
+
+  naming_conventions:
+    description: >
+      Define naming conventions for pipelines, jobs, stages, artifacts,
+      environments, and related resources.
+    pipeline_naming: ""
+    job_naming: ""
+    artifact_naming: ""
+    environment_naming: ""
+    content: ""
+    required: true
+
+# ============================================================
+# SECTION 10: ROLES & RESPONSIBILITIES
+# ============================================================
+roles_and_responsibilities:
+  raci_matrix:
+    description: >
+      Define a RACI matrix for CI/CD activities: pipeline creation,
+      pipeline maintenance, deployment approvals, incident response,
+      security scanning, monitoring, tooling decisions.
+    matrix:
+      - activity: ""
+        responsible: ""
+        accountable: ""
+        consulted: ""
+        informed: ""
+    content: ""
+    required: true
+
+  team_ownership:
+    description: >
+      Define the ownership model for CI/CD pipelines. Specify whether
+      pipelines are owned by product teams, a platform/DevOps team,
+      or a shared responsibility model.
+    ownership_model: ""
+    platform_team_responsibilities: []
+    product_team_responsibilities: []
+    content: ""
+    required: true
+
+# ============================================================
+# SECTION 11: EXCEPTION & ESCALATION PROCESS
+# ============================================================
+exception_process:
+  exception_handling:
+    description: >
+      Define how exceptions to CI/CD standards are handled: emergency
+      deployments (hotfixes), bypassing quality gates, temporary
+      pipeline modifications. Specify approval requirements and
+      time-bound exceptions.
+    emergency_deployment_process: ""
+    gate_bypass_approval: ""
+    time_bound_exception_policy: ""
+    content: ""
+    required: true
+
+  escalation_matrix:
+    description: >
+      Define escalation paths for pipeline failures, blocked
+      deployments, security vulnerabilities found in pipeline, and
+      tooling outages.
+    escalation_paths:
+      - scenario: ""
+        level_1: ""
+        level_2: ""
+        level_3: ""
+    content: ""
+    required: true
+
+# ============================================================
+# ATTACHMENTS & APPENDICES
+# ============================================================
+attachments:
+  description: >
+    List any supporting files: architecture diagrams, pipeline flow
+    diagrams, tool comparison matrices, migration plans, training
+    materials.
+  files: []
+
+# ============================================================
+# CHANGE LOG
+# ============================================================
+change_log:
+  - version: ""
+    date: ""
+    author: ""
+    changes: ""

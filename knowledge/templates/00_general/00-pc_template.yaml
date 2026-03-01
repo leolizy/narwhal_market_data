@@ -1,0 +1,269 @@
+# ============================================================
+# Platform Canon (PC) Template
+# Pattern: Flat metadata structure
+# Version: 1.0
+# Aligned to: BABOK 3.0, IEEE 830-1998
+# ============================================================
+
+# ----------------------------------------------------------
+# METADATA — Document identity, ownership, and lifecycle
+# ----------------------------------------------------------
+metadata:
+  document_id: "PC-[NNNN]"                # e.g., PC-0001
+  title: ""
+  version: ""                               # Semantic: Major.Minor (e.g. 1.0, 1.7)
+  status: ""                                # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                        # Public | Internal | Confidential | Restricted
+  created_date: ""                          # ISO 8601: YYYY-MM-DD
+  last_updated: ""                          # ISO 8601: YYYY-MM-DD
+  author: ""
+  reviewer: ""
+  approver: ""
+  business_sponsor: ""                      # PC-specific: executive sponsor for this initiative
+  related_documents: []                     # List of related document IDs (e.g. FRD-NPH-0001, NFR-NPH-0001)
+  tags: []                                  # Freeform tags for search/categorization
+  supersedes: ""                            # ID of document this replaces, if any
+
+# ----------------------------------------------------------
+# SECTION 1: Executive Summary
+# ----------------------------------------------------------
+executive_summary:
+  description: >
+    A concise overview of the initiative, its business driver, and the expected
+    outcome. Should be understandable by a senior stakeholder in under 2 minutes.
+    Reference: BABOK Section 4.5 — Define Business Need.
+  content: ""
+  required: true
+
+# ----------------------------------------------------------
+# SECTION 2: Business Objectives
+# ----------------------------------------------------------
+objectives:
+  description: >
+    Measurable business goals this initiative aims to achieve. Each objective
+    should be SMART (Specific, Measurable, Achievable, Relevant, Time-bound).
+    Reference: BABOK Section 6.1 — Define Future State.
+  items:
+    - id: "BO-001"
+      statement: ""
+      success_measure: ""                   # How will achievement be measured?
+  required: true
+
+# ----------------------------------------------------------
+# SECTION 3: Problem Statement
+# ----------------------------------------------------------
+problem_statement:
+  description: >
+    Articulate the current pain points, inefficiencies, or gaps that justify
+    this initiative. Ties directly to Business Objectives.
+    Reference: BABOK Section 4.4 — Define Business Need.
+  content: ""
+  required: true
+
+# ----------------------------------------------------------
+# SECTION 4: Scope
+# ----------------------------------------------------------
+scope:
+  description: >
+    Clear boundary of what is included and excluded from this initiative.
+    Include domain-specific definitions where applicable.
+    Reference: IEEE 830 Section 1.2 — Scope.
+  in_scope:
+    - ""
+  out_of_scope:
+    - ""
+  domain_definitions: []                    # Domain-specific data entity or term definitions
+  required: true
+
+# ----------------------------------------------------------
+# SECTION 5: Stakeholder Analysis
+# ----------------------------------------------------------
+stakeholders:
+  description: >
+    Identify all parties with an interest in or influence over the initiative.
+    Reference: BABOK Section 2.2 — Stakeholder Analysis.
+  items:
+    - stakeholder: ""
+      role: ""
+      interest: ""
+      responsibility: ""
+  required: true
+
+# ----------------------------------------------------------
+# SECTION 6: Current State Analysis
+# ----------------------------------------------------------
+current_state:
+  description: >
+    Describe the existing situation — processes, systems, pain points.
+    Reference: BABOK Section 6.1 — Define Current State.
+  items:
+    - ""
+  required: true
+
+# ----------------------------------------------------------
+# SECTION 7: Future State Vision
+# ----------------------------------------------------------
+future_state:
+  description: >
+    Describe the desired end state after the initiative is delivered.
+    Include target-state outcomes.
+    Reference: BABOK Section 6.2 — Define Future State.
+  vision: ""
+  target_outcomes:
+    - ""
+  required: true
+
+# ----------------------------------------------------------
+# SECTION 8: Requirements
+# ----------------------------------------------------------
+requirements:
+  description: >
+    All functional and non-functional requirements. Each requirement must be
+    uniquely identifiable, typed, prioritized (MoSCoW), and traceable to a
+    business objective. Acceptance criteria enable validation.
+    Reference: IEEE 830 Section 3 — Specific Requirements; BABOK Section 7.
+  functional:
+    - id: "PC-001"
+      type: "functional"                    # functional | nonfunctional | constraint
+      statement: ""
+      priority: ""                          # Must | Should | Could | Won't (MoSCoW)
+      traces_to: []                         # List of BO-xxx IDs this requirement supports
+      acceptance:
+        - id: "AC-PC-001-01"
+          statement: ""
+      sub_requirements:                     # Optional breakdown (e.g. FR-1.1, FR-1.2)
+        - id: ""
+          statement: ""
+  nonfunctional:
+    - id: "PC-100"
+      type: "nonfunctional"
+      category: ""                          # Availability | Performance | Scalability | Security | etc.
+      statement: ""
+      priority: ""
+      target_metric: ""                     # Quantifiable target (e.g. ">99.99% uptime")
+      acceptance:
+        - id: "AC-PC-100-01"
+          statement: ""
+  constraints:
+    - id: "PC-200"
+      type: "constraint"
+      statement: ""
+      priority: ""
+  required: true
+
+# ----------------------------------------------------------
+# SECTION 9: Assumptions & Constraints
+# ----------------------------------------------------------
+assumptions_and_constraints:
+  description: >
+    Assumptions are conditions believed to be true but not yet confirmed.
+    Constraints are fixed limitations that bound the solution.
+    Reference: BABOK Section 6.3.
+  assumptions:
+    - ""
+  constraints:
+    - ""
+  required: true
+
+# ----------------------------------------------------------
+# SECTION 10: Risks & Mitigation
+# ----------------------------------------------------------
+risks:
+  description: >
+    Identify business and delivery risks with impact, likelihood, and
+    mitigation strategies.
+    Reference: BABOK Section 6.4 — Define Risk.
+  items:
+    - risk: ""
+      impact: ""                            # High | Medium | Low
+      likelihood: ""                        # High | Medium | Low
+      mitigation: ""
+  required: true
+
+# ----------------------------------------------------------
+# SECTION 11: Success Metrics / KPIs
+# ----------------------------------------------------------
+success_metrics:
+  description: >
+    Quantifiable indicators that will be used to measure initiative success
+    post-delivery. Should map back to Business Objectives.
+  items:
+    - metric: ""
+      target: ""
+      measurement_method: ""
+  required: true
+
+# ----------------------------------------------------------
+# SECTION 12: Dependencies
+# ----------------------------------------------------------
+dependencies:
+  description: >
+    External or internal dependencies that could affect delivery timeline
+    or scope.
+  items:
+    - ""
+  required: true
+
+# ----------------------------------------------------------
+# SECTION 13: Glossary
+# ----------------------------------------------------------
+glossary:
+  description: >
+    Definitions of domain-specific terms, acronyms, and abbreviations used
+    in this document. Reference: IEEE 830 Section 1.4 — Definitions.
+  items:
+    - term: ""
+      definition: ""
+  required: false
+
+# ----------------------------------------------------------
+# SECTION 14: Traceability Matrix
+# ----------------------------------------------------------
+traceability:
+  description: >
+    Maps each requirement to its originating business objective and downstream
+    artifacts (FRD, test cases, etc.) for impact analysis and coverage tracking.
+  matrix:
+    - requirement_id: ""
+      traces_to_objective: ""               # BO-xxx
+      traces_to_downstream: []              # FRD-xxx, PSD-xxx, etc.
+  required: false
+
+# ----------------------------------------------------------
+# SECTION 15: Approval
+# ----------------------------------------------------------
+approvals:
+  description: >
+    Sign-off records from accountable stakeholders. Document is not considered
+    Approved until all required approvals are captured.
+  items:
+    - role: ""
+      name: ""
+      decision: ""                          # Approved | Approved with Conditions | Rejected
+      signature: ""
+      date: ""
+  required: true
+
+# ----------------------------------------------------------
+# CHANGE LOG — Version history
+# ----------------------------------------------------------
+change_log:
+  description: >
+    Append an entry for every version change. Major version = structural or
+    scope change. Minor version = content refinement.
+  entries:
+    - version: ""
+      date: ""
+      author: ""
+      summary: ""
+
+# ----------------------------------------------------------
+# ATTACHMENTS — Supporting documents
+# ----------------------------------------------------------
+attachments:
+  description: >
+    References to supplementary files (diagrams, spreadsheets, external specs).
+  items:
+    - filename: ""
+      description: ""
+      location: ""                          # Relative path or URL

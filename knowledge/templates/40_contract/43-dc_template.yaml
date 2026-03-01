@@ -1,0 +1,400 @@
+# ============================================================
+# Data Layer Contract Template
+# Version: 1.0
+# Framework: Open Data Contract Standard (ODCS) / Data Mesh
+# Scope: Per dataset or table
+# ============================================================
+
+metadata:
+  document_id: "DC-[NNNN]"               # e.g., DC-0001
+  title: ""
+  version: ""
+  status: ""                              # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                      # Public | Internal | Confidential | Restricted
+  created_date: ""
+  last_updated: ""
+  author: ""
+  reviewer: ""
+  approver: ""
+  related_documents: []                   # List of related doc IDs (e.g., DBAD-0001, API-0003, AEC-0001)
+  tags: []                                # Freeform tags for search/categorization
+  supersedes: ""                          # ID of document this replaces, if any
+
+# ============================================================
+# 1. CONTRACT OVERVIEW
+# ============================================================
+contract_overview:
+  description: >
+    High-level summary of this data contract — what dataset it governs,
+    why it exists, and the business context it supports.
+  content: ""
+  required: true
+
+# ============================================================
+# 2. DATA PRODUCT IDENTIFICATION
+# ============================================================
+data_product_identification:
+  description: >
+    Uniquely identifies the data product/dataset covered by this contract.
+    Includes ownership, domain, and classification metadata.
+  required: true
+
+  product_name: ""                        # Logical name of the dataset (e.g., "customer_orders")
+  product_id: ""                          # Unique identifier in the data catalog
+  domain: ""                              # Business domain (e.g., "Sales", "Finance", "Customer")
+  subdomain: ""                           # Optional subdomain (e.g., "Order Fulfillment")
+  owner_team: ""                          # Team accountable for this data product
+  owner_contact: ""                       # Email or channel for the owning team
+  data_steward: ""                        # Individual responsible for data quality
+  tier: ""                                # Tier 1 (Critical) | Tier 2 (Important) | Tier 3 (Informational)
+  tags: []                                # Searchable tags (e.g., ["pii", "financial", "real-time"])
+
+# ============================================================
+# 3. SCHEMA DEFINITION
+# ============================================================
+schema_definition:
+  description: >
+    The authoritative schema for the dataset. Defines every field,
+    its type, constraints, and semantic meaning. This is the core
+    of the contract — consumers rely on this not changing without notice.
+  required: true
+
+  schema_format: ""                       # Avro | Protobuf | JSON Schema | DDL | Parquet | Custom
+  schema_version: ""                      # Schema version (follows semantic versioning)
+  schema_registry_url: ""                 # URL to schema registry entry (if applicable)
+
+  fields:
+    - name: ""
+      description: ""
+      data_type: ""                       # string | integer | float | boolean | date | timestamp | array | map | struct
+      logical_type: ""                    # Optional: email, currency, iso_country_code, uuid, etc.
+      nullable: false                     # true | false
+      primary_key: false                  # true | false
+      foreign_key: ""                     # Reference to another dataset.field (if applicable)
+      default_value: ""                   # Default if not provided
+      constraints: ""                     # e.g., "length <= 255", "value > 0", "enum: [A, B, C]"
+      pii: false                          # true if field contains personally identifiable information
+      sensitive: false                    # true if field contains sensitive/restricted data
+      example: ""                         # Example value for documentation
+      tags: []                            # Field-level tags
+
+  # Repeat the fields block for each column/field in the dataset
+
+# ============================================================
+# 4. SEMANTIC DEFINITIONS & BUSINESS RULES
+# ============================================================
+semantic_definitions:
+  description: >
+    Business-level definitions and rules that govern how the data
+    should be interpreted and validated. Prevents ambiguity between
+    producer and consumer teams.
+  required: true
+
+  business_glossary:
+    - term: ""
+      definition: ""
+      source_of_truth: ""                 # System or document that is the canonical source
+
+  business_rules:
+    - rule_id: ""                         # e.g., BR-001
+      description: ""                     # e.g., "order_total must equal sum of line_item amounts"
+      validation_logic: ""                # SQL, pseudo-code, or natural language expression
+      severity: ""                        # Critical | Warning | Informational
+      action_on_failure: ""               # Reject | Flag | Log
+
+# ============================================================
+# 5. WRITE PATH CONTRACT
+# ============================================================
+write_path_contract:
+  description: >
+    Defines the guarantees and constraints governing how data is written
+    into this dataset. Bridges the gap between the service-level DBC
+    (which governs behavioural postconditions) and the physical database
+    layer (documented in the referenced DBAD). Producers must honour
+    these guarantees; consumers may rely on them for correctness.
+  required: true
+  db_architecture_ref: ""               # Reference to DBAD document ID (e.g., DBAD-0001)
+
+  transaction_guarantees:
+    description: >
+      ACID guarantees for write operations against this dataset.
+      Defines the isolation level and transaction boundary so that
+      producers and DBC postconditions are consistent with physical
+      storage behaviour.
+    isolation_level: ""                 # READ COMMITTED | REPEATABLE READ | SERIALIZABLE
+    transaction_boundary: ""            # Single Row | Single Table | Multi-Table
+    atomicity_notes: ""                 # e.g., "Order header and line items written atomically"
+    rollback_guarantee: ""              # What is guaranteed to be undone on failure
+    required: true
+
+  idempotency:
+    description: >
+      Idempotency contract for write operations. Defines the key(s)
+      used to detect duplicate writes and the expected behaviour when
+      a duplicate is encountered. Aligns with AEC idempotency_key
+      where events trigger writes.
+    supported: false                    # true | false
+    idempotency_key_fields: []          # Fields forming the idempotency key (e.g., ["order_id", "event_id"])
+    deduplication_window: ""            # e.g., "24 hours", "indefinite"
+    on_duplicate_behavior: ""           # Ignore | Upsert | Reject | Return existing
+    required: true
+
+  locking_strategy:
+    description: >
+      Concurrency control strategy for writes to this dataset.
+      Specifies whether optimistic or pessimistic locking is applied
+      and how conflicts are resolved when concurrent writes occur.
+    strategy: ""                        # Optimistic | Pessimistic | None
+    conflict_resolution: ""             # Last-Write-Wins | First-Write-Wins | Merge | Reject
+    lock_timeout: ""                    # e.g., "5 seconds" (for pessimistic locking)
+    retry_policy: ""                    # e.g., "3 retries with exponential backoff"
+    required: true
+
+  write_modes:
+    description: >
+      Supported write operations and their permitted conditions.
+      Explicitly defines what is and is not allowed — prevents
+      uncontracted mutations from silently entering the dataset.
+    supported_operations:
+      insert: false
+      update: false
+      upsert: false
+      soft_delete: false                # Logical delete via flag (e.g., is_deleted = true)
+      hard_delete: false                # Physical removal of the row
+    soft_delete_field: ""               # Field name used for soft delete (if applicable)
+    required: true
+
+  batch_write_behaviour:
+    description: >
+      Constraints and guarantees for batch or bulk write operations.
+      Defines limits, partial failure handling, and ordering guarantees
+      so that producers know the safe boundaries for bulk ingestion.
+    max_batch_size: null                # Maximum records per batch operation (null = no limit)
+    partial_failure_handling: ""        # All-or-nothing | Best-effort | Per-record result
+    ordering_guarantee: ""              # Strict (insertion order preserved) | None
+    required: false
+
+  transformation_contract:
+    description: >
+      Mapping between the upstream payload shape (API request body or
+      AEC event payload) and the stored schema defined in Section 3.
+      Documents enrichment, normalization, and field derivation applied
+      before persistence — making the transformation layer explicit and
+      traceable rather than implicit in service code.
+    source_schema_ref: ""               # API or AEC document ID this dataset is written from
+    transformations:
+      - source_field: ""               # Field name in the source payload
+        target_field: ""               # Field name in the stored schema
+        transformation_logic: ""       # e.g., "Uppercase", "Parse ISO date", "Derived: qty * price"
+        nullable_handling: ""          # e.g., "Default to 0 if null"
+    enrichment_sources: []             # External sources used to enrich data before write
+    required: false
+
+# ============================================================
+# 6. DATA QUALITY STANDARDS
+# ============================================================
+data_quality_standards:
+  description: >
+    Measurable quality expectations that the data producer commits to.
+    These are the contractual guarantees that consumers can rely on.
+  required: true
+
+  quality_dimensions:
+    completeness:
+      description: "Percentage of non-null values in required fields"
+      threshold: ""                       # e.g., ">= 99.5%"
+      measurement_method: ""              # SQL query, Great Expectations suite, dbt test, etc.
+
+    accuracy:
+      description: "Degree to which data correctly represents real-world entities"
+      threshold: ""
+      measurement_method: ""
+
+    freshness:
+      description: "Maximum allowed age of the most recent record"
+      threshold: ""                       # e.g., "<= 15 minutes", "<= 24 hours"
+      measurement_method: ""
+
+    uniqueness:
+      description: "No duplicate records on the defined primary key"
+      threshold: ""                       # e.g., "0 duplicates"
+      measurement_method: ""
+
+    consistency:
+      description: "Data values are consistent across related datasets"
+      threshold: ""
+      measurement_method: ""
+
+    validity:
+      description: "Data conforms to defined formats and constraints"
+      threshold: ""
+      measurement_method: ""
+
+  custom_checks:
+    - check_id: ""
+      description: ""
+      query_or_logic: ""
+      threshold: ""
+      severity: ""                        # Critical | Warning | Informational
+
+# ============================================================
+# 7. SERVICE LEVEL AGREEMENTS (SLAs)
+# ============================================================
+service_level_agreements:
+  description: >
+    Operational commitments from the data producer regarding
+    availability, latency, throughput, and incident response.
+  required: true
+
+  availability:
+    target: ""                            # e.g., "99.9%"
+    measurement_window: ""                # e.g., "monthly", "quarterly"
+    exclusions: ""                        # Planned maintenance windows, etc.
+
+  latency:
+    ingestion_latency: ""                 # Max time from source event to landing in dataset
+    processing_latency: ""                # Max time from landing to ready-for-consumption
+    end_to_end_latency: ""                # Source event to consumer-accessible
+
+  delivery_schedule:
+    frequency: ""                         # Real-time | Hourly | Daily | Weekly | On-demand
+    expected_delivery_time: ""            # e.g., "Daily by 06:00 UTC"
+    timezone: ""
+
+  throughput:
+    expected_volume: ""                   # e.g., "~500K records/day"
+    max_volume: ""                        # Peak capacity
+    record_size_limit: ""                 # Max size per record if applicable
+
+  incident_response:
+    notification_channel: ""              # e.g., "#data-incidents Slack channel"
+    response_time: ""                     # e.g., "< 1 hour for Tier 1"
+    resolution_time: ""                   # e.g., "< 4 hours for Tier 1"
+    escalation_path: ""
+
+# ============================================================
+# 8. ACCESS & SECURITY
+# ============================================================
+access_and_security:
+  description: >
+    Defines who can access this dataset, how access is granted,
+    and what security controls are in place.
+  required: true
+
+  access_mechanism: ""                    # e.g., "SQL via Snowflake", "Kafka topic", "S3 bucket", "API"
+  connection_details: ""                  # Endpoint, topic name, table path (non-sensitive)
+  authentication_method: ""               # OAuth2 | IAM Role | Service Account | API Key
+  authorization_model: ""                 # RBAC | ABAC | Column-level | Row-level
+
+  approved_consumers:
+    - team: ""
+      access_level: ""                    # Read | Read-Write | Admin
+      granted_date: ""
+      expiry_date: ""
+
+  data_masking:
+    - field: ""
+      masking_rule: ""                    # e.g., "hash", "redact", "tokenize", "null"
+      applies_to: ""                      # Which consumer roles see masked data
+
+  retention_policy:
+    retention_period: ""                  # e.g., "3 years", "indefinite"
+    archival_strategy: ""                 # e.g., "Move to cold storage after 1 year"
+    deletion_procedure: ""
+
+# ============================================================
+# 9. LINEAGE & DEPENDENCIES
+# ============================================================
+lineage_and_dependencies:
+  description: >
+    Documents where the data comes from (upstream) and where it
+    flows to (downstream). Critical for impact analysis.
+  required: true
+
+  source_systems:
+    - system_name: ""
+      description: ""
+      extraction_method: ""               # CDC | Full Load | API Pull | Streaming
+      refresh_frequency: ""
+
+  upstream_datasets:
+    - dataset_id: ""
+      contract_id: ""                     # Reference to upstream DC document
+      relationship: ""                    # e.g., "joins on customer_id"
+
+  downstream_consumers:
+    - consumer_name: ""
+      use_case: ""
+      contract_id: ""                     # Reference to downstream DC document (if exists)
+
+  transformation_summary: ""              # High-level description of transformations applied
+
+# ============================================================
+# 10. VERSIONING & COMPATIBILITY
+# ============================================================
+versioning_and_compatibility:
+  description: >
+    Rules governing how this contract and its schema evolve over time.
+    Defines what constitutes a breaking vs. non-breaking change.
+  required: true
+
+  versioning_strategy: ""                 # Semantic Versioning (MAJOR.MINOR.PATCH)
+
+  breaking_changes:
+    definition: >
+      Changes that require consumer action: removing fields, changing
+      data types, renaming fields, changing primary keys, altering
+      business rule semantics.
+    notification_period: ""               # e.g., "30 days minimum"
+    migration_support: ""                 # e.g., "Dual-publish for 2 sprints"
+
+  non_breaking_changes:
+    definition: >
+      Changes that are backward-compatible: adding new nullable fields,
+      adding new tags, improving descriptions, relaxing constraints.
+    notification_period: ""               # e.g., "In next release notes"
+
+  deprecation_policy:
+    notice_period: ""                     # e.g., "90 days"
+    sunset_process: ""                    # Steps taken before retiring a field or dataset
+
+# ============================================================
+# 11. SUPPORT & COMMUNICATION
+# ============================================================
+support_and_communication:
+  description: >
+    How consumers can get help, report issues, and stay informed
+    about changes to this data product.
+  required: false
+
+  support_channel: ""                     # e.g., "#team-data-platform", JIRA queue
+  documentation_url: ""                   # Link to data catalog or wiki page
+  office_hours: ""                        # e.g., "Tuesdays 2-3pm UTC"
+  announcement_channel: ""                # Where changes are communicated
+  feedback_mechanism: ""                  # How consumers submit enhancement requests
+
+# ============================================================
+# 12. ATTACHMENTS
+# ============================================================
+attachments:
+  description: >
+    Supporting files such as ERD diagrams, sample data files,
+    schema registry exports, or data flow diagrams.
+  required: false
+  files: []
+    # - filename: ""
+    #   description: ""
+    #   location: ""
+
+# ============================================================
+# 13. CHANGE LOG
+# ============================================================
+change_log:
+  description: >
+    Version history of this contract document itself.
+  required: true
+  entries:
+    - version: ""
+      date: ""
+      author: ""
+      changes: ""

@@ -1,0 +1,234 @@
+# ============================================================
+# NFR Acceptance Report Template
+# Version: 1.0
+# Framework: ISO 25010 (Quality Model), IEEE 829 (Test Reporting)
+# Granularity: Per NFR Category / Per Test
+# ============================================================
+
+metadata:
+  document_id: "NFRAR-[NNNN]"            # e.g., NFRAR-0001
+  title: ""                               # e.g., "Performance NFR Acceptance Report — Order Service v2.3"
+  version: ""                             # Semantic: Major.Minor (e.g., 1.0)
+  status: ""                              # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                      # Public | Internal | Confidential | Restricted
+  created_date: ""                        # YYYY-MM-DD
+  last_updated: ""                        # YYYY-MM-DD
+  author: ""                              # Name / Role
+  reviewer: ""                            # Name / Role
+  approver: ""                            # Name / Role (final sign-off authority)
+  nfr_category: ""                        # Performance | Security | Availability | Scalability | Usability | Maintainability | Compatibility | Compliance
+  related_documents: []                   # List of related doc IDs (e.g., NFR-0001, NFTS-0001, CICD-0001)
+  tags: []                                # Freeform tags for search/categorization
+  supersedes: ""                          # ID of document this replaces, if any
+
+# -----------------------------------------------------------
+# Section 1: Executive Summary
+# -----------------------------------------------------------
+executive_summary:
+  description: >
+    High-level summary of the NFR acceptance evaluation for this category.
+    Provides stakeholders with a quick pass/fail overview and key findings
+    without requiring them to read the full report.
+  content:
+    overall_verdict: ""                   # Accepted | Rejected | Conditionally Accepted
+    total_nfrs_evaluated: 0
+    passed: 0
+    failed: 0
+    conditionally_accepted: 0
+    deferred: 0
+    summary_narrative: ""                 # 2-4 sentence summary of findings
+  required: true
+
+# -----------------------------------------------------------
+# Section 2: Scope & Objectives
+# -----------------------------------------------------------
+scope_and_objectives:
+  description: >
+    Defines which NFR category this report covers, the system/module
+    under test, and what the acceptance evaluation aims to achieve.
+  content:
+    nfr_category: ""                      # e.g., Performance
+    system_under_test: ""                 # e.g., Order Processing Service v2.3
+    module_or_component: ""               # e.g., Payment Gateway Module
+    evaluation_objectives:
+      - ""                                # e.g., "Validate response time under peak load"
+    in_scope:
+      - ""                                # NFR IDs or descriptions in scope
+    out_of_scope:
+      - ""                                # NFR IDs or descriptions excluded
+    baseline_reference: ""                # Reference to baseline metrics or prior report
+  required: true
+
+# -----------------------------------------------------------
+# Section 3: NFR Acceptance Criteria Reference
+# -----------------------------------------------------------
+acceptance_criteria_reference:
+  description: >
+    Lists each NFR under evaluation with its defined acceptance criteria,
+    sourced from the NFR document. This section establishes the benchmark
+    against which test results are measured.
+  content:
+    criteria:
+      - nfr_id: ""                        # e.g., NFR-PERF-001
+        nfr_title: ""                     # e.g., "API Response Time"
+        description: ""                   # Full NFR statement
+        acceptance_threshold: ""          # e.g., "95th percentile response time < 200ms"
+        measurement_method: ""            # e.g., "JMeter load test, 500 concurrent users"
+        priority: ""                      # Critical | High | Medium | Low
+        source_document: ""               # e.g., NFR-0012 Section 4.2
+  required: true
+
+# -----------------------------------------------------------
+# Section 4: Test Environment & Configuration
+# -----------------------------------------------------------
+test_environment:
+  description: >
+    Documents the environment in which NFR tests were executed.
+    Critical for reproducibility and to validate that test conditions
+    match production-like settings.
+  content:
+    environment_name: ""                  # e.g., Staging, Pre-Production, Performance Lab
+    infrastructure:
+      compute: ""                         # e.g., "4x c5.2xlarge EC2 instances"
+      memory: ""                          # e.g., "16 GB per node"
+      storage: ""                         # e.g., "500 GB SSD, io2 volume"
+      network: ""                         # e.g., "10 Gbps internal, 1 Gbps external"
+    software_stack:
+      os: ""                              # e.g., "Ubuntu 22.04 LTS"
+      runtime: ""                         # e.g., "JDK 17, Node.js 20 LTS"
+      database: ""                        # e.g., "PostgreSQL 15.3"
+      middleware: ""                      # e.g., "Kafka 3.5, Redis 7.2"
+    test_data:
+      description: ""                     # e.g., "Synthetic dataset with 10M records"
+      volume: ""                          # e.g., "10 million order records"
+      data_masking_applied: false         # true/false
+    tools_used:
+      - tool_name: ""                     # e.g., "JMeter"
+        version: ""                       # e.g., "5.6"
+        purpose: ""                       # e.g., "Load testing"
+    deviations_from_production: ""        # Document any differences from prod
+  required: true
+
+# -----------------------------------------------------------
+# Section 5: Test Execution Summary
+# -----------------------------------------------------------
+test_execution_summary:
+  description: >
+    Summarizes when and how the NFR tests were executed, including
+    test cycles, duration, and any interruptions or re-runs.
+  content:
+    test_cycle: ""                        # e.g., "Cycle 2 — Regression"
+    execution_start_date: ""              # YYYY-MM-DD
+    execution_end_date: ""                # YYYY-MM-DD
+    total_test_duration: ""               # e.g., "8 hours"
+    executed_by: ""                       # Name / Team
+    interruptions_or_reruns:
+      - description: ""
+        impact: ""
+        resolution: ""
+  required: true
+
+# -----------------------------------------------------------
+# Section 6: Detailed Test Results (Per NFR)
+# -----------------------------------------------------------
+detailed_test_results:
+  description: >
+    The core section. For EACH NFR evaluated, documents the actual
+    test result against the acceptance criteria, evidence collected,
+    and the individual pass/fail verdict.
+  content:
+    results:
+      - nfr_id: ""                        # e.g., NFR-PERF-001
+        nfr_title: ""                     # e.g., "API Response Time"
+        acceptance_threshold: ""          # e.g., "95th percentile < 200ms"
+        actual_result: ""                 # e.g., "95th percentile = 178ms"
+        verdict: ""                       # Pass | Fail | Conditionally Accepted | Deferred
+        evidence:
+          - type: ""                      # e.g., "JMeter Report", "Grafana Dashboard", "Log File"
+            reference: ""                 # File path, URL, or attachment ID
+        observations: ""                  # Notable findings, anomalies, or context
+        conditions_or_waivers: ""         # If conditionally accepted, state conditions
+        remediation_plan: ""              # If failed, reference remediation actions
+        linked_defects: []                # e.g., ["DEF-1234", "DEF-1235"]
+  required: true
+
+# -----------------------------------------------------------
+# Section 7: Risk Assessment
+# -----------------------------------------------------------
+risk_assessment:
+  description: >
+    Identifies risks arising from NFR test results, especially for
+    failed or conditionally accepted items. Helps stakeholders make
+    informed go/no-go decisions.
+  content:
+    risks:
+      - risk_id: ""                       # e.g., RISK-001
+        description: ""                   # e.g., "Memory leak under sustained load may cause OOM in production"
+        related_nfr: ""                   # e.g., NFR-PERF-003
+        likelihood: ""                    # High | Medium | Low
+        impact: ""                        # High | Medium | Low
+        mitigation: ""                    # e.g., "Apply memory pool patch before release"
+        risk_owner: ""                    # Name / Role
+  required: true
+
+# -----------------------------------------------------------
+# Section 8: Recommendations
+# -----------------------------------------------------------
+recommendations:
+  description: >
+    Actionable recommendations based on the test results. Includes
+    the overall go/no-go recommendation and specific follow-up items.
+  content:
+    overall_recommendation: ""            # Proceed to release | Hold release | Proceed with conditions
+    key_recommendations:
+      - recommendation: ""
+        priority: ""                      # Critical | High | Medium | Low
+        assigned_to: ""
+        target_date: ""                   # YYYY-MM-DD
+  required: true
+
+# -----------------------------------------------------------
+# Section 9: Sign-Off
+# -----------------------------------------------------------
+sign_off:
+  description: >
+    Formal approval section. Captures the decision of each
+    stakeholder regarding the NFR acceptance for this category.
+  content:
+    approvals:
+      - role: ""                          # e.g., "QA Lead"
+        name: ""
+        decision: ""                      # Accepted | Rejected | Conditionally Accepted
+        comments: ""
+        date: ""                          # YYYY-MM-DD
+        signature: ""                     # Digital signature or reference
+  required: true
+
+# -----------------------------------------------------------
+# Section 10: Appendices & Attachments
+# -----------------------------------------------------------
+appendices:
+  description: >
+    Supporting materials, raw data, detailed reports, and
+    supplementary evidence referenced in the report.
+  content:
+    attachments:
+      - attachment_id: ""                 # e.g., ATT-001
+        title: ""                         # e.g., "JMeter Full Report — Peak Load Test"
+        file_reference: ""               # File path or URL
+        description: ""
+  required: false
+
+# -----------------------------------------------------------
+# Change Log
+# -----------------------------------------------------------
+change_log:
+  description: >
+    Tracks all revisions to this acceptance report.
+  content:
+    entries:
+      - version: ""
+        date: ""                          # YYYY-MM-DD
+        author: ""
+        changes: ""
+  required: true

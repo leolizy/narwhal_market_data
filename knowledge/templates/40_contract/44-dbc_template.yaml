@@ -1,0 +1,260 @@
+# ============================================================
+# Logical Specification (Design by Contract) Template
+# Version: 1.0
+# Framework: Bertrand Meyer's DbC Principles, IEEE 1016
+# Granularity: Per Service / API Boundary
+# ============================================================
+
+metadata:
+  document_id: "DBC-[NNNN]"              # e.g., DBC-0001
+  title: ""
+  version: ""
+  status: ""                              # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                      # Public | Internal | Confidential | Restricted
+  created_date: ""
+  last_updated: ""
+  author: ""
+  reviewer: ""
+  approver: ""
+  related_documents: []                   # List of related doc IDs (e.g., API-0001, PSD-0001)
+  tags: []                                # Freeform tags for search/categorization
+  supersedes: ""                          # ID of document this replaces, if any
+
+# ============================================================
+# 1. Introduction
+# ============================================================
+introduction:
+  description: >
+    High-level overview of the service/API boundary this specification covers,
+    including its role in the system, the rationale for applying Design by Contract,
+    and how this document should be consumed by developers and QA.
+  content: ""
+  required: true
+
+# ============================================================
+# 2. Service / API Boundary Definition
+# ============================================================
+service_boundary:
+  description: >
+    Define the exact boundary of the service or API this specification governs.
+    Include the service name, bounded context, upstream/downstream dependencies,
+    and the communication protocol (REST, gRPC, messaging, etc.).
+  service_name: ""
+  bounded_context: ""
+  protocol: ""                            # REST | gRPC | GraphQL | Message Queue | Event Bus
+  upstream_dependencies: []               # Services this boundary consumes from
+  downstream_consumers: []                # Services that consume from this boundary
+  content: ""
+  required: true
+
+# ============================================================
+# 3. Glossary & Definitions
+# ============================================================
+glossary:
+  description: >
+    Define domain-specific terms, abbreviations, and DbC terminology used in
+    this document. Include definitions for precondition, postcondition, invariant,
+    and any domain vocabulary relevant to the contracts.
+  terms:
+    - term: ""
+      definition: ""
+  required: true
+
+# ============================================================
+# 4. Contract Catalogue
+# ============================================================
+# Repeat this block for each operation/endpoint in the service boundary.
+contract_catalogue:
+  description: >
+    The core of this document. Each entry defines one operation or endpoint
+    with its full Design by Contract specification: preconditions (what the
+    caller must guarantee), postconditions (what the service guarantees on
+    success), error postconditions (guarantees on failure), and the operation
+    signature.
+  contracts:
+    - contract_id: "DBC-[NNNN]-C[NNN]"   # e.g., DBC-0001-C001
+      operation_name: ""
+      operation_signature: ""
+      description: >
+        Brief description of what this operation does and its business purpose.
+      content: ""
+
+      # 4.1 Preconditions
+      preconditions:
+        description: >
+          Conditions that MUST be true before this operation is invoked.
+          The caller is responsible for satisfying these. If any precondition
+          is violated, the service behaviour is undefined (or returns a
+          specific error per the error postcondition).
+        items:
+          - id: "PRE-[NNN]"              # e.g., PRE-001
+            condition: ""
+            rationale: ""
+            violation_response: ""        # What happens if violated (e.g., HTTP 400, exception type)
+        required: true
+
+      # 4.2 Postconditions
+      postconditions:
+        description: >
+          Conditions the service GUARANTEES to be true after successful execution,
+          provided all preconditions were met. These are the obligations of the
+          service to the caller.
+        items:
+          - id: "POST-[NNN]"             # e.g., POST-001
+            condition: ""
+            rationale: ""
+            verifiable_by: ""            # How QA can verify this (test approach)
+        required: true
+
+      # 4.3 Error Postconditions
+      error_postconditions:
+        description: >
+          Conditions the service guarantees when the operation fails (even if
+          preconditions were met). Defines the failure contract — what the
+          caller can rely on in error scenarios (e.g., no side effects,
+          specific error codes, rollback guarantees).
+        items:
+          - id: "EPOST-[NNN]"            # e.g., EPOST-001
+            error_condition: ""
+            guaranteed_state: ""
+            error_code: ""               # HTTP status, gRPC code, exception type
+            rationale: ""
+        required: true
+
+      # 4.4 Input / Output Schema
+      input_output:
+        description: >
+          Define the input parameters and output response structure for this
+          operation. Reference shared schemas where applicable.
+        input_schema: ""
+        output_schema: ""
+        required: true
+
+  required: true
+
+# ============================================================
+# 5. Service Invariants
+# ============================================================
+service_invariants:
+  description: >
+    Conditions that must ALWAYS hold true for the service, regardless of which
+    operation is called. These represent the fundamental integrity guarantees
+    of the service (e.g., data consistency rules, security constraints,
+    ordering guarantees). Invariants are checked before and after every
+    public operation.
+  invariants:
+    - id: "INV-[NNN]"                    # e.g., INV-001
+      condition: ""
+      scope: ""                           # Global | Per-Entity | Per-Session
+      rationale: ""
+      verification_method: ""             # How to verify (runtime assertion, integration test, etc.)
+  required: true
+
+# ============================================================
+# 6. Contract Inheritance & Composition
+# ============================================================
+contract_inheritance:
+  description: >
+    Define how contracts relate to parent or composed services. Under DbC
+    inheritance rules: subtypes may weaken preconditions and strengthen
+    postconditions (Liskov Substitution Principle). Document any contract
+    extensions, overrides, or compositions from upstream services.
+  inherited_contracts:
+    - source_document_id: ""
+      source_contract_id: ""
+      relationship: ""                    # Inherited | Composed | Extended | Overridden
+      modification_notes: ""
+  required: false
+
+# ============================================================
+# 7. Contract Verification Strategy
+# ============================================================
+verification_strategy:
+  description: >
+    Define how each contract (preconditions, postconditions, invariants) will
+    be verified. This section bridges the specification to QA activities
+    including unit tests, integration tests, runtime assertions, and
+    monitoring.
+  approaches:
+    - contract_id: ""                     # Reference to contract/invariant ID
+      verification_type: ""              # Unit Test | Integration Test | Runtime Assertion | Contract Test | Monitor
+      test_case_reference: ""            # Link to test case ID (e.g., UT-0001)
+      automation_status: ""              # Automated | Manual | Planned
+      notes: ""
+  required: true
+
+# ============================================================
+# 8. Failure Mode & Blame Assignment
+# ============================================================
+failure_modes:
+  description: >
+    Define the blame model: when a contract is violated, who is at fault?
+    Under DbC, precondition violations are the caller's fault; postcondition
+    and invariant violations are the service's fault. Document the expected
+    diagnostic behaviour for each failure mode.
+  failure_cases:
+    - scenario: ""
+      violated_contract: ""              # Reference PRE/POST/EPOST/INV ID
+      blame: ""                          # Caller | Service | Infrastructure
+      diagnostic_action: ""              # Log, alert, circuit-break, etc.
+      escalation_path: ""
+  required: true
+
+# ============================================================
+# 9. Assumptions & Constraints
+# ============================================================
+assumptions_constraints:
+  description: >
+    Document assumptions about the operating environment, dependencies,
+    and constraints that bound the contracts (e.g., network reliability,
+    data freshness, third-party SLAs).
+  assumptions:
+    - id: "ASM-[NNN]"
+      assumption: ""
+      impact_if_invalid: ""
+  constraints:
+    - id: "CON-[NNN]"
+      constraint: ""
+      rationale: ""
+  required: true
+
+# ============================================================
+# 10. Traceability Matrix
+# ============================================================
+traceability:
+  description: >
+    Map each contract to its originating requirement, design decision,
+    and test case(s). Ensures full traceability from requirement through
+    contract to verification.
+  matrix:
+    - contract_id: ""
+      requirement_id: ""                  # FRD reference
+      design_reference: ""                # PSD reference
+      test_case_ids: []                   # UT references
+  required: true
+
+# ============================================================
+# 11. Attachments
+# ============================================================
+attachments:
+  description: >
+    Supporting materials such as sequence diagrams, state diagrams,
+    schema definitions, or formal notation (e.g., Z notation, OCL).
+  files:
+    - filename: ""
+      description: ""
+      type: ""                            # Diagram | Schema | Formal Spec | Other
+  required: false
+
+# ============================================================
+# 12. Change Log
+# ============================================================
+change_log:
+  description: >
+    Version history tracking all changes to this specification.
+  entries:
+    - version: ""
+      date: ""
+      author: ""
+      changes: ""
+  required: true

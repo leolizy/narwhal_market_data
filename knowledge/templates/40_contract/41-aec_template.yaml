@@ -1,0 +1,371 @@
+# ============================================================
+# Async Event Contract Template
+# Version: 1.0
+# Framework: AsyncAPI 3.x aligned | Kafka
+# Granularity: Per event type
+# ============================================================
+
+metadata:
+  document_id: "AEC-[NNNN]"              # e.g., AEC-0001
+  title: ""                               # Human-readable event name, e.g., "Order Created Event Contract"
+  version: ""                             # Semantic version: Major.Minor (e.g., 1.0)
+  status: ""                              # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                      # Public | Internal | Confidential | Restricted
+  created_date: ""                        # ISO 8601: YYYY-MM-DD
+  last_updated: ""                        # ISO 8601: YYYY-MM-DD
+  author: ""                              # Team or individual who owns the event definition
+  reviewer: ""                            # Assigned technical reviewer
+  approver: ""                            # Architecture board or tech lead who signs off
+  related_documents: []                   # List of related doc IDs (e.g., API-0003, DC-0001, AEC-0002)
+  tags: []                                # Freeform tags for search/categorization
+  supersedes: ""                          # ID of document this replaces, if any
+
+# -------------------------------------------------------------------
+# Section 1: Event Overview
+# -------------------------------------------------------------------
+event_overview:
+  description: >
+    Provide a concise summary of what this event represents in the business domain,
+    why it exists, and what downstream behavior it triggers.
+  content:
+    event_name: ""                        # Machine-readable name, e.g., "order.created"
+    domain: ""                            # Bounded context / domain, e.g., "Order Management"
+    event_type: ""                        # Domain | Integration | System | Notification
+    business_description: ""              # Plain-language explanation of the business meaning
+    trigger_condition: ""                 # What action or state change produces this event
+  required: true
+
+# -------------------------------------------------------------------
+# Section 2: Ownership & Contacts
+# -------------------------------------------------------------------
+ownership:
+  description: >
+    Identify the producing team, consuming teams, and escalation contacts.
+    This section establishes accountability for the event lifecycle.
+  content:
+    producer_team: ""                     # Team that publishes this event
+    producer_service: ""                  # Service/application that emits the event
+    producer_contact: ""                  # Slack channel, email, or on-call alias
+    registered_consumers:                 # Known consumers of this event
+      - consumer_team: ""
+        consumer_service: ""
+        consumer_contact: ""
+        use_case: ""                      # Brief description of how the consumer uses this event
+    escalation_contact: ""                # Who to contact for breaking changes or incidents
+  required: true
+
+# -------------------------------------------------------------------
+# Section 3: Channel & Transport Configuration (Kafka)
+# -------------------------------------------------------------------
+channel_config:
+  description: >
+    Define the Kafka topic, partitioning strategy, and transport-level
+    configuration. Aligned with AsyncAPI channel and binding concepts.
+  content:
+    channel_name: ""                      # Kafka topic name, e.g., "order.events.created"
+    channel_naming_convention: ""         # e.g., "{domain}.events.{event_action}"
+    protocol: "kafka"
+    kafka_bindings:
+      cluster: ""                         # Kafka cluster identifier or alias
+      partition_count: null               # Number of partitions
+      partition_key: ""                   # Field used as partition key, e.g., "order_id"
+      partition_strategy: ""              # Key-based | Round-robin | Custom
+      replication_factor: null            # Replication factor (e.g., 3)
+      retention_ms: null                  # Message retention in milliseconds
+      cleanup_policy: ""                  # delete | compact | delete,compact
+      min_insync_replicas: null           # Minimum ISR count
+      compression_type: ""               # none | gzip | snappy | lz4 | zstd
+    consumer_group_convention: ""         # e.g., "{consumer_service}.{event_name}.cg"
+    dead_letter_topic: ""                 # DLT topic name, e.g., "order.events.created.dlt"
+  required: true
+
+# -------------------------------------------------------------------
+# Section 4: Message Specification
+# -------------------------------------------------------------------
+message_spec:
+  description: >
+    Define the message envelope, headers, and payload structure.
+    Aligned with AsyncAPI message object and CloudEvents-compatible headers.
+  content:
+    message_id_strategy: ""              # UUID | ULID | Snowflake | Custom
+    content_type: ""                     # application/json | application/avro | application/protobuf
+    encoding: "UTF-8"
+    schema_registry:
+      enabled: false                     # true if using a schema registry
+      registry_url: ""                   # URL of the schema registry
+      subject_name: ""                   # Schema subject in the registry
+      compatibility_mode: ""             # BACKWARD | FORWARD | FULL | NONE
+    headers:
+      description: >
+        Standard message headers. Include CloudEvents-compatible metadata
+        for interoperability.
+      fields:
+        - name: "ce_id"
+          type: "string"
+          description: "Unique event identifier (CloudEvents 'id')"
+          required: true
+        - name: "ce_source"
+          type: "string"
+          description: "URI identifying the event producer (CloudEvents 'source')"
+          required: true
+        - name: "ce_type"
+          type: "string"
+          description: "Event type identifier (CloudEvents 'type'), e.g., 'com.example.order.created'"
+          required: true
+        - name: "ce_time"
+          type: "string"
+          description: "ISO 8601 timestamp of when the event occurred"
+          required: true
+        - name: "ce_specversion"
+          type: "string"
+          description: "CloudEvents specification version, e.g., '1.0'"
+          required: true
+        - name: "correlation_id"
+          type: "string"
+          description: "Trace/correlation ID for distributed tracing"
+          required: true
+        - name: "schema_version"
+          type: "string"
+          description: "Version of the payload schema"
+          required: true
+    payload_schema:
+      description: >
+        Define the event payload using JSON Schema notation.
+        Include field name, type, constraints, and whether each field is required.
+      fields:
+        - name: ""
+          type: ""
+          description: ""
+          required: true
+          constraints: ""                # e.g., "maxLength: 255", "enum: [A, B, C]"
+          example: ""
+    sample_message: |
+      {
+        "headers": {
+          "ce_id": "evt-abc123",
+          "ce_source": "/order-service",
+          "ce_type": "com.example.order.created",
+          "ce_time": "2026-01-15T10:30:00Z",
+          "ce_specversion": "1.0",
+          "correlation_id": "corr-xyz789",
+          "schema_version": "1.0"
+        },
+        "payload": {}
+      }
+  required: true
+
+# -------------------------------------------------------------------
+# Section 5: Data Transformation & Mapping
+# -------------------------------------------------------------------
+data_transformation:
+  description: >
+    Defines how data is transformed when entering (producer side) and
+    leaving (consumer side) this event contract. Makes the mapping
+    between upstream sources, the event payload, and downstream targets
+    explicit and traceable — preventing transformation logic from being
+    invisible in service code on both sides of the event.
+  required: true
+
+  producer_mapping:
+    description: >
+      Documents how the producing service constructs the event payload
+      from its source data. The source may be an API request body, a
+      domain object, a DB read, or internal service state. References
+      the upstream API or DC contract where applicable.
+    source_ref: ""                       # Source contract ID (e.g., API-0003, DC-0001) or domain model name
+    source_type: ""                      # API Request | Domain Object | DB Read | Internal State
+    field_mappings:
+      - source_field: ""                 # Field name in the source
+        payload_field: ""                # Corresponding field in the event payload (Section 4)
+        transformation_logic: ""         # e.g., "Uppercase", "Epoch to ISO 8601", "Derived: qty * price"
+        nullable_handling: ""            # e.g., "Omit field if null", "Default to empty string"
+    enrichment:
+      - payload_field: ""               # Field added to the payload that is not in the source
+        source_of_enrichment: ""         # e.g., "Lookup from customer-service", "System timestamp"
+        enrichment_timing: ""            # At-publish | Pre-publish async | Cached
+    projection_exclusions: []            # Source fields deliberately excluded from the payload and why
+    required: true
+
+  consumer_mappings:
+    description: >
+      Documents how each registered consumer transforms the event payload
+      into their own target schema or action. Each consumer entry links
+      to the relevant DC, API, or AEC contract for full end-to-end
+      traceability from event payload through to storage or downstream call.
+    consumers:
+      - consumer_service: ""             # Must match a registered_consumer in Section 2
+        target_type: ""                  # DB Write | API Call | Read Model | Cache Update | Forward Event
+        target_contract_ref: ""          # DC, API, or AEC document ID of the consumer's target
+        field_mappings:
+          - payload_field: ""            # Field from the event payload
+            target_field: ""             # Field in the consumer's target schema
+            transformation_logic: ""     # e.g., "Parse string to UUID", "Map enum A→1"
+            nullable_handling: ""        # e.g., "Default to false if absent"
+        filtering_logic: ""              # Conditions under which this consumer ignores the event
+        ordering_sensitivity: ""         # Whether the consumer requires ordered processing
+    required: true
+
+# -------------------------------------------------------------------
+# Section 6: Schema Evolution & Compatibility
+# -------------------------------------------------------------------
+schema_evolution:
+  description: >
+    Define the rules for how the event schema may change over time
+    without breaking existing consumers.
+  content:
+    compatibility_strategy: ""           # BACKWARD | FORWARD | FULL
+    allowed_changes:
+      - "Add optional fields with default values"
+      - "Add new header fields"
+    breaking_changes:
+      - "Remove or rename existing fields"
+      - "Change field types"
+      - "Change partition key semantics"
+    deprecation_policy:
+      notice_period: ""                  # e.g., "30 days minimum"
+      communication_channel: ""          # e.g., "#event-contracts Slack channel"
+      sunset_process: ""                 # Steps to retire an old schema version
+    versioning_strategy: ""              # Header-based | Topic-per-version | Schema registry
+  required: true
+
+# -------------------------------------------------------------------
+# Section 7: Delivery Guarantees & SLA
+# -------------------------------------------------------------------
+delivery_sla:
+  description: >
+    Define the quality-of-service expectations for this event,
+    including latency, ordering, and reliability guarantees.
+  content:
+    delivery_guarantee: ""               # At-least-once | At-most-once | Exactly-once
+    ordering_guarantee: ""               # Per-partition (by key) | Global | None
+    expected_throughput: ""              # e.g., "~500 events/sec peak"
+    max_publish_latency: ""             # e.g., "< 200ms p99"
+    max_end_to_end_latency: ""          # e.g., "< 2s from event trigger to consumer processing"
+    availability_target: ""             # e.g., "99.95%"
+    retry_policy:
+      max_retries: null                  # Number of consumer retry attempts
+      backoff_strategy: ""               # Fixed | Exponential | Linear
+      backoff_initial_ms: null
+      backoff_max_ms: null
+    dead_letter_handling:
+      enabled: false
+      dlt_topic: ""
+      alert_on_dlt: false
+      reprocessing_strategy: ""          # Manual | Automated | Scheduled
+    idempotency:
+      required: false
+      idempotency_key: ""               # Field(s) used for deduplication
+      deduplication_window: ""           # e.g., "1 hour"
+  required: true
+
+# -------------------------------------------------------------------
+# Section 8: Security & Access Control
+# -------------------------------------------------------------------
+security:
+  description: >
+    Define authentication, authorization, and data sensitivity
+    controls for producing and consuming this event.
+  content:
+    authentication_mechanism: ""         # mTLS | SASL/SCRAM | SASL/OAUTHBEARER | None
+    authorization:
+      producer_acl: ""                   # e.g., "WRITE on topic order.events.created"
+      consumer_acl: ""                   # e.g., "READ on topic order.events.created, GROUP on *.order.created.cg"
+    data_classification: ""              # Public | Internal | Confidential | PII | PHI
+    pii_fields: []                       # List of payload fields containing PII
+    encryption:
+      in_transit: ""                     # TLS version, e.g., "TLS 1.3"
+      at_rest: ""                        # e.g., "AES-256 (broker-level)"
+      field_level: false                 # Whether specific fields are encrypted
+      encrypted_fields: []               # List of field-level encrypted fields
+    data_retention_compliance: ""        # e.g., "GDPR Art. 17 — right to erasure supported via tombstone events"
+  required: true
+
+# -------------------------------------------------------------------
+# Section 9: Observability & Monitoring
+# -------------------------------------------------------------------
+observability:
+  description: >
+    Define the monitoring, alerting, and tracing expectations
+    for this event to ensure operational visibility.
+  content:
+    metrics:
+      - name: ""                         # e.g., "event.published.count"
+        type: ""                         # Counter | Gauge | Histogram
+        description: ""
+    key_dashboards: []                   # Links to Grafana/Datadog dashboards
+    alerting_rules:
+      - alert_name: ""                   # e.g., "ConsumerLagHigh"
+        condition: ""                    # e.g., "consumer_lag > 10000 for 5 minutes"
+        severity: ""                     # Critical | Warning | Info
+        notification_channel: ""         # e.g., "#alerts-order-events"
+    distributed_tracing:
+      enabled: false
+      trace_header: ""                   # e.g., "traceparent" (W3C) or "correlation_id"
+      tracing_system: ""                 # e.g., "Jaeger", "Zipkin", "OpenTelemetry"
+    logging_requirements: ""             # e.g., "Log event_id and correlation_id at INFO level on publish and consume"
+  required: false
+
+# -------------------------------------------------------------------
+# Section 10: Testing & Validation
+# -------------------------------------------------------------------
+testing:
+  description: >
+    Define the testing strategy for validating event production,
+    consumption, schema compliance, and failure scenarios.
+  content:
+    contract_testing:
+      tool: ""                           # e.g., "Pact", "Spring Cloud Contract", "Custom"
+      producer_tests: ""                 # How the producer validates its output against the contract
+      consumer_tests: ""                 # How each consumer validates its handling of the event
+    schema_validation:
+      validation_point: ""               # e.g., "At publish time via schema registry"
+      reject_on_invalid: false           # Whether invalid messages are rejected or sent to DLT
+    integration_test_environment: ""     # e.g., "staging-kafka-cluster"
+    sample_test_events: []               # List of sample events for testing
+    chaos_testing:
+      enabled: false
+      scenarios: []                      # e.g., ["broker failure", "consumer crash", "schema mismatch"]
+  required: false
+
+# -------------------------------------------------------------------
+# Section 11: Dependencies & Related Events
+# -------------------------------------------------------------------
+dependencies:
+  description: >
+    Map the event's relationships to other events, services,
+    and documents to understand the broader event flow.
+  content:
+    upstream_events: []                  # Events that typically precede this one
+    downstream_events: []                # Events typically triggered after this one
+    saga_participation:
+      saga_name: ""                      # If this event participates in a saga/orchestration
+      saga_step: ""                      # e.g., "Step 2 — Confirm Inventory"
+      compensating_event: ""             # Event emitted on rollback
+    related_apis: []                     # REST/gRPC APIs related to this event
+    event_flow_diagram: ""               # Link to a visual event flow diagram
+  required: false
+
+# -------------------------------------------------------------------
+# Attachments
+# -------------------------------------------------------------------
+attachments:
+  description: >
+    Supporting files such as AsyncAPI spec files, Avro/Protobuf schemas,
+    architecture diagrams, or sample payloads.
+  files: []
+  #  - filename: ""
+  #    description: ""
+  #    location: ""
+
+# -------------------------------------------------------------------
+# Change Log
+# -------------------------------------------------------------------
+change_log:
+  description: >
+    Track all changes to this contract. Every approved modification
+    must be logged here before the document version is incremented.
+  entries: []
+  #  - version: ""
+  #    date: ""
+  #    author: ""
+  #    changes: ""

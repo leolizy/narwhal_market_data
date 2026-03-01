@@ -1,0 +1,587 @@
+# ============================================================
+# NFTS — Non-Functional Test Specification Template
+# Version: 1.0
+# Standard: ISO/IEC/IEEE 29119-3, ISO 25010, IEEE 829-2008
+# ============================================================
+
+metadata:
+  document_id: "NFTS-[NNNN]"             # e.g., NFTS-0001
+  title: ""
+  version: ""
+  status: ""                              # Draft | In Review | Approved | Superseded | Retired
+  classification: ""                      # Public | Internal | Confidential | Restricted
+  created_date: ""
+  last_updated: ""
+  author: ""                              # QA Lead or Performance Test Engineer
+  reviewer: ""                            # Test Manager / Architect
+  approver: ""                            # QA Manager / Project Manager
+  related_documents: []                   # List of related doc IDs (e.g., NFR-0001, CICD-0001, DBAD-0001, TSI-0001)
+  tags: []                                # Freeform tags for search/categorization
+  supersedes: ""                          # ID of document this replaces, if any
+
+# ============================================================
+# SECTION 1 — INTRODUCTION
+# ============================================================
+introduction:
+  description: >
+    Provides context for the document — its purpose, the system under test,
+    scope of non-functional testing, and definitions used throughout.
+  required: true
+
+  purpose:
+    description: >
+      Briefly describe the goal of this NFTS and the system or component it covers.
+    content: ""
+
+  system_under_test:
+    description: >
+      Identify the application, service, or component being tested. Include version,
+      environment, and any relevant component boundaries.
+    content: ""
+
+  scope:
+    description: >
+      Define what non-functional quality attributes are in scope (e.g., performance,
+      security, reliability) and explicitly state what is out of scope.
+    in_scope: []
+    out_of_scope: []
+
+  definitions_and_acronyms:
+    description: >
+      List all domain-specific terms, acronyms, and abbreviations used in this document.
+    required: false
+    entries: []
+    # entries format:
+    # - term: "TPS"
+    #   definition: "Transactions Per Second"
+
+# ============================================================
+# SECTION 2 — REFERENCES
+# ============================================================
+references:
+  description: >
+    List all documents, standards, and frameworks that inform or govern this NFTS.
+    Each entry must trace back to an approved project artifact.
+  required: true
+  entries: []
+  # entries format:
+  # - doc_id: "NFR-0001"
+  #   title: "Non-Functional Requirements"
+  #   version: "1.2"
+  #   location: ""
+
+# ============================================================
+# SECTION 3 — TEST STRATEGY
+# ============================================================
+test_strategy:
+  description: >
+    Describes the overall approach to non-functional testing, including the test
+    types to be executed, guiding principles, test levels, and sequence of execution.
+  required: true
+
+  approach:
+    description: >
+      High-level narrative of how non-functional testing will be approached —
+      automated vs manual, tool-driven vs script-based, continuous vs milestone-based.
+    content: ""
+
+  test_types_included:
+    description: >
+      Enumerate the non-functional test types to be executed as part of this specification.
+      Mark each as Active (will be executed) or Deferred (planned but not in this cycle).
+    entries:
+      - type: "Performance Testing"
+        status: ""              # Active | Deferred | Not Applicable
+        rationale: ""
+      - type: "Load Testing"
+        status: ""
+        rationale: ""
+      - type: "Stress Testing"
+        status: ""
+        rationale: ""
+      - type: "Endurance / Soak Testing"
+        status: ""
+        rationale: ""
+      - type: "Spike Testing"
+        status: ""
+        rationale: ""
+      - type: "Security Testing"
+        status: ""
+        rationale: ""
+      - type: "Reliability & Availability Testing"
+        status: ""
+        rationale: ""
+      - type: "Scalability Testing"
+        status: ""
+        rationale: ""
+      - type: "Usability Testing"
+        status: ""
+        rationale: ""
+      - type: "Compatibility Testing"
+        status: ""
+        rationale: ""
+      - type: "Maintainability Testing"
+        status: ""
+        rationale: ""
+      - type: "Disaster Recovery Testing"
+        status: ""
+        rationale: ""
+
+  nft_execution_sequence:
+    description: >
+      Define the recommended execution order for the test types above, including
+      any dependencies (e.g., performance baseline must be established before stress testing).
+    content: ""
+
+# ============================================================
+# SECTION 4 — ENTRY & EXIT CRITERIA
+# ============================================================
+entry_exit_criteria:
+  description: >
+    Defines the conditions that must be satisfied before non-functional testing begins
+    (entry) and the conditions that signal completion (exit).
+  required: true
+
+  entry_criteria:
+    description: >
+      Conditions that must ALL be met before NFT execution commences.
+      Typical criteria include: functional testing complete, environment stable,
+      test data loaded, NFR baseline agreed.
+    items: []
+    # items format:
+    # - criterion: "Functional regression test pass rate >= 95%"
+    #   owner: ""
+
+  exit_criteria:
+    description: >
+      Conditions that define when non-functional testing is considered complete and
+      acceptable. Typical criteria include: all critical NFRs met, defect thresholds
+      satisfied, sign-off obtained.
+    items: []
+    # items format:
+    # - criterion: "All P1 NFT defects resolved or risk-accepted"
+    #   owner: ""
+
+  suspension_criteria:
+    description: >
+      Conditions under which NFT execution should be paused and escalated.
+    required: false
+    items: []
+
+  resumption_criteria:
+    description: >
+      Conditions that must be met to resume testing after a suspension.
+    required: false
+    items: []
+
+# ============================================================
+# SECTION 5 — TEST ENVIRONMENT
+# ============================================================
+test_environment:
+  description: >
+    Specifies the infrastructure, configuration, and tooling required to execute
+    non-functional tests. NFT results are only valid if executed in an approved environment.
+  required: true
+
+  environment_name: ""                    # e.g., NFT-ENV-01, Performance Lab
+  environment_type: ""                    # Dedicated | Shared | Cloud-Provisioned | On-Premise
+
+  hardware_specifications:
+    description: >
+      Document the server/VM specs for the environment under test. Include CPU, RAM,
+      storage, network bandwidth, and number of nodes.
+    nodes: []
+    # nodes format:
+    # - role: "Application Server"
+    #   cpu: ""
+    #   ram: ""
+    #   storage: ""
+    #   os: ""
+    #   count: 0
+
+  software_and_middleware:
+    description: >
+      List all software, middleware, and services running in the test environment.
+    entries: []
+    # entries format:
+    # - component: "Apache Tomcat"
+    #   version: ""
+    #   configuration_notes: ""
+
+  network_topology:
+    description: >
+      Describe network configuration, bandwidth, latency constraints, and any
+      proxies, load balancers, or CDN configurations relevant to testing.
+    content: ""
+
+  test_tools:
+    description: >
+      List all tools used to execute and monitor non-functional tests.
+    entries: []
+    # entries format:
+    # - tool: "Apache JMeter"
+    #   purpose: "Load and performance test execution"
+    #   version: ""
+    # - tool: "Grafana + Prometheus"
+    #   purpose: "Real-time monitoring and metrics"
+    #   version: ""
+
+  environment_differences_from_production:
+    description: >
+      Document any known differences between the NFT environment and production.
+      This is critical for interpreting test results accurately.
+    content: ""
+
+# ============================================================
+# SECTION 6 — TEST DATA REQUIREMENTS
+# ============================================================
+test_data:
+  description: >
+    Specifies the volume, type, and preparation method for test data used in
+    non-functional testing. Inadequate test data is a leading cause of misleading NFT results.
+  required: true
+
+  data_volume_requirements:
+    description: >
+      Define the minimum data volume needed to simulate realistic production conditions.
+      Specify record counts per entity as applicable.
+    content: ""
+
+  data_generation_approach:
+    description: >
+      Describe how test data will be generated or obtained (e.g., production anonymization,
+      synthetic generation, seeded datasets). Note any PII/compliance considerations.
+    content: ""
+
+  data_reset_strategy:
+    description: >
+      Define how data will be reset between test runs to ensure test repeatability.
+    content: ""
+
+# ============================================================
+# SECTION 7 — PERFORMANCE TESTING SPECIFICATION
+# ============================================================
+performance_testing:
+  description: >
+    Specifies all performance-related test scenarios, thresholds, and acceptance criteria
+    derived from the NFR document. Covers baseline, load, stress, soak, and spike testing.
+  required: true
+
+  baseline_metrics:
+    description: >
+      Document the current (or expected) baseline performance metrics for comparison.
+      If no baseline exists, note that baseline establishment is a test objective.
+    response_time_baseline_ms: null
+    throughput_baseline_tps: null
+    error_rate_baseline_pct: null
+    notes: ""
+
+  workload_models:
+    description: >
+      Define the user and transaction workload models for each test scenario.
+      A workload model specifies concurrent users, transaction mix, and ramp-up profile.
+    entries: []
+    # entries format:
+    # - scenario_id: "WL-001"
+    #   scenario_name: "Normal Business Hours Load"
+    #   concurrent_users: 0
+    #   transaction_mix: {}    # e.g., {login: 10%, search: 50%, checkout: 20%, browse: 20%}
+    #   ramp_up_duration_min: 0
+    #   sustain_duration_min: 0
+    #   ramp_down_duration_min: 0
+    #   think_time_sec: 0
+
+  test_scenarios:
+    description: >
+      List all performance test scenarios to be executed, each with acceptance criteria.
+    entries: []
+    # entries format:
+    # - scenario_id: "PERF-001"
+    #   test_type: "Load Test"               # Load | Stress | Soak | Spike | Baseline
+    #   workload_model_ref: "WL-001"
+    #   nfr_ref: ""                          # Traceability to NFR requirement
+    #   description: ""
+    #   acceptance_criteria:
+    #     avg_response_time_ms: null
+    #     p95_response_time_ms: null
+    #     p99_response_time_ms: null
+    #     error_rate_pct: null
+    #     throughput_tps: null
+    #     cpu_utilization_pct: null
+    #     memory_utilization_pct: null
+    #   test_duration_min: 0
+    #   priority: ""                         # P1 | P2 | P3
+
+  monitoring_metrics:
+    description: >
+      Specify the system and application metrics to be captured during performance testing.
+    server_metrics: []         # e.g., CPU %, Memory %, Disk I/O, Network I/O
+    application_metrics: []    # e.g., Thread count, Connection pool, GC activity
+    database_metrics: []       # e.g., Query time, Lock waits, Connection count
+
+# ============================================================
+# SECTION 8 — SECURITY TESTING SPECIFICATION
+# ============================================================
+security_testing:
+  description: >
+    Specifies the security test scope, methodology, tools, and acceptance criteria.
+    Aligns to OWASP Top 10, relevant compliance frameworks (e.g., ISO 27001, SOC2,
+    PCI-DSS, HIPAA), and NFR security requirements.
+  required: true
+
+  security_framework_references:
+    description: >
+      List the security standards and frameworks that govern this testing scope.
+    entries: []
+    # e.g., OWASP Top 10 2021, OWASP ASVS Level 2, PCI-DSS 4.0
+
+  threat_model_reference:
+    description: >
+      Reference to the threat model document if one exists for the system under test.
+    content: ""
+    required: false
+
+  security_test_scenarios:
+    description: >
+      List individual security test scenarios by category.
+    entries: []
+    # entries format:
+    # - scenario_id: "SEC-001"
+    #   category: "Authentication"           # Authentication | Authorization | Input Validation |
+    #                                        # Encryption | Session Management | Injection |
+    #                                        # CSRF | Security Misconfiguration | Logging & Monitoring
+    #   description: ""
+    #   methodology: ""                      # SAST | DAST | Manual Penetration | Code Review
+    #   tool: ""
+    #   nfr_ref: ""
+    #   acceptance_criteria: ""
+    #   priority: ""
+
+  vulnerability_acceptance_thresholds:
+    description: >
+      Define the maximum acceptable vulnerability counts by severity at exit.
+    critical: 0                             # Must be 0 for exit
+    high: 0
+    medium: null
+    low: null
+    notes: ""
+
+# ============================================================
+# SECTION 9 — RELIABILITY & AVAILABILITY TESTING SPECIFICATION
+# ============================================================
+reliability_availability_testing:
+  description: >
+    Specifies tests to validate system uptime, fault tolerance, recovery time,
+    and data integrity under failure conditions. Directly maps to SLA commitments.
+  required: true
+
+  availability_targets:
+    description: >
+      Define the agreed availability targets from NFR / SLA documents.
+    target_uptime_pct: null                 # e.g., 99.9
+    max_planned_downtime_hrs_per_month: null
+    max_unplanned_downtime_min_per_incident: null
+    rto_minutes: null                       # Recovery Time Objective
+    rpo_minutes: null                       # Recovery Point Objective
+
+  reliability_test_scenarios:
+    description: >
+      Define scenarios to validate fault tolerance, failover, and recovery behaviors.
+    entries: []
+    # entries format:
+    # - scenario_id: "REL-001"
+    #   test_type: "Failover"                # Failover | Recovery | Chaos | Data Integrity
+    #   description: ""
+    #   failure_injection_method: ""
+    #   expected_behavior: ""
+    #   acceptance_criteria: ""
+    #   nfr_ref: ""
+
+# ============================================================
+# SECTION 10 — SCALABILITY TESTING SPECIFICATION
+# ============================================================
+scalability_testing:
+  description: >
+    Specifies tests to validate the system's ability to scale horizontally or
+    vertically in response to increasing load, and to determine scaling limits.
+  required: false
+
+  scalability_objectives:
+    description: >
+      Describe what scaling behavior is expected and what the tests aim to validate.
+    content: ""
+
+  scalability_test_scenarios:
+    description: >
+      Define specific scenarios to test horizontal and vertical scaling behavior.
+    entries: []
+    # entries format:
+    # - scenario_id: "SCALE-001"
+    #   description: ""
+    #   scaling_type: ""               # Horizontal | Vertical | Auto-Scale
+    #   load_increment_steps: []
+    #   acceptance_criteria: ""
+    #   nfr_ref: ""
+
+# ============================================================
+# SECTION 11 — USABILITY TESTING SPECIFICATION
+# ============================================================
+usability_testing:
+  description: >
+    Specifies tests to validate ease of use, learnability, accessibility, and user
+    satisfaction. Particularly relevant for customer-facing systems.
+  required: false
+
+  accessibility_standard: ""              # e.g., WCAG 2.1 Level AA
+
+  usability_test_scenarios:
+    description: >
+      List usability tasks, participant profiles, and acceptance criteria.
+    entries: []
+    # entries format:
+    # - scenario_id: "USA-001"
+    #   task_description: ""
+    #   participant_profile: ""
+    #   success_metric: ""             # e.g., Task completion rate >= 90%
+    #   nfr_ref: ""
+
+# ============================================================
+# SECTION 12 — COMPATIBILITY TESTING SPECIFICATION
+# ============================================================
+compatibility_testing:
+  description: >
+    Specifies tests to validate system behavior across browsers, devices, operating
+    systems, and integration environments.
+  required: false
+
+  browser_compatibility:
+    description: >
+      List browsers and versions to be tested.
+    entries: []
+    # entries format: {browser: "Chrome", version: "latest-2"}
+
+  device_compatibility:
+    description: >
+      List device types and OS versions to be tested.
+    entries: []
+
+  integration_compatibility:
+    description: >
+      List external systems and APIs whose compatibility must be validated.
+    entries: []
+
+# ============================================================
+# SECTION 13 — DEFECT MANAGEMENT FOR NFT
+# ============================================================
+defect_management:
+  description: >
+    Defines how defects discovered during non-functional testing are classified,
+    reported, and managed, including NFT-specific severity definitions.
+  required: true
+
+  severity_classification:
+    description: >
+      NFT-specific severity classification aligned to NFR breach impact.
+    p1_critical:
+      definition: ""   # e.g., SLA-breaching performance or total system failure under target load
+      example: ""
+    p2_high:
+      definition: ""
+      example: ""
+    p3_medium:
+      definition: ""
+      example: ""
+    p4_low:
+      definition: ""
+      example: ""
+
+  defect_tracking_tool: ""               # e.g., Jira, Azure DevOps
+  defect_label_convention: ""            # e.g., [NFT], [PERF], [SEC]
+  retest_policy: ""
+
+# ============================================================
+# SECTION 14 — ROLES AND RESPONSIBILITIES
+# ============================================================
+roles_and_responsibilities:
+  description: >
+    Defines who is accountable for designing, executing, monitoring, and signing off
+    on non-functional testing activities.
+  required: true
+  entries: []
+  # entries format:
+  # - role: "Performance Test Engineer"
+  #   responsibilities:
+  #     - "Design and execute performance test scripts"
+  #     - "Analyze and report performance results"
+  #   assigned_to: ""
+
+# ============================================================
+# SECTION 15 — RISKS AND MITIGATIONS
+# ============================================================
+risks_and_mitigations:
+  description: >
+    Documents NFT-specific risks and their mitigation strategies. Common risks include
+    environment instability, insufficient test data, and tool licensing constraints.
+  required: true
+  entries: []
+  # entries format:
+  # - risk_id: "RISK-001"
+  #   description: ""
+  #   likelihood: ""       # High | Medium | Low
+  #   impact: ""           # High | Medium | Low
+  #   mitigation: ""
+  #   owner: ""
+
+# ============================================================
+# SECTION 16 — REPORTING REQUIREMENTS
+# ============================================================
+reporting:
+  description: >
+    Defines the reports to be produced as outputs of non-functional testing,
+    their frequency, audience, and format.
+  required: true
+
+  reports:
+    - report_type: "NFT Execution Progress Report"
+      frequency: ""                        # e.g., Daily during execution
+      audience: ""
+      format: ""                           # e.g., Email summary, Dashboard, Wiki
+    - report_type: "Performance Test Results Report"
+      frequency: ""
+      audience: ""
+      format: ""
+    - report_type: "Security Test Summary Report"
+      frequency: ""
+      audience: ""
+      format: ""
+    - report_type: "Final NFT Completion Report"
+      frequency: "Once — at NFT exit"
+      audience: ""
+      format: ""
+
+# ============================================================
+# ATTACHMENTS
+# ============================================================
+attachments:
+  description: >
+    Reference to supporting files, scripts, dashboards, and evidence artifacts.
+  required: false
+  entries: []
+  # entries format:
+  # - file_name: "jmeter_load_scripts.zip"
+  #   description: "JMeter test scripts for performance scenarios"
+  #   location: ""
+
+# ============================================================
+# CHANGE LOG
+# ============================================================
+change_log:
+  description: >
+    Tracks all changes to this document. A new entry must be added for every version increment.
+  required: true
+  entries: []
+  # entries format:
+  # - version: "1.0"
+  #   date: ""
+  #   author: ""
+  #   changes: "Initial draft"
