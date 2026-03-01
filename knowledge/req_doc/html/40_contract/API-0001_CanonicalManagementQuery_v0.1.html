@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NMD Canonical Management &amp; Query API</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.65;
+      color: #2d3748;
+      background: #f7f8fa;
+      margin: 0;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      padding: 2.5rem 3rem;
+    }
+    h1 {
+      font-size: 2em;
+      color: #1a3d5c;
+      border-bottom: 3px solid #2c5f8a;
+      padding-bottom: .4em;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 1.45em;
+      color: #2c5f8a;
+      border-bottom: 1px solid #d0dce8;
+      padding-bottom: .25em;
+      margin-top: 2.2em;
+    }
+    h3 { font-size: 1.15em; color: #3a6ea8; margin-top: 1.5em; }
+    h4, h5, h6 { color: #4a5568; margin-top: 1.2em; }
+    p { margin: .8em 0; }
+    a { color: #2c5f8a; }
+    hr {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 2em 0;
+    }
+    code {
+      background: #eef2f7;
+      padding: .15em .4em;
+      border-radius: 4px;
+      font-size: .88em;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+    }
+    pre {
+      background: #1e2433;
+      color: #cdd5e0;
+      padding: 1.1em 1.4em;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1em 0;
+    }
+    pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+      font-size: .9em;
+    }
+    blockquote {
+      border-left: 4px solid #2c5f8a;
+      margin: 1em 0;
+      padding: .6em 1.1em;
+      background: #f0f5fb;
+      color: #4a5568;
+      border-radius: 0 4px 4px 0;
+    }
+    blockquote p { margin: 0; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1.2em 0;
+      font-size: .9em;
+    }
+    th {
+      background: #2c5f8a;
+      color: #fff;
+      padding: .55em .9em;
+      text-align: left;
+      font-weight: 600;
+    }
+    td {
+      padding: .45em .9em;
+      border: 1px solid #d0dce8;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #f7f9fc; }
+    ul, ol { padding-left: 1.8em; margin: .6em 0; }
+    li { margin: .3em 0; }
+    strong { color: #1a3d5c; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+<h1>API Contract — NMD Canonical Management &amp; Query API</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Document ID</td>
+      <td>API-0001</td>
+    </tr>
+    <tr>
+      <td>OpenAPI Version</td>
+      <td>3.1.0</td>
+    </tr>
+    <tr>
+      <td>Title</td>
+      <td>NMD Canonical Management &amp; Query API</td>
+    </tr>
+    <tr>
+      <td>Version</td>
+      <td>v0.1</td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>Draft</td>
+    </tr>
+    <tr>
+      <td>Created</td>
+      <td>2026-03-01</td>
+    </tr>
+    <tr>
+      <td>Last Updated</td>
+      <td>2026-03-01</td>
+    </tr>
+    <tr>
+      <td>Author</td>
+      <td>Leo</td>
+    </tr>
+    <tr>
+      <td>Related Documents</td>
+      <td>FRD-NMD-0001,PSD-0001,PSD-0002</td>
+    </tr>
+    <tr>
+      <td>Classification</td>
+      <td>Internal</td>
+    </tr>
+    <tr>
+      <td>Source FRD</td>
+      <td>FRD-NMD-0001</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>1. Overview</h2>
+<p>REST API for the NMD Product Canonical module. Provides lifecycle management of canonical instrument records (create, update, status change) and read-only query access (lookup by canonical key and attribute search). This is the authoritative identity layer for all NMD ingestion, normalisation, and export modules.</p>
+<p>Source FRD: FRD-NMD-0001 — Product Canonical Management &amp; Query Maintenance spec: PSD-0001 Query spec: PSD-0002</p>
+<hr>
+<h2>2. Endpoints</h2>
+<h3>Canonical Maintenance</h3>
+<p>Create, update, and manage status of canonical instrument records (PSD-0001)</p>
+<h3>Canonical Query</h3>
+<p>Read-only lookup and attribute search of canonical records (PSD-0002)</p>
+<h4><code>POST /canonical</code></h4>
+<p><strong>Create a new canonical instrument record</strong></p>
+<p>Creates a new canonical instrument record. The canonical key is computed by the system as a deterministic hash of the 5 hierarchy columns. Initial status is supplied by the caller (Data Owner) or taken from source configuration (Source Processing). Duplicate canonical keys are rejected.</p>
+<p>Ref: PSD-0001 CRUD — Create</p>
+<p><strong>Request Body:</strong> <code>CanonicalRecordCreateRequest</code> (see Schemas section)</p>
+<p><strong>Responses:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>201</td>
+      <td>Canonical record created successfully</td>
+    </tr>
+    <tr>
+      <td>400</td>
+      <td>Validation error — e.g. missing exchange, invalid entity type, duplicate canonical key</td>
+    </tr>
+    <tr>
+      <td>401</td>
+      <td>Unauthorised</td>
+    </tr>
+    <tr>
+      <td>403</td>
+      <td>Forbidden — caller role does not have create permission</td>
+    </tr>
+    <tr>
+      <td>409</td>
+      <td>Conflict — canonical record with this key already exists</td>
+    </tr>
+    <tr>
+      <td>500</td>
+      <td>Internal server error</td>
+    </tr>
+  </tbody>
+</table>
+<h4><code>GET /canonical/{canonical_key}</code></h4>
+<p><strong>Lookup canonical record by canonical key</strong></p>
+<p>Returns the full canonical record for the given canonical key, subject to the caller&#x27;s role-based status filter. By default only Active records are returned. Data Owner and Data Ingestion Module may also retrieve Inactive and Disabled records. Query &amp; Export Module may never retrieve Disabled records.</p>
+<p>Ref: PSD-0002 Flow A</p>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>In</th>
+      <th>Required</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>canonical_key</code></td>
+      <td>path</td>
+      <td>Yes</td>
+      <td>string</td>
+      <td>The deterministic hash key identifying the canonical record</td>
+    </tr>
+    <tr>
+      <td><code>status_filter</code></td>
+      <td>query</td>
+      <td>No</td>
+      <td>string — one of: Active, Inactive, Disable</td>
+      <td>Optional status filter. Permitted values depend on caller role. Query &amp; Export Module may not request Disabled.</td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Responses:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>200</td>
+      <td>Canonical record found</td>
+    </tr>
+    <tr>
+      <td>400</td>
+      <td>Bad request — e.g. empty canonical_key or disallowed status_filter for caller role</td>
+    </tr>
+    <tr>
+      <td>401</td>
+      <td>Unauthorised</td>
+    </tr>
+    <tr>
+      <td>404</td>
+      <td>Canonical record not found</td>
+    </tr>
+    <tr>
+      <td>500</td>
+      <td>Internal server error</td>
+    </tr>
+  </tbody>
+</table>
+<h4><code>PUT /canonical/{canonical_key}</code></h4>
+<p><strong>Update non-locked fields of a canonical record</strong></p>
+<p>Updates the non-locked fields of an existing canonical record. The 5 hierarchy columns (exchange, commodity, product_type, product_code, contract), asset_class, entity_type, and canonical_key are immutable after creation and are rejected if included. Only status is editable via this endpoint — see PATCH /canonical/{canonical_key}/status for status lifecycle changes.</p>
+<p>Ref: PSD-0001 CRUD — Update</p>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>In</th>
+      <th>Required</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>canonical_key</code></td>
+      <td>path</td>
+      <td>Yes</td>
+      <td>string</td>
+      <td>The canonical key of the record to update</td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Request Body:</strong> <code>CanonicalRecordUpdateRequest</code> (see Schemas section)</p>
+<p><strong>Responses:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>200</td>
+      <td>Record updated successfully</td>
+    </tr>
+    <tr>
+      <td>400</td>
+      <td>Validation error — e.g. attempt to modify locked fields</td>
+    </tr>
+    <tr>
+      <td>401</td>
+      <td>Unauthorised</td>
+    </tr>
+    <tr>
+      <td>403</td>
+      <td>Forbidden — caller role does not have update permission</td>
+    </tr>
+    <tr>
+      <td>404</td>
+      <td>Canonical record not found</td>
+    </tr>
+    <tr>
+      <td>500</td>
+      <td>Internal server error</td>
+    </tr>
+  </tbody>
+</table>
+<h4><code>PATCH /canonical/{canonical_key}/status</code></h4>
+<p><strong>Change the status of a canonical record</strong></p>
+<p>Changes the status of a canonical record and triggers a top-down cascade to all non-Disabled descendants. A child record cannot be set to a status more permissive than its parent. One canonical.status.changed event is emitted per affected record (including cascade-triggered descendants).</p>
+<p>Ref: PSD-0001 CRUD — Status Change; AEC-0003</p>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>In</th>
+      <th>Required</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>canonical_key</code></td>
+      <td>path</td>
+      <td>Yes</td>
+      <td>string</td>
+      <td>The canonical key of the record whose status to change</td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Request Body:</strong> <code>StatusChangeRequest</code> (see Schemas section)</p>
+<p><strong>Responses:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>200</td>
+      <td>Status changed successfully. Response includes the updated record; cascade to descendants is async.</td>
+    </tr>
+    <tr>
+      <td>400</td>
+      <td>Validation error — e.g. child status more permissive than parent</td>
+    </tr>
+    <tr>
+      <td>401</td>
+      <td>Unauthorised</td>
+    </tr>
+    <tr>
+      <td>403</td>
+      <td>Forbidden — caller role does not have status change permission</td>
+    </tr>
+    <tr>
+      <td>404</td>
+      <td>Canonical record not found</td>
+    </tr>
+    <tr>
+      <td>500</td>
+      <td>Internal server error</td>
+    </tr>
+  </tbody>
+</table>
+<h4><code>GET /canonical/search</code></h4>
+<p><strong>Attribute search of canonical records</strong></p>
+<p>Searches the canonical entity table by one or more attributes. At least one attribute must be provided — open-ended queries with no filter are not permitted. Contract ticker search uses prefix match only. Results are sorted Active → Inactive → Disabled, then by exchange, commodity, product_type, product_code. Paginated — default page size 50, maximum 2000.</p>
+<p>Ref: PSD-0002 Flow B</p>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>In</th>
+      <th>Required</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>exchange</code></td>
+      <td>query</td>
+      <td>No</td>
+      <td>string</td>
+      <td>Exact match on exchange</td>
+    </tr>
+    <tr>
+      <td><code>commodity</code></td>
+      <td>query</td>
+      <td>No</td>
+      <td>string</td>
+      <td>Exact match on commodity</td>
+    </tr>
+    <tr>
+      <td><code>product_type</code></td>
+      <td>query</td>
+      <td>No</td>
+      <td>string — one of: PHY, FUT, CMB, OOP, OOF, OOC</td>
+      <td>Exact match on product type (Futures &amp; Options only)</td>
+    </tr>
+    <tr>
+      <td><code>product_code</code></td>
+      <td>query</td>
+      <td>No</td>
+      <td>string</td>
+      <td>Exact match on product code</td>
+    </tr>
+    <tr>
+      <td><code>contract</code></td>
+      <td>query</td>
+      <td>No</td>
+      <td>string</td>
+      <td>Prefix match on contract ticker — contains and suffix match not supported in Phase 1</td>
+    </tr>
+    <tr>
+      <td><code>entity_type</code></td>
+      <td>query</td>
+      <td>No</td>
+      <td>string</td>
+      <td>Exact match on entity type</td>
+    </tr>
+    <tr>
+      <td><code>status_filter</code></td>
+      <td>query</td>
+      <td>No</td>
+      <td>string — one of: Active, Inactive, Disable</td>
+      <td>Optional status filter — role-dependent; Query &amp; Export Module may not request Disabled</td>
+    </tr>
+    <tr>
+      <td><code>page</code></td>
+      <td>query</td>
+      <td>No</td>
+      <td>integer</td>
+      <td>Page number (1-based)</td>
+    </tr>
+    <tr>
+      <td><code>page_size</code></td>
+      <td>query</td>
+      <td>No</td>
+      <td>integer</td>
+      <td>Page size — default 50, maximum 2000. Requests exceeding 2000 are capped at 2000.</td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Responses:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>200</td>
+      <td>Search results</td>
+    </tr>
+    <tr>
+      <td>400</td>
+      <td>Bad request — e.g. no search attributes provided, or disallowed status_filter for caller role</td>
+    </tr>
+    <tr>
+      <td>401</td>
+      <td>Unauthorised</td>
+    </tr>
+    <tr>
+      <td>500</td>
+      <td>Internal server error</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>3. Schemas</h2>
+<h3><code>CanonicalRecord</code></h3>
+<p>A canonical instrument record — the authoritative identity for one unique financial instrument in NMD</p>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Read-Only</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>canonical_key</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Deterministic hash of the 5 hierarchy columns — immutable after creation</td>
+    </tr>
+    <tr>
+      <td><code>exchange</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Exchange identifier. For FX records: fixed value &#x27;FX&#x27;</td>
+    </tr>
+    <tr>
+      <td><code>commodity</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Commodity identifier. For FX Currency Pair: XXXYYY format (6 uppercase characters). Null for L1 entity types.</td>
+    </tr>
+    <tr>
+      <td><code>product_type</code></td>
+      <td>string (PHY,FUT,CMB,OOP,OOF,OOC)</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Product type — Futures &amp; Options only. Null for FX and entity types below L3.</td>
+    </tr>
+    <tr>
+      <td><code>product_code</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Product code — null for entity types below L3 and all FX records</td>
+    </tr>
+    <tr>
+      <td><code>contract</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Contract ticker. For Option Contract: YYYYMM_CP_STRIKE</td>
+    </tr>
+    <tr>
+      <td><code>asset_class</code></td>
+      <td>string (Futures &amp; Options,FX)</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Asset class — immutable after creation</td>
+    </tr>
+    <tr>
+      <td><code>entity_type</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Entity type — must be valid for the selected asset class. Immutable after creation.</td>
+    </tr>
+    <tr>
+      <td><code>status</code></td>
+      <td>string (Active,Inactive,Disable)</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Operational status — editable via PATCH /canonical/{canonical_key}/status</td>
+    </tr>
+    <tr>
+      <td><code>source</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Creation actor — &#x27;User&#x27; or source processing identifier</td>
+    </tr>
+    <tr>
+      <td><code>created_by</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>created_at</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>last_updated_by</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>last_updated_at</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<h3><code>CanonicalRecordCreateRequest</code></h3>
+<p>Request body for creating a new canonical record</p>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Read-Only</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>exchange</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Exchange identifier. Use &#x27;FX&#x27; for FX records.</td>
+    </tr>
+    <tr>
+      <td><code>commodity</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Commodity identifier. Required for entity types above L1. FX: XXXYYY format.</td>
+    </tr>
+    <tr>
+      <td><code>product_type</code></td>
+      <td>string (PHY,FUT,CMB,OOP,OOF,OOC)</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Product type — Futures &amp; Options L3+ only. Must be null for FX.</td>
+    </tr>
+    <tr>
+      <td><code>product_code</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Product code — L3+ only. Must be null for FX.</td>
+    </tr>
+    <tr>
+      <td><code>contract</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Contract ticker — contract-level entity types only. Must be null for FX.</td>
+    </tr>
+    <tr>
+      <td><code>asset_class</code></td>
+      <td>string (Futures &amp; Options,FX)</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>entity_type</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Entity type — must be valid for the selected asset class</td>
+    </tr>
+    <tr>
+      <td><code>status</code></td>
+      <td>string (Active,Inactive,Disable)</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Initial status. Source Processing: taken from source configuration — never defaulted.</td>
+    </tr>
+  </tbody>
+</table>
+<h3><code>CanonicalRecordUpdateRequest</code></h3>
+<p>Request body for updating non-locked fields of a canonical record. The 5 hierarchy columns, asset_class, entity_type, and canonical_key may not be included — locked after creation.</p>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Read-Only</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>status</code></td>
+      <td>string (Active,Inactive,Disable)</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Use PATCH /canonical/{canonical_key}/status for status changes with cascade semantics. Included here for completeness — direct status update without cascade is not the canonical path.</td>
+    </tr>
+  </tbody>
+</table>
+<h3><code>StatusChangeRequest</code></h3>
+<p>Request body for changing the status of a canonical record</p>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Read-Only</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>new_status</code></td>
+      <td>string (Active,Inactive,Disable)</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>The target status. Child record status cannot be more permissive than parent status.</td>
+    </tr>
+  </tbody>
+</table>
+<h3><code>CanonicalSearchResponse</code></h3>
+<p>Paginated attribute search results</p>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Read-Only</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>data</code></td>
+      <td>array</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Matching canonical records — sorted Active → Inactive → Disabled, then by exchange, commodity, product_type, product_code</td>
+    </tr>
+    <tr>
+      <td><code>pagination</code></td>
+      <td>PaginationMeta</td>
+      <td>No</td>
+      <td>No</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<h3><code>PaginationMeta</code></h3>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Read-Only</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>page</code></td>
+      <td>integer</td>
+      <td>No</td>
+      <td>No</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>page_size</code></td>
+      <td>integer</td>
+      <td>No</td>
+      <td>No</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>total_items</code></td>
+      <td>integer</td>
+      <td>No</td>
+      <td>No</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><code>total_pages</code></td>
+      <td>integer</td>
+      <td>No</td>
+      <td>No</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<h3><code>ErrorResponse</code></h3>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Read-Only</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>error_code</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Machine-readable error code</td>
+    </tr>
+    <tr>
+      <td><code>message</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Human-readable error message</td>
+    </tr>
+    <tr>
+      <td><code>details</code></td>
+      <td>array</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Optional list of validation errors</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>Change Log</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th>Date</th>
+      <th>Author</th>
+      <th>Summary</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>v0.1</td>
+      <td>2026-03-01</td>
+      <td>Leo</td>
+      <td>Initial draft — covers POST /canonical (create), PUT /canonical/{key} (update), PATCH /canonical/{key}/status (status change with cascade), GET /canonical/{key} (lookup), GET /canonical/search (attribute search with prefix match on contract, pagination 50/2000, fixed sort order)</td>
+    </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

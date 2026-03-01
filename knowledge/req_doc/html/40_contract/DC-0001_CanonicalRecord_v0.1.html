@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canonical Record Data Contract</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.65;
+      color: #2d3748;
+      background: #f7f8fa;
+      margin: 0;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      padding: 2.5rem 3rem;
+    }
+    h1 {
+      font-size: 2em;
+      color: #1a3d5c;
+      border-bottom: 3px solid #2c5f8a;
+      padding-bottom: .4em;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 1.45em;
+      color: #2c5f8a;
+      border-bottom: 1px solid #d0dce8;
+      padding-bottom: .25em;
+      margin-top: 2.2em;
+    }
+    h3 { font-size: 1.15em; color: #3a6ea8; margin-top: 1.5em; }
+    h4, h5, h6 { color: #4a5568; margin-top: 1.2em; }
+    p { margin: .8em 0; }
+    a { color: #2c5f8a; }
+    hr {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 2em 0;
+    }
+    code {
+      background: #eef2f7;
+      padding: .15em .4em;
+      border-radius: 4px;
+      font-size: .88em;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+    }
+    pre {
+      background: #1e2433;
+      color: #cdd5e0;
+      padding: 1.1em 1.4em;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1em 0;
+    }
+    pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+      font-size: .9em;
+    }
+    blockquote {
+      border-left: 4px solid #2c5f8a;
+      margin: 1em 0;
+      padding: .6em 1.1em;
+      background: #f0f5fb;
+      color: #4a5568;
+      border-radius: 0 4px 4px 0;
+    }
+    blockquote p { margin: 0; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1.2em 0;
+      font-size: .9em;
+    }
+    th {
+      background: #2c5f8a;
+      color: #fff;
+      padding: .55em .9em;
+      text-align: left;
+      font-weight: 600;
+    }
+    td {
+      padding: .45em .9em;
+      border: 1px solid #d0dce8;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #f7f9fc; }
+    ul, ol { padding-left: 1.8em; margin: .6em 0; }
+    li { margin: .3em 0; }
+    strong { color: #1a3d5c; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+<h1>Data Contract — Canonical Record Data Contract</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Document ID</td>
+      <td>DC-0001</td>
+    </tr>
+    <tr>
+      <td>Title</td>
+      <td>Canonical Record Data Contract</td>
+    </tr>
+    <tr>
+      <td>Version</td>
+      <td>v0.1</td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>Draft</td>
+    </tr>
+    <tr>
+      <td>Created</td>
+      <td>2026-03-01</td>
+    </tr>
+    <tr>
+      <td>Last Updated</td>
+      <td>2026-03-01</td>
+    </tr>
+    <tr>
+      <td>Author</td>
+      <td>Leo</td>
+    </tr>
+    <tr>
+      <td>Reviewer</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Approver</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Related Documents</td>
+      <td>FRD-NMD-0001, PSD-0001, PSD-0002, AEC-0001, AEC-0002, AEC-0003</td>
+    </tr>
+    <tr>
+      <td>Classification</td>
+      <td>Internal</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>1. Contract Overview</h2>
+<p>This data contract governs the canonical instrument record — the authoritative identity for every unique financial instrument in NMD. The canonical entity table is the single source of truth for instrument identity. All ingestion, normalisation, and export modules resolve their data against this table. The contract defines the schema, ownership, quality standards, SLA, and access rules for the canonical record dataset.</p>
+<hr>
+<h2>2. Data Product Identification</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Product Name</td>
+      <td>Canonical Record</td>
+    </tr>
+    <tr>
+      <td>Product Id</td>
+      <td>NMD-CANONICAL</td>
+    </tr>
+    <tr>
+      <td>Domain</td>
+      <td>NMD</td>
+    </tr>
+    <tr>
+      <td>Subdomain</td>
+      <td>Canonical</td>
+    </tr>
+    <tr>
+      <td>Owner Team</td>
+      <td>NMD Team</td>
+    </tr>
+    <tr>
+      <td>Owner Contact</td>
+      <td>Team Lead</td>
+    </tr>
+    <tr>
+      <td>Data Steward</td>
+      <td>Data Owner (ACT-001)</td>
+    </tr>
+    <tr>
+      <td>Tier</td>
+      <td>Tier 1 (Critical)</td>
+    </tr>
+    <tr>
+      <td>Tags</td>
+      <td>canonical, instrument-identity, market-data, master-data</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>3. Schema Definition</h2>
+<p><strong>Schema Format:</strong> JSON Schema / DDL <strong>Schema Version:</strong> v0.1 <strong>Schema Registry:</strong> TBD — platform schema registry</p>
+<h3>Fields</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Nullable</th>
+      <th>PK</th>
+      <th>Constraints</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>canonical_key</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Unique; non-empty; computed by system — not supplied by caller</td>
+      <td>Deterministic hash of the 5 hierarchy columns (null placeholders for absent levels). Primary key — unique across all records. Immutable after creation.</td>
+    </tr>
+    <tr>
+      <td><code>exchange</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Non-empty; for FX asset class: must equal &#x27;FX&#x27;</td>
+      <td>Exchange identifier. Mandatory on every record. For FX records: fixed value &#x27;FX&#x27;. Locked after creation.</td>
+    </tr>
+    <tr>
+      <td><code>commodity</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>For FX Currency Pair: exactly 6 uppercase characters (XXXYYY format)</td>
+      <td>Commodity identifier. Required for entity types above L1. For FX Currency Pair: must be XXXYYY format (6 uppercase characters, no separator). Locked after creation.</td>
+    </tr>
+    <tr>
+      <td><code>product_type</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Futures &amp; Options: one of PHY, FUT, CMB, OOP, OOF, OOC. FX: must be null.</td>
+      <td>Product type — Futures &amp; Options only. Required for L3+ entity types. Must be null for FX. Locked after creation.</td>
+    </tr>
+    <tr>
+      <td><code>product_code</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>FX: must be null</td>
+      <td>Product code — required for L3+ entity types. Must be null for FX. Locked after creation.</td>
+    </tr>
+    <tr>
+      <td><code>contract</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Option Contract: YYYYMM_CP_STRIKE</td>
+      <td>YYYYMMDD_CP_STRIKE</td>
+    </tr>
+    <tr>
+      <td><code>asset_class</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>No</td>
+      <td>One of: Futures &amp; Options, FX</td>
+      <td>Asset class. One of: Futures &amp; Options, FX. Locked after creation.</td>
+    </tr>
+    <tr>
+      <td><code>entity_type</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Must be valid for the selected asset_class</td>
+      <td>Entity type — must match a predefined type for the selected asset class. Locked after creation. Futures &amp; Options: Exchange</td>
+    </tr>
+    <tr>
+      <td><code>status</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>No</td>
+      <td>One of: Active, Inactive, Disable. Cannot be more permissive than parent record status.</td>
+      <td>Operational status. Subject to parent status constraint — child cannot be more permissive than parent. Editable.</td>
+    </tr>
+    <tr>
+      <td><code>source</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>No</td>
+      <td>System-assigned; non-empty</td>
+      <td>Creation actor identifier. &#x27;User&#x27; for Data Owner; source processing identifier for automated creation. Read-only.</td>
+    </tr>
+    <tr>
+      <td><code>created_by</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>No</td>
+      <td>System-assigned; non-empty</td>
+      <td>Identity of the actor who created the record. System-assigned. Read-only.</td>
+    </tr>
+    <tr>
+      <td><code>created_at</code></td>
+      <td>timestamp</td>
+      <td>No</td>
+      <td>No</td>
+      <td>System-assigned</td>
+      <td>Timestamp of record creation. System-assigned. Read-only.</td>
+    </tr>
+    <tr>
+      <td><code>last_updated_by</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td>No</td>
+      <td>System-assigned; non-empty</td>
+      <td>Identity of the actor who last updated the record. System-assigned on every write.</td>
+    </tr>
+    <tr>
+      <td><code>last_updated_at</code></td>
+      <td>timestamp</td>
+      <td>No</td>
+      <td>No</td>
+      <td>System-assigned</td>
+      <td>Timestamp of the most recent update. System-assigned on every write.</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>4. Semantic Definitions</h2>
+<h3>Business Glossary</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Term</th>
+      <th>Definition</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Canonical Record</td>
+      <td>A single authoritative row in the canonical entity table representing one unique financial instrument, identified by its canonical key. No two instruments share the same canonical key.</td>
+    </tr>
+    <tr>
+      <td>Canonical Key</td>
+      <td>A deterministic hash computed from the 5 hierarchy columns (exchange, commodity, product_type, product_code, contract) with null placeholders for absent levels. The same 5-column input always produces the same key.</td>
+    </tr>
+    <tr>
+      <td>Hierarchy Columns</td>
+      <td>The 5 columns that define instrument identity: exchange, commodity, product_type, product_code, contract. These are locked after creation — corrections require disabling the record and creating a new one.</td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>Active: full data loading enabled. Inactive: reference data only, no market data loading. Disable: all loading suppressed; record excluded from exports.</td>
+    </tr>
+    <tr>
+      <td>Status Cascade</td>
+      <td>A top-down propagation of a status change from a parent record to all non-Disabled descendants. Disabled descendants are exempt and remain unchanged.</td>
+    </tr>
+    <tr>
+      <td>Entity Type</td>
+      <td>The level of the hierarchy this record represents. Futures &amp; Options: Exchange, Commodity, Product, Future Contract, Option Reference Contract, Option Contract. FX: FX Currency Pair.</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Business Rules</h3>
+<ul>
+  <li>Exchange is mandatory on every record</li>
+  <li>Canonical key is immutable after creation</li>
+  <li>The 5 hierarchy columns, asset_class, and entity_type are locked after creation</li>
+  <li>Status cascade is top-down to all non-Disabled descendants</li>
+  <li>Child status cannot be more permissive than parent status</li>
+  <li>No hard deletes — retirement via Disable status only</li>
+  <li>All writes produce an immutable audit log entry</li>
+</ul>
+<hr>
+<h2>5. Write Path Contract</h2>
+<p><strong>DB Architecture Reference:</strong> TBD — DBAD document not yet created <strong>Transaction Guarantees:</strong> Each write operation (create, update, status change) is atomic — the record update and audit log entry are committed together or not at all <strong>Idempotency:</strong> Create: idempotent on canonical_key — duplicate keys are rejected (409 Conflict). Status change: idempotent on (canonical_key, new_status) — reapplying the same status is a no-op. <strong>Locking Strategy:</strong> TBD — platform standard row-level locking for concurrent write protection <strong>Batch Write Behaviour:</strong> Not supported in Phase 1 — records created individually by Data Owner or Source Processing <strong>Transformation Contract:</strong> Canonical key is computed by the system as a deterministic hash of the 5 hierarchy columns at creation time. The hash algorithm must be agreed and implemented consistently across all NMD modules (PRE-003 in PSD-0001).</p>
+<p><strong>Write Modes:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Mode</th>
+      <th>Supported</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>insert</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>update</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>upsert</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>soft_delete</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>hard_delete</td>
+      <td>No</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>6. Data Quality Standards</h2>
+<h3>Completeness</h3>
+<ul>
+  <li>exchange must be non-null and non-empty on every record</li>
+  <li>asset_class must be non-null on every record</li>
+  <li>entity_type must be non-null on every record</li>
+  <li>status must be non-null on every record</li>
+  <li>All 5 audit fields (source, created_by, created_at, last_updated_by, last_updated_at) populated by system on every write</li>
+</ul>
+<h3>Uniqueness</h3>
+<ul>
+  <li>canonical_key is unique across all records — duplicate keys rejected on creation</li>
+</ul>
+<h3>Validity</h3>
+<ul>
+  <li>asset_class: one of Futures &amp; Options, FX</li>
+  <li>entity_type: valid for the selected asset_class</li>
+  <li>product_type: Futures &amp; Options — one of PHY, FUT, CMB, OOP, OOF, OOC; FX — must be null</li>
+  <li>contract (Option Contract): YYYYMM_CP_STRIKE | YYYYMMDD_CP_STRIKE | YYYYMMWN_CP_STRIKE</li>
+  <li>commodity (FX Currency Pair): exactly 6 uppercase characters (XXXYYY format)</li>
+  <li>status: one of Active, Inactive, Disable</li>
+</ul>
+<h3>Consistency</h3>
+<ul>
+  <li>canonical_key always equals the deterministic hash of the 5 hierarchy columns</li>
+  <li>child record status cannot be more permissive than parent record status</li>
+</ul>
+<h3>Timeliness</h3>
+<ul>
+  <li>last_updated_at reflects the timestamp of the most recent write — no stale audit timestamps</li>
+</ul>
+<h3>Custom Checks</h3>
+<ul>
+  <li>Verify canonical_key recomputation matches stored value on any read (data integrity check)</li>
+  <li>Monitor for records with status Active where parent is Inactive or Disabled (consistency violation)</li>
+</ul>
+<hr>
+<h2>7. Service Level Agreements</h2>
+<p><strong>Availability:</strong> TBD — platform standard <strong>Delivery Schedule:</strong> Real-time — every write is immediately queryable; no batch windows <strong>Throughput:</strong> TBD — platform standard; status cascade on large parent hierarchies may produce burst write volume <strong>Incident Response:</strong> Escalation contact: Team Lead</p>
+<p><strong>Latency:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Path</th>
+      <th>SLA</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Lookup By Canonical Key</td>
+      <td>Hot path — must meet platform latency target NFR-NMD-001-001 (TBD)</td>
+    </tr>
+    <tr>
+      <td>Attribute Search</td>
+      <td>Non-hot path — SLA TBD (OQ-001 in PSD-0002)</td>
+    </tr>
+    <tr>
+      <td>Write Operations</td>
+      <td>TBD — platform standard</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>8. Access and Security</h2>
+<p><strong>Access Mechanism:</strong> Canonical Query API (PSD-0002) for reads; Canonical Management API (PSD-0001) for writes. Direct database access not permitted. <strong>Authentication:</strong> TBD — platform standard (JWT Bearer / mTLS) <strong>Authorization Model:</strong> Role-based — Data Owner, Data Ingestion Module, Query &amp; Export Module <strong>Data Masking:</strong> Not applicable — no PII or sensitive data in canonical records <strong>Retention Policy:</strong> Indefinite — no hard deletes; Disabled records retained permanently</p>
+<p><strong>Approved Consumers:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Consumer</th>
+      <th>Access</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Data Owner (ACT-001)</td>
+      <td>Read all status types; Write (create, update, status change)</td>
+    </tr>
+    <tr>
+      <td>Data Ingestion Module (ACT-003 / FRD-NMD-0002)</td>
+      <td>Read all status types; Write (create from golden source, set status per source config)</td>
+    </tr>
+    <tr>
+      <td>Query &amp; Export Module (ACT-004 / FRD-NMD-0003)</td>
+      <td>Read Active and Inactive only — Disabled records never returned</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>9. Lineage and Dependencies</h2>
+<p><strong>Source Systems:</strong></p>
+<ul>
+  <li>Data Owner manual input via Operator UI</li>
+  <li>Source Processing from golden sources (FRD-NMD-0002 — to be specified)</li>
+</ul>
+<p><strong>Upstream Datasets:</strong></p>
+<ul>
+  <li>Source configuration (FRD-NMD-0002) — provides golden source flag and initial status for Source Processing path</li>
+</ul>
+<p><strong>Downstream Consumers:</strong></p>
+<ul>
+  <li>Data Ingestion Module (FRD-NMD-0002) — source-to-canonical mappings and ingestion pipelines; triggered by AEC-0001 and AEC-0003</li>
+  <li>Query &amp; Export Module (FRD-NMD-0003) — enrichment cache and export eligibility; triggered by AEC-0002 and AEC-0003</li>
+</ul>
+<p><strong>Transformation Summary:</strong> No transformation — canonical record data is the authoritative source; consumers call the Canonical Query API to retrieve records. Canonical key is computed by the system at creation as a deterministic hash.</p>
+<hr>
+<h2>10. Versioning and Compatibility</h2>
+<p><strong>Versioning Strategy:</strong> Schema changes follow the canonical record version. Breaking changes require a new document version and 30-day consumer migration notice. <strong>Deprecation Policy:</strong> Deprecated fields must be flagged with a deprecation notice and remain present for a minimum of 30 days before removal</p>
+<p><strong>Breaking Changes:</strong></p>
+<ul>
+  <li>Removing or renaming any existing field</li>
+  <li>Changing the data type of any existing field</li>
+  <li>Adding a new non-nullable field without a default value</li>
+  <li>Changing the canonical key hash algorithm</li>
+</ul>
+<p><strong>Non-Breaking Changes:</strong></p>
+<ul>
+  <li>Adding a new nullable field</li>
+  <li>Adding a new enum value to status (if backward compatible)</li>
+  <li>Updating field descriptions or examples</li>
+</ul>
+<hr>
+<h2>Change Log</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th>Date</th>
+      <th>Author</th>
+      <th>Summary</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>v0.1</td>
+      <td>2026-03-01</td>
+      <td>Leo</td>
+      <td>Initial draft — full field catalog for canonical record entity. Covers 14 fields (5 hierarchy columns locked at creation, status, asset_class, entity_type, source audit fields). Includes semantic definitions, write path contract, data quality standards, SLA, access &amp; security, lineage, and versioning policy. Aligned with PSD-0001, PSD-0002, AEC-0001/0002/0003.</td>
+    </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

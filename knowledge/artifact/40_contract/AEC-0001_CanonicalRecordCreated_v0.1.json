@@ -1,0 +1,141 @@
+{
+  "kind": "AsyncEventContract",
+  "metadata": {
+    "document_id": "AEC-0001",
+    "title": "Canonical Record Created",
+    "version": "v0.1",
+    "status": "Draft",
+    "classification": "Internal",
+    "created_date": "2026-03-01",
+    "last_updated": "2026-03-01",
+    "author": "Leo",
+    "reviewer": "TBD",
+    "approver": "TBD",
+    "related_documents": [
+      "FRD-NMD-0001",
+      "PSD-0001"
+    ],
+    "tags": [
+      "canonical",
+      "event",
+      "market-data"
+    ],
+    "supersedes": null
+  },
+  "event_overview": {
+    "event_name": "canonical.record.created",
+    "domain": "canonical",
+    "event_type": "notification",
+    "trigger": "A new canonical instrument record is persisted \u2014 either manually by a Data Owner via the Operator UI, or automatically by Source Processing from a golden source",
+    "business_description": "Signals to downstream systems that a new instrument identity is available in the canonical entity table and can be referenced for ingestion, enrichment, and export. Consumers should call the Canonical Query API (PSD-0002 FLOW-A) using the canonical_key to retrieve the full record."
+  },
+  "ownership": {
+    "producer_team": "NMD Team",
+    "producer_service": "NMD-CANONICAL (FRD-NMD-0001)",
+    "registered_consumers": [
+      {
+        "team": "NMD Team",
+        "service": "Data Ingestion Module (FRD-NMD-0002)",
+        "purpose": "Detect new canonical records to initialise source-to-canonical mappings and ingestion pipelines"
+      }
+    ],
+    "escalation_contact": "Team Lead"
+  },
+  "channel_config": {
+    "topic": "nmd.canonical.record.created",
+    "partition_key": "canonical_key",
+    "partitions": "TBD \u2014 platform standard",
+    "replication_factor": "TBD \u2014 platform standard",
+    "retention": "TBD \u2014 platform standard",
+    "compression": "snappy"
+  },
+  "message_spec": {
+    "headers": {
+      "specversion": "1.0",
+      "type": "canonical.record.created",
+      "source": "nmd/canonical",
+      "id": "UUID \u2014 unique per event",
+      "time": "ISO 8601 timestamp",
+      "datacontenttype": "application/json"
+    },
+    "payload": {
+      "schema_format": "TBD",
+      "fields": [
+        {
+          "field": "canonical_key",
+          "type": "string",
+          "required": true,
+          "description": "The canonical key hash of the newly created record. Consumers use this to call the Canonical Query API for the full record."
+        }
+      ]
+    }
+  },
+  "data_transformation": {
+    "producer_mapping": [
+      {
+        "source_field": "canonical_key (Canonical Record)",
+        "event_field": "payload.canonical_key",
+        "transform": "Direct copy"
+      }
+    ],
+    "consumer_mappings": [
+      {
+        "consumer": "Data Ingestion Module (FRD-NMD-0002)",
+        "mappings": [
+          {
+            "event_field": "payload.canonical_key",
+            "consumer_action": "Use as lookup key to call Canonical Query API (PSD-0002 FLOW-A) and fetch full record before initialising source mappings"
+          }
+        ]
+      }
+    ]
+  },
+  "schema_evolution": {
+    "compatibility_strategy": "Backward compatible \u2014 new optional fields may be added without a version bump; no existing fields may be removed or have their type changed without a major version increment",
+    "breaking_changes": "Topic rename, field removal, field type change, partition key change \u2014 all require major version bump and 30-day consumer migration notice",
+    "deprecation_policy": "Deprecated fields must be flagged in the schema with a deprecation notice and remain present for a minimum of 30 days before removal",
+    "versioning": "Breaking changes result in a new event type (e.g., canonical.record.created.v2) published in parallel until all consumers have migrated"
+  },
+  "delivery_sla": {
+    "guarantee": "At-least-once \u2014 consumers must be idempotent on canonical_key",
+    "ordering": "Ordered per canonical_key within a partition \u2014 no global ordering guarantee",
+    "latency": "TBD \u2014 within platform event pipeline SLA",
+    "availability": "TBD \u2014 platform standard",
+    "retry_policy": "Standard Kafka producer retry \u2014 platform standard",
+    "dead_letter_topic": "nmd.canonical.record.created.dlt \u2014 failed consumer messages routed here after max retries",
+    "idempotency": "Consumers must deduplicate on canonical_key; duplicate events may be produced in failure/retry scenarios"
+  },
+  "security": {
+    "authentication": "Kafka ACL \u2014 mTLS or SASL (TBD \u2014 platform standard)",
+    "authorization": {
+      "produce": "NMD-CANONICAL service only",
+      "consume": "Data Ingestion Module (FRD-NMD-0002) only"
+    },
+    "encryption": "TLS in transit \u2014 platform standard",
+    "pii_handling": "No PII in payload \u2014 canonical_key is a deterministic hash; no personal or sensitive data transmitted",
+    "compliance": "Internal classification \u2014 no regulatory data handling requirements for this event"
+  },
+  "observability": {
+    "metrics": [
+      "Event production rate (events/sec)",
+      "Consumer lag per partition",
+      "DLT message count"
+    ],
+    "alerting": [
+      "Alert on DLT message count > 0",
+      "Alert on consumer lag exceeding threshold (TBD)"
+    ],
+    "tracing": "Propagate trace ID in CloudEvents extension header for end-to-end tracing",
+    "logging": "Producer logs canonical_key and event ID on each publish; consumer logs canonical_key on receipt"
+  },
+  "change_log": {
+    "entries": [
+      {
+        "version": "v0.1",
+        "date": "2026-03-01",
+        "author": "Leo",
+        "description": "Initial draft \u2014 lightweight notification event carrying canonical_key only; consumers call Canonical Query API for full record"
+      }
+    ]
+  }
+}

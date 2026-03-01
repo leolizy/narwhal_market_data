@@ -1,0 +1,557 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "NMD Canonical Management & Query API",
+    "description": "REST API for the NMD Product Canonical module. Provides lifecycle management of canonical instrument records (create, update, status change) and read-only query access (lookup by canonical key and attribute search). This is the authoritative identity layer for all NMD ingestion, normalisation, and export modules.\n\nSource FRD: FRD-NMD-0001 — Product Canonical Management & Query\nMaintenance spec: PSD-0001\nQuery spec: PSD-0002",
+    "version": "v0.1",
+    "contact": {
+      "name": "NMD Team"
+    },
+    "x-document-id": "API-0001",
+    "x-status": "Draft",
+    "x-author": "Leo",
+    "x-created-date": "2026-03-01",
+    "x-last-updated": "2026-03-01",
+    "x-related-documents": ["FRD-NMD-0001", "PSD-0001", "PSD-0002"],
+    "x-classification": "Internal"
+  },
+  "servers": [
+    {
+      "url": "TBD — platform base URL",
+      "description": "Production"
+    }
+  ],
+  "security": [
+    {"BearerAuth": []}
+  ],
+  "tags": [
+    {
+      "name": "Canonical Maintenance",
+      "description": "Create, update, and manage status of canonical instrument records (PSD-0001)"
+    },
+    {
+      "name": "Canonical Query",
+      "description": "Read-only lookup and attribute search of canonical records (PSD-0002)"
+    }
+  ],
+  "paths": {
+    "/canonical": {
+      "post": {
+        "summary": "Create a new canonical instrument record",
+        "operationId": "createCanonicalRecord",
+        "tags": ["Canonical Maintenance"],
+        "description": "Creates a new canonical instrument record. The canonical key is computed by the system as a deterministic hash of the 5 hierarchy columns. Initial status is supplied by the caller (Data Owner) or taken from source configuration (Source Processing). Duplicate canonical keys are rejected.\n\nRef: PSD-0001 CRUD — Create",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CanonicalRecordCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Canonical record created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CanonicalRecord"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error — e.g. missing exchange, invalid entity type, duplicate canonical key",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "401": {"description": "Unauthorised"},
+          "403": {"description": "Forbidden — caller role does not have create permission"},
+          "409": {
+            "description": "Conflict — canonical record with this key already exists",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/canonical/{canonical_key}": {
+      "get": {
+        "summary": "Lookup canonical record by canonical key",
+        "operationId": "getCanonicalRecord",
+        "tags": ["Canonical Query"],
+        "description": "Returns the full canonical record for the given canonical key, subject to the caller's role-based status filter. By default only Active records are returned. Data Owner and Data Ingestion Module may also retrieve Inactive and Disabled records. Query & Export Module may never retrieve Disabled records.\n\nRef: PSD-0002 Flow A",
+        "parameters": [
+          {
+            "name": "canonical_key",
+            "in": "path",
+            "required": true,
+            "description": "The deterministic hash key identifying the canonical record",
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "status_filter",
+            "in": "query",
+            "required": false,
+            "description": "Optional status filter. Permitted values depend on caller role. Query & Export Module may not request Disabled.",
+            "schema": {
+              "type": "string",
+              "enum": ["Active", "Inactive", "Disable"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Canonical record found",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/CanonicalRecord"}
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — e.g. empty canonical_key or disallowed status_filter for caller role",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "401": {"description": "Unauthorised"},
+          "404": {
+            "description": "Canonical record not found",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update non-locked fields of a canonical record",
+        "operationId": "updateCanonicalRecord",
+        "tags": ["Canonical Maintenance"],
+        "description": "Updates the non-locked fields of an existing canonical record. The 5 hierarchy columns (exchange, commodity, product_type, product_code, contract), asset_class, entity_type, and canonical_key are immutable after creation and are rejected if included. Only status is editable via this endpoint — see PATCH /canonical/{canonical_key}/status for status lifecycle changes.\n\nRef: PSD-0001 CRUD — Update",
+        "parameters": [
+          {
+            "name": "canonical_key",
+            "in": "path",
+            "required": true,
+            "description": "The canonical key of the record to update",
+            "schema": {"type": "string"}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CanonicalRecordUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Record updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/CanonicalRecord"}
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error — e.g. attempt to modify locked fields",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "401": {"description": "Unauthorised"},
+          "403": {"description": "Forbidden — caller role does not have update permission"},
+          "404": {"description": "Canonical record not found"},
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/canonical/{canonical_key}/status": {
+      "patch": {
+        "summary": "Change the status of a canonical record",
+        "operationId": "changeCanonicalStatus",
+        "tags": ["Canonical Maintenance"],
+        "description": "Changes the status of a canonical record and triggers a top-down cascade to all non-Disabled descendants. A child record cannot be set to a status more permissive than its parent. One canonical.status.changed event is emitted per affected record (including cascade-triggered descendants).\n\nRef: PSD-0001 CRUD — Status Change; AEC-0003",
+        "parameters": [
+          {
+            "name": "canonical_key",
+            "in": "path",
+            "required": true,
+            "description": "The canonical key of the record whose status to change",
+            "schema": {"type": "string"}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusChangeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status changed successfully. Response includes the updated record; cascade to descendants is async.",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/CanonicalRecord"}
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error — e.g. child status more permissive than parent",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "401": {"description": "Unauthorised"},
+          "403": {"description": "Forbidden — caller role does not have status change permission"},
+          "404": {"description": "Canonical record not found"},
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/canonical/search": {
+      "get": {
+        "summary": "Attribute search of canonical records",
+        "operationId": "searchCanonicalRecords",
+        "tags": ["Canonical Query"],
+        "description": "Searches the canonical entity table by one or more attributes. At least one attribute must be provided — open-ended queries with no filter are not permitted. Contract ticker search uses prefix match only. Results are sorted Active → Inactive → Disabled, then by exchange, commodity, product_type, product_code. Paginated — default page size 50, maximum 2000.\n\nRef: PSD-0002 Flow B",
+        "parameters": [
+          {
+            "name": "exchange",
+            "in": "query",
+            "required": false,
+            "schema": {"type": "string"},
+            "description": "Exact match on exchange"
+          },
+          {
+            "name": "commodity",
+            "in": "query",
+            "required": false,
+            "schema": {"type": "string"},
+            "description": "Exact match on commodity"
+          },
+          {
+            "name": "product_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["PHY", "FUT", "CMB", "OOP", "OOF", "OOC"]
+            },
+            "description": "Exact match on product type (Futures & Options only)"
+          },
+          {
+            "name": "product_code",
+            "in": "query",
+            "required": false,
+            "schema": {"type": "string"},
+            "description": "Exact match on product code"
+          },
+          {
+            "name": "contract",
+            "in": "query",
+            "required": false,
+            "schema": {"type": "string"},
+            "description": "Prefix match on contract ticker — contains and suffix match not supported in Phase 1"
+          },
+          {
+            "name": "entity_type",
+            "in": "query",
+            "required": false,
+            "schema": {"type": "string"},
+            "description": "Exact match on entity type"
+          },
+          {
+            "name": "status_filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["Active", "Inactive", "Disable"]
+            },
+            "description": "Optional status filter — role-dependent; Query & Export Module may not request Disabled"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {"type": "integer", "default": 1, "minimum": 1},
+            "description": "Page number (1-based)"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {"type": "integer", "default": 50, "minimum": 1, "maximum": 2000},
+            "description": "Page size — default 50, maximum 2000. Requests exceeding 2000 are capped at 2000."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CanonicalSearchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — e.g. no search attributes provided, or disallowed status_filter for caller role",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "401": {"description": "Unauthorised"},
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CanonicalRecord": {
+        "type": "object",
+        "description": "A canonical instrument record — the authoritative identity for one unique financial instrument in NMD",
+        "required": ["canonical_key", "exchange", "asset_class", "entity_type", "status", "source", "created_by", "created_at", "last_updated_by", "last_updated_at"],
+        "properties": {
+          "canonical_key": {
+            "type": "string",
+            "description": "Deterministic hash of the 5 hierarchy columns — immutable after creation",
+            "readOnly": true
+          },
+          "exchange": {
+            "type": "string",
+            "description": "Exchange identifier. For FX records: fixed value 'FX'",
+            "readOnly": true
+          },
+          "commodity": {
+            "type": "string",
+            "nullable": true,
+            "description": "Commodity identifier. For FX Currency Pair: XXXYYY format (6 uppercase characters). Null for L1 entity types.",
+            "readOnly": true
+          },
+          "product_type": {
+            "type": "string",
+            "enum": ["PHY", "FUT", "CMB", "OOP", "OOF", "OOC"],
+            "nullable": true,
+            "description": "Product type — Futures & Options only. Null for FX and entity types below L3.",
+            "readOnly": true
+          },
+          "product_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "Product code — null for entity types below L3 and all FX records",
+            "readOnly": true
+          },
+          "contract": {
+            "type": "string",
+            "nullable": true,
+            "description": "Contract ticker. For Option Contract: YYYYMM_CP_STRIKE | YYYYMMDD_CP_STRIKE | YYYYMMWN_CP_STRIKE. Null for non-contract entity types and all FX records.",
+            "readOnly": true
+          },
+          "asset_class": {
+            "type": "string",
+            "enum": ["Futures & Options", "FX"],
+            "description": "Asset class — immutable after creation",
+            "readOnly": true
+          },
+          "entity_type": {
+            "type": "string",
+            "description": "Entity type — must be valid for the selected asset class. Immutable after creation.",
+            "readOnly": true
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Active", "Inactive", "Disable"],
+            "description": "Operational status — editable via PATCH /canonical/{canonical_key}/status"
+          },
+          "source": {
+            "type": "string",
+            "description": "Creation actor — 'User' or source processing identifier",
+            "readOnly": true
+          },
+          "created_by": {
+            "type": "string",
+            "readOnly": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "last_updated_by": {
+            "type": "string",
+            "readOnly": true
+          },
+          "last_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "CanonicalRecordCreateRequest": {
+        "type": "object",
+        "description": "Request body for creating a new canonical record",
+        "required": ["exchange", "asset_class", "entity_type", "status"],
+        "properties": {
+          "exchange": {"type": "string", "description": "Exchange identifier. Use 'FX' for FX records."},
+          "commodity": {"type": "string", "nullable": true, "description": "Commodity identifier. Required for entity types above L1. FX: XXXYYY format."},
+          "product_type": {
+            "type": "string",
+            "enum": ["PHY", "FUT", "CMB", "OOP", "OOF", "OOC"],
+            "nullable": true,
+            "description": "Product type — Futures & Options L3+ only. Must be null for FX."
+          },
+          "product_code": {"type": "string", "nullable": true, "description": "Product code — L3+ only. Must be null for FX."},
+          "contract": {"type": "string", "nullable": true, "description": "Contract ticker — contract-level entity types only. Must be null for FX."},
+          "asset_class": {"type": "string", "enum": ["Futures & Options", "FX"]},
+          "entity_type": {"type": "string", "description": "Entity type — must be valid for the selected asset class"},
+          "status": {"type": "string", "enum": ["Active", "Inactive", "Disable"], "description": "Initial status. Source Processing: taken from source configuration — never defaulted."}
+        }
+      },
+      "CanonicalRecordUpdateRequest": {
+        "type": "object",
+        "description": "Request body for updating non-locked fields of a canonical record. The 5 hierarchy columns, asset_class, entity_type, and canonical_key may not be included — locked after creation.",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["Active", "Inactive", "Disable"],
+            "description": "Use PATCH /canonical/{canonical_key}/status for status changes with cascade semantics. Included here for completeness — direct status update without cascade is not the canonical path."
+          }
+        }
+      },
+      "StatusChangeRequest": {
+        "type": "object",
+        "description": "Request body for changing the status of a canonical record",
+        "required": ["new_status"],
+        "properties": {
+          "new_status": {
+            "type": "string",
+            "enum": ["Active", "Inactive", "Disable"],
+            "description": "The target status. Child record status cannot be more permissive than parent status."
+          }
+        }
+      },
+      "CanonicalSearchResponse": {
+        "type": "object",
+        "description": "Paginated attribute search results",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/CanonicalRecord"},
+            "description": "Matching canonical records — sorted Active → Inactive → Disabled, then by exchange, commodity, product_type, product_code"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "properties": {
+          "page": {"type": "integer"},
+          "page_size": {"type": "integer"},
+          "total_items": {"type": "integer"},
+          "total_pages": {"type": "integer"}
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["error_code", "message"],
+        "properties": {
+          "error_code": {"type": "string", "description": "Machine-readable error code"},
+          "message": {"type": "string", "description": "Human-readable error message"},
+          "details": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Optional list of validation errors"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "TBD — platform standard authentication"
+      }
+    }
+  },
+  "x-source-frd": "FRD-NMD-0001",
+  "x-generated-date": "2026-03-01",
+  "x-change-log": [
+    {
+      "version": "v0.1",
+      "date": "2026-03-01",
+      "author": "Leo",
+      "description": "Initial draft — covers POST /canonical (create), PUT /canonical/{key} (update), PATCH /canonical/{key}/status (status change with cascade), GET /canonical/{key} (lookup), GET /canonical/search (attribute search with prefix match on contract, pagination 50/2000, fixed sort order)"
+    }
+  ]
+}

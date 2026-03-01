@@ -1,0 +1,188 @@
+{
+  "kind": "AsyncEventContract",
+  "metadata": {
+    "document_id": "AEC-0003",
+    "title": "Canonical Status Changed",
+    "version": "v0.1",
+    "status": "Draft",
+    "classification": "Internal",
+    "created_date": "2026-03-01",
+    "last_updated": "2026-03-01",
+    "author": "Leo",
+    "reviewer": "TBD",
+    "approver": "TBD",
+    "related_documents": [
+      "FRD-NMD-0001",
+      "PSD-0001"
+    ],
+    "tags": [
+      "canonical",
+      "event",
+      "market-data",
+      "status"
+    ],
+    "supersedes": null
+  },
+  "event_overview": {
+    "event_name": "canonical.status.changed",
+    "domain": "canonical",
+    "event_type": "notification",
+    "trigger": "The status of a canonical record changes \u2014 either directly by a Data Owner or Source Processing, or as a result of a top-down status cascade from a parent record. One event is emitted per affected record including cascade-triggered descendants.",
+    "business_description": "Signals to downstream systems that the operational status of a canonical instrument has changed. Consumers gate their processing behaviour on canonical status \u2014 Active enables full data loading, Inactive enables reference data only, Disable suppresses all loading. The new_status field is included in the payload to allow consumers to act without a round-trip to the Query API."
+  },
+  "ownership": {
+    "producer_team": "NMD Team",
+    "producer_service": "NMD-CANONICAL (FRD-NMD-0001)",
+    "registered_consumers": [
+      {
+        "team": "NMD Team",
+        "service": "Data Ingestion Module (FRD-NMD-0002)",
+        "purpose": "Gate data loading behaviour by canonical status \u2014 Active allows full ingestion, Inactive reference data only, Disable suppresses all loading"
+      },
+      {
+        "team": "NMD Team",
+        "service": "Query & Export Module (FRD-NMD-0003)",
+        "purpose": "Refresh export eligibility \u2014 Active and Inactive records included per caller permissions, Disabled records excluded"
+      }
+    ],
+    "escalation_contact": "Team Lead"
+  },
+  "channel_config": {
+    "topic": "nmd.canonical.status.changed",
+    "partition_key": "canonical_key",
+    "partitions": "TBD \u2014 platform standard",
+    "replication_factor": "TBD \u2014 platform standard",
+    "retention": "TBD \u2014 platform standard",
+    "compression": "snappy"
+  },
+  "message_spec": {
+    "headers": {
+      "specversion": "1.0",
+      "type": "canonical.status.changed",
+      "source": "nmd/canonical",
+      "id": "UUID \u2014 unique per event",
+      "time": "ISO 8601 timestamp",
+      "datacontenttype": "application/json"
+    },
+    "payload": {
+      "schema_format": "TBD",
+      "fields": [
+        {
+          "field": "canonical_key",
+          "type": "string",
+          "required": true,
+          "description": "The canonical key hash of the record whose status changed"
+        },
+        {
+          "field": "new_status",
+          "type": "string",
+          "required": true,
+          "description": "The new status value \u2014 one of: Active, Inactive, Disable. Included in payload to allow consumers to act without a round-trip to the Query API."
+        },
+        {
+          "field": "triggered_by",
+          "type": "string",
+          "required": true,
+          "description": "Identifies the change trigger \u2014 one of: User, SourceProcessing, Cascade. Cascade indicates the status change was propagated from a parent record."
+        }
+      ]
+    }
+  },
+  "data_transformation": {
+    "producer_mapping": [
+      {
+        "source_field": "canonical_key (Canonical Record)",
+        "event_field": "payload.canonical_key",
+        "transform": "Direct copy"
+      },
+      {
+        "source_field": "status (Canonical Record \u2014 post-update value)",
+        "event_field": "payload.new_status",
+        "transform": "Direct copy of new status value"
+      },
+      {
+        "source_field": "change_trigger (audit log entry)",
+        "event_field": "payload.triggered_by",
+        "transform": "Map to User | SourceProcessing | Cascade based on change actor"
+      }
+    ],
+    "consumer_mappings": [
+      {
+        "consumer": "Data Ingestion Module (FRD-NMD-0002)",
+        "mappings": [
+          {
+            "event_field": "payload.canonical_key",
+            "consumer_action": "Identify which instrument's ingestion pipeline to adjust"
+          },
+          {
+            "event_field": "payload.new_status",
+            "consumer_action": "Active \u2192 enable full ingestion; Inactive \u2192 reference data only; Disable \u2192 suppress all loading"
+          }
+        ]
+      },
+      {
+        "consumer": "Query & Export Module (FRD-NMD-0003)",
+        "mappings": [
+          {
+            "event_field": "payload.canonical_key",
+            "consumer_action": "Identify which instrument's export eligibility to refresh"
+          },
+          {
+            "event_field": "payload.new_status",
+            "consumer_action": "Active/Inactive \u2192 include per caller permissions; Disable \u2192 exclude from all exports"
+          }
+        ]
+      }
+    ]
+  },
+  "schema_evolution": {
+    "compatibility_strategy": "Backward compatible \u2014 new optional fields may be added without a version bump; no existing fields (canonical_key, new_status, triggered_by) may be removed or have their type changed without a major version increment",
+    "breaking_changes": "Topic rename, field removal, field type change, new required field, partition key change \u2014 all require major version bump and 30-day consumer migration notice",
+    "deprecation_policy": "Deprecated fields must be flagged in the schema with a deprecation notice and remain present for a minimum of 30 days before removal",
+    "versioning": "Breaking changes result in a new event type (e.g., canonical.status.changed.v2) published in parallel until all consumers have migrated"
+  },
+  "delivery_sla": {
+    "guarantee": "At-least-once \u2014 consumers must be idempotent on (canonical_key, new_status) combination",
+    "ordering": "Ordered per canonical_key within a partition \u2014 status changes for the same record are processed in order",
+    "latency": "TBD \u2014 within platform event pipeline SLA; cascade events may produce a burst of messages for large hierarchies",
+    "availability": "TBD \u2014 platform standard",
+    "retry_policy": "Standard Kafka producer retry \u2014 platform standard",
+    "dead_letter_topic": "nmd.canonical.status.changed.dlt \u2014 failed consumer messages routed here after max retries",
+    "idempotency": "Consumers must deduplicate on (canonical_key, event id); cascade scenarios may produce high event volumes \u2014 consumers should be designed for burst throughput"
+  },
+  "security": {
+    "authentication": "Kafka ACL \u2014 mTLS or SASL (TBD \u2014 platform standard)",
+    "authorization": {
+      "produce": "NMD-CANONICAL service only",
+      "consume": "Data Ingestion Module (FRD-NMD-0002), Query & Export Module (FRD-NMD-0003)"
+    },
+    "encryption": "TLS in transit \u2014 platform standard",
+    "pii_handling": "No PII in payload \u2014 canonical_key is a deterministic hash; new_status and triggered_by are operational metadata only",
+    "compliance": "Internal classification \u2014 no regulatory data handling requirements for this event"
+  },
+  "observability": {
+    "metrics": [
+      "Event production rate (events/sec) \u2014 monitor for cascade bursts",
+      "Consumer lag per partition",
+      "DLT message count",
+      "Cascade event volume per parent change (to detect runaway cascades)"
+    ],
+    "alerting": [
+      "Alert on DLT message count > 0",
+      "Alert on consumer lag exceeding threshold (TBD)",
+      "Alert on cascade event burst exceeding expected volume threshold (TBD)"
+    ],
+    "tracing": "Propagate trace ID in CloudEvents extension header; link cascade child events to parent event trace for full cascade visibility",
+    "logging": "Producer logs canonical_key, new_status, triggered_by, and event ID on each publish; consumer logs canonical_key and new_status on receipt"
+  },
+  "change_log": {
+    "entries": [
+      {
+        "version": "v0.1",
+        "date": "2026-03-01",
+        "author": "Leo",
+        "description": "Initial draft \u2014 status change notification carrying canonical_key, new_status, and triggered_by; one event per affected record including cascade-triggered descendants"
+      }
+    ]
+  }
+}

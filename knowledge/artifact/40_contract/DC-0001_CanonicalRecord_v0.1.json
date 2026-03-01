@@ -1,0 +1,412 @@
+{
+  "kind": "DataContract",
+  "metadata": {
+    "document_id": "DC-0001",
+    "title": "Canonical Record Data Contract",
+    "version": "v0.1",
+    "status": "Draft",
+    "classification": "Internal",
+    "created_date": "2026-03-01",
+    "last_updated": "2026-03-01",
+    "author": "Leo",
+    "reviewer": "TBD",
+    "approver": "TBD",
+    "related_documents": ["FRD-NMD-0001", "PSD-0001", "PSD-0002", "AEC-0001", "AEC-0002", "AEC-0003"]
+  },
+  "contract_overview": {
+    "content": "This data contract governs the canonical instrument record — the authoritative identity for every unique financial instrument in NMD. The canonical entity table is the single source of truth for instrument identity. All ingestion, normalisation, and export modules resolve their data against this table. The contract defines the schema, ownership, quality standards, SLA, and access rules for the canonical record dataset.",
+    "required": true
+  },
+  "data_product_identification": {
+    "product_name": "Canonical Record",
+    "product_id": "NMD-CANONICAL",
+    "domain": "NMD",
+    "subdomain": "Canonical",
+    "owner_team": "NMD Team",
+    "owner_contact": "Team Lead",
+    "data_steward": "Data Owner (ACT-001)",
+    "tier": "Tier 1 (Critical)",
+    "tags": ["canonical", "instrument-identity", "market-data", "master-data"]
+  },
+  "schema_definition": {
+    "schema_format": "JSON Schema / DDL",
+    "schema_version": "v0.1",
+    "schema_registry_url": "TBD — platform schema registry",
+    "fields": [
+      {
+        "name": "canonical_key",
+        "description": "Deterministic hash of the 5 hierarchy columns (null placeholders for absent levels). Primary key — unique across all records. Immutable after creation.",
+        "data_type": "string",
+        "logical_type": "hash",
+        "nullable": false,
+        "primary_key": true,
+        "foreign_key": "",
+        "default_value": "",
+        "constraints": "Unique; non-empty; computed by system — not supplied by caller",
+        "pii": false,
+        "sensitive": false,
+        "example": "a3f1b29c7e..."
+      },
+      {
+        "name": "exchange",
+        "description": "Exchange identifier. Mandatory on every record. For FX records: fixed value 'FX'. Locked after creation.",
+        "data_type": "string",
+        "logical_type": "",
+        "nullable": false,
+        "primary_key": false,
+        "foreign_key": "",
+        "default_value": "",
+        "constraints": "Non-empty; for FX asset class: must equal 'FX'",
+        "pii": false,
+        "sensitive": false,
+        "example": "CME"
+      },
+      {
+        "name": "commodity",
+        "description": "Commodity identifier. Required for entity types above L1. For FX Currency Pair: must be XXXYYY format (6 uppercase characters, no separator). Locked after creation.",
+        "data_type": "string",
+        "logical_type": "",
+        "nullable": true,
+        "primary_key": false,
+        "foreign_key": "",
+        "default_value": "",
+        "constraints": "For FX Currency Pair: exactly 6 uppercase characters (XXXYYY format)",
+        "pii": false,
+        "sensitive": false,
+        "example": "NG"
+      },
+      {
+        "name": "product_type",
+        "description": "Product type — Futures & Options only. Required for L3+ entity types. Must be null for FX. Locked after creation.",
+        "data_type": "string",
+        "logical_type": "enum",
+        "nullable": true,
+        "primary_key": false,
+        "foreign_key": "",
+        "default_value": "",
+        "constraints": "Futures & Options: one of PHY, FUT, CMB, OOP, OOF, OOC. FX: must be null.",
+        "pii": false,
+        "sensitive": false,
+        "example": "FUT"
+      },
+      {
+        "name": "product_code",
+        "description": "Product code — required for L3+ entity types. Must be null for FX. Locked after creation.",
+        "data_type": "string",
+        "logical_type": "",
+        "nullable": true,
+        "primary_key": false,
+        "foreign_key": "",
+        "default_value": "",
+        "constraints": "FX: must be null",
+        "pii": false,
+        "sensitive": false,
+        "example": "NG"
+      },
+      {
+        "name": "contract",
+        "description": "Contract ticker — required for contract-level entity types. Must be null for FX. Locked after creation. Option Contract format: YYYYMM_CP_STRIKE | YYYYMMDD_CP_STRIKE | YYYYMMWN_CP_STRIKE where CP = C or P.",
+        "data_type": "string",
+        "logical_type": "",
+        "nullable": true,
+        "primary_key": false,
+        "foreign_key": "",
+        "default_value": "",
+        "constraints": "Option Contract: YYYYMM_CP_STRIKE | YYYYMMDD_CP_STRIKE | YYYYMMWN_CP_STRIKE. FX: must be null.",
+        "pii": false,
+        "sensitive": false,
+        "example": "202503_C_4.500"
+      },
+      {
+        "name": "asset_class",
+        "description": "Asset class. One of: Futures & Options, FX. Locked after creation.",
+        "data_type": "string",
+        "logical_type": "enum",
+        "nullable": false,
+        "primary_key": false,
+        "foreign_key": "",
+        "default_value": "",
+        "constraints": "One of: Futures & Options, FX",
+        "pii": false,
+        "sensitive": false,
+        "example": "Futures & Options"
+      },
+      {
+        "name": "entity_type",
+        "description": "Entity type — must match a predefined type for the selected asset class. Locked after creation. Futures & Options: Exchange | Commodity | Product | Future Contract | Option Reference Contract | Option Contract. FX: FX Currency Pair.",
+        "data_type": "string",
+        "logical_type": "enum",
+        "nullable": false,
+        "primary_key": false,
+        "foreign_key": "",
+        "default_value": "",
+        "constraints": "Must be valid for the selected asset_class",
+        "pii": false,
+        "sensitive": false,
+        "example": "Future Contract"
+      },
+      {
+        "name": "status",
+        "description": "Operational status. Subject to parent status constraint — child cannot be more permissive than parent. Editable.",
+        "data_type": "string",
+        "logical_type": "enum",
+        "nullable": false,
+        "primary_key": false,
+        "foreign_key": "",
+        "default_value": "",
+        "constraints": "One of: Active, Inactive, Disable. Cannot be more permissive than parent record status.",
+        "pii": false,
+        "sensitive": false,
+        "example": "Active"
+      },
+      {
+        "name": "source",
+        "description": "Creation actor identifier. 'User' for Data Owner; source processing identifier for automated creation. Read-only.",
+        "data_type": "string",
+        "logical_type": "",
+        "nullable": false,
+        "primary_key": false,
+        "foreign_key": "",
+        "default_value": "",
+        "constraints": "System-assigned; non-empty",
+        "pii": false,
+        "sensitive": false,
+        "example": "User"
+      },
+      {
+        "name": "created_by",
+        "description": "Identity of the actor who created the record. System-assigned. Read-only.",
+        "data_type": "string",
+        "logical_type": "",
+        "nullable": false,
+        "primary_key": false,
+        "foreign_key": "",
+        "default_value": "",
+        "constraints": "System-assigned; non-empty",
+        "pii": false,
+        "sensitive": false,
+        "example": "data_owner_user_id"
+      },
+      {
+        "name": "created_at",
+        "description": "Timestamp of record creation. System-assigned. Read-only.",
+        "data_type": "timestamp",
+        "logical_type": "ISO 8601",
+        "nullable": false,
+        "primary_key": false,
+        "foreign_key": "",
+        "default_value": "",
+        "constraints": "System-assigned",
+        "pii": false,
+        "sensitive": false,
+        "example": "2026-03-01T10:00:00Z"
+      },
+      {
+        "name": "last_updated_by",
+        "description": "Identity of the actor who last updated the record. System-assigned on every write.",
+        "data_type": "string",
+        "logical_type": "",
+        "nullable": false,
+        "primary_key": false,
+        "foreign_key": "",
+        "default_value": "",
+        "constraints": "System-assigned; non-empty",
+        "pii": false,
+        "sensitive": false,
+        "example": "data_owner_user_id"
+      },
+      {
+        "name": "last_updated_at",
+        "description": "Timestamp of the most recent update. System-assigned on every write.",
+        "data_type": "timestamp",
+        "logical_type": "ISO 8601",
+        "nullable": false,
+        "primary_key": false,
+        "foreign_key": "",
+        "default_value": "",
+        "constraints": "System-assigned",
+        "pii": false,
+        "sensitive": false,
+        "example": "2026-03-01T12:00:00Z"
+      }
+    ]
+  },
+  "semantic_definitions": {
+    "business_glossary": [
+      {
+        "term": "Canonical Record",
+        "definition": "A single authoritative row in the canonical entity table representing one unique financial instrument, identified by its canonical key. No two instruments share the same canonical key."
+      },
+      {
+        "term": "Canonical Key",
+        "definition": "A deterministic hash computed from the 5 hierarchy columns (exchange, commodity, product_type, product_code, contract) with null placeholders for absent levels. The same 5-column input always produces the same key."
+      },
+      {
+        "term": "Hierarchy Columns",
+        "definition": "The 5 columns that define instrument identity: exchange, commodity, product_type, product_code, contract. These are locked after creation — corrections require disabling the record and creating a new one."
+      },
+      {
+        "term": "Status",
+        "definition": "Active: full data loading enabled. Inactive: reference data only, no market data loading. Disable: all loading suppressed; record excluded from exports."
+      },
+      {
+        "term": "Status Cascade",
+        "definition": "A top-down propagation of a status change from a parent record to all non-Disabled descendants. Disabled descendants are exempt and remain unchanged."
+      },
+      {
+        "term": "Entity Type",
+        "definition": "The level of the hierarchy this record represents. Futures & Options: Exchange, Commodity, Product, Future Contract, Option Reference Contract, Option Contract. FX: FX Currency Pair."
+      }
+    ],
+    "business_rules": [
+      "Exchange is mandatory on every record",
+      "Canonical key is immutable after creation",
+      "The 5 hierarchy columns, asset_class, and entity_type are locked after creation",
+      "Status cascade is top-down to all non-Disabled descendants",
+      "Child status cannot be more permissive than parent status",
+      "No hard deletes — retirement via Disable status only",
+      "All writes produce an immutable audit log entry"
+    ]
+  },
+  "write_path_contract": {
+    "db_architecture_ref": "TBD — DBAD document not yet created",
+    "transaction_guarantees": "Each write operation (create, update, status change) is atomic — the record update and audit log entry are committed together or not at all",
+    "idempotency": "Create: idempotent on canonical_key — duplicate keys are rejected (409 Conflict). Status change: idempotent on (canonical_key, new_status) — reapplying the same status is a no-op.",
+    "locking_strategy": "TBD — platform standard row-level locking for concurrent write protection",
+    "write_modes": {
+      "insert": true,
+      "update": true,
+      "upsert": false,
+      "soft_delete": true,
+      "hard_delete": false
+    },
+    "batch_write_behaviour": "Not supported in Phase 1 — records created individually by Data Owner or Source Processing",
+    "transformation_contract": "Canonical key is computed by the system as a deterministic hash of the 5 hierarchy columns at creation time. The hash algorithm must be agreed and implemented consistently across all NMD modules (PRE-003 in PSD-0001)."
+  },
+  "data_quality_standards": {
+    "quality_dimensions": [
+      {
+        "dimension": "Completeness",
+        "rules": [
+          "exchange must be non-null and non-empty on every record",
+          "asset_class must be non-null on every record",
+          "entity_type must be non-null on every record",
+          "status must be non-null on every record",
+          "All 5 audit fields (source, created_by, created_at, last_updated_by, last_updated_at) populated by system on every write"
+        ]
+      },
+      {
+        "dimension": "Uniqueness",
+        "rules": [
+          "canonical_key is unique across all records — duplicate keys rejected on creation"
+        ]
+      },
+      {
+        "dimension": "Validity",
+        "rules": [
+          "asset_class: one of Futures & Options, FX",
+          "entity_type: valid for the selected asset_class",
+          "product_type: Futures & Options — one of PHY, FUT, CMB, OOP, OOF, OOC; FX — must be null",
+          "contract (Option Contract): YYYYMM_CP_STRIKE | YYYYMMDD_CP_STRIKE | YYYYMMWN_CP_STRIKE",
+          "commodity (FX Currency Pair): exactly 6 uppercase characters (XXXYYY format)",
+          "status: one of Active, Inactive, Disable"
+        ]
+      },
+      {
+        "dimension": "Consistency",
+        "rules": [
+          "canonical_key always equals the deterministic hash of the 5 hierarchy columns",
+          "child record status cannot be more permissive than parent record status"
+        ]
+      },
+      {
+        "dimension": "Timeliness",
+        "rules": [
+          "last_updated_at reflects the timestamp of the most recent write — no stale audit timestamps"
+        ]
+      }
+    ],
+    "custom_checks": [
+      "Verify canonical_key recomputation matches stored value on any read (data integrity check)",
+      "Monitor for records with status Active where parent is Inactive or Disabled (consistency violation)"
+    ]
+  },
+  "service_level_agreements": {
+    "availability": "TBD — platform standard",
+    "latency": {
+      "lookup_by_canonical_key": "Hot path — must meet platform latency target NFR-NMD-001-001 (TBD)",
+      "attribute_search": "Non-hot path — SLA TBD (OQ-001 in PSD-0002)",
+      "write_operations": "TBD — platform standard"
+    },
+    "delivery_schedule": "Real-time — every write is immediately queryable; no batch windows",
+    "throughput": "TBD — platform standard; status cascade on large parent hierarchies may produce burst write volume",
+    "incident_response": "Escalation contact: Team Lead"
+  },
+  "access_and_security": {
+    "access_mechanism": "Canonical Query API (PSD-0002) for reads; Canonical Management API (PSD-0001) for writes. Direct database access not permitted.",
+    "connection_details": "TBD — platform standard service endpoint",
+    "authentication_method": "TBD — platform standard (JWT Bearer / mTLS)",
+    "authorization_model": "Role-based — Data Owner, Data Ingestion Module, Query & Export Module",
+    "approved_consumers": [
+      {
+        "consumer": "Data Owner (ACT-001)",
+        "access": "Read all status types; Write (create, update, status change)"
+      },
+      {
+        "consumer": "Data Ingestion Module (ACT-003 / FRD-NMD-0002)",
+        "access": "Read all status types; Write (create from golden source, set status per source config)"
+      },
+      {
+        "consumer": "Query & Export Module (ACT-004 / FRD-NMD-0003)",
+        "access": "Read Active and Inactive only — Disabled records never returned"
+      }
+    ],
+    "data_masking": "Not applicable — no PII or sensitive data in canonical records",
+    "retention_policy": "Indefinite — no hard deletes; Disabled records retained permanently"
+  },
+  "lineage_and_dependencies": {
+    "source_systems": [
+      "Data Owner manual input via Operator UI",
+      "Source Processing from golden sources (FRD-NMD-0002 — to be specified)"
+    ],
+    "upstream_datasets": [
+      "Source configuration (FRD-NMD-0002) — provides golden source flag and initial status for Source Processing path"
+    ],
+    "downstream_consumers": [
+      "Data Ingestion Module (FRD-NMD-0002) — source-to-canonical mappings and ingestion pipelines; triggered by AEC-0001 and AEC-0003",
+      "Query & Export Module (FRD-NMD-0003) — enrichment cache and export eligibility; triggered by AEC-0002 and AEC-0003"
+    ],
+    "transformation_summary": "No transformation — canonical record data is the authoritative source; consumers call the Canonical Query API to retrieve records. Canonical key is computed by the system at creation as a deterministic hash."
+  },
+  "versioning_and_compatibility": {
+    "versioning_strategy": "Schema changes follow the canonical record version. Breaking changes require a new document version and 30-day consumer migration notice.",
+    "breaking_changes": [
+      "Removing or renaming any existing field",
+      "Changing the data type of any existing field",
+      "Adding a new non-nullable field without a default value",
+      "Changing the canonical key hash algorithm"
+    ],
+    "non_breaking_changes": [
+      "Adding a new nullable field",
+      "Adding a new enum value to status (if backward compatible)",
+      "Updating field descriptions or examples"
+    ],
+    "deprecation_policy": "Deprecated fields must be flagged with a deprecation notice and remain present for a minimum of 30 days before removal"
+  },
+  "support_and_communication": {
+    "support_channel": "Team Lead",
+    "incident_escalation": "Team Lead",
+    "change_notification": "Breaking schema changes require 30-day advance notice to all registered consumers"
+  },
+  "attachments": [],
+  "change_log": {
+    "entries": [
+      {
+        "version": "v0.1",
+        "date": "2026-03-01",
+        "author": "Leo",
+        "description": "Initial draft — full field catalog for canonical record entity. Covers 14 fields (5 hierarchy columns locked at creation, status, asset_class, entity_type, source audit fields). Includes semantic definitions, write path contract, data quality standards, SLA, access & security, lineage, and versioning policy. Aligned with PSD-0001, PSD-0002, AEC-0001/0002/0003."
+      }
+    ]
+  }
+}

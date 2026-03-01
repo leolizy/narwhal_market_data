@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canonical Status Changed</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.65;
+      color: #2d3748;
+      background: #f7f8fa;
+      margin: 0;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      padding: 2.5rem 3rem;
+    }
+    h1 {
+      font-size: 2em;
+      color: #1a3d5c;
+      border-bottom: 3px solid #2c5f8a;
+      padding-bottom: .4em;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 1.45em;
+      color: #2c5f8a;
+      border-bottom: 1px solid #d0dce8;
+      padding-bottom: .25em;
+      margin-top: 2.2em;
+    }
+    h3 { font-size: 1.15em; color: #3a6ea8; margin-top: 1.5em; }
+    h4, h5, h6 { color: #4a5568; margin-top: 1.2em; }
+    p { margin: .8em 0; }
+    a { color: #2c5f8a; }
+    hr {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 2em 0;
+    }
+    code {
+      background: #eef2f7;
+      padding: .15em .4em;
+      border-radius: 4px;
+      font-size: .88em;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+    }
+    pre {
+      background: #1e2433;
+      color: #cdd5e0;
+      padding: 1.1em 1.4em;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1em 0;
+    }
+    pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+      font-size: .9em;
+    }
+    blockquote {
+      border-left: 4px solid #2c5f8a;
+      margin: 1em 0;
+      padding: .6em 1.1em;
+      background: #f0f5fb;
+      color: #4a5568;
+      border-radius: 0 4px 4px 0;
+    }
+    blockquote p { margin: 0; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1.2em 0;
+      font-size: .9em;
+    }
+    th {
+      background: #2c5f8a;
+      color: #fff;
+      padding: .55em .9em;
+      text-align: left;
+      font-weight: 600;
+    }
+    td {
+      padding: .45em .9em;
+      border: 1px solid #d0dce8;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #f7f9fc; }
+    ul, ol { padding-left: 1.8em; margin: .6em 0; }
+    li { margin: .3em 0; }
+    strong { color: #1a3d5c; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+<h1>Async Event Contract — Canonical Status Changed</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Document ID</td>
+      <td>AEC-0003</td>
+    </tr>
+    <tr>
+      <td>Title</td>
+      <td>Canonical Status Changed</td>
+    </tr>
+    <tr>
+      <td>Version</td>
+      <td>v0.1</td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>Draft</td>
+    </tr>
+    <tr>
+      <td>Created</td>
+      <td>2026-03-01</td>
+    </tr>
+    <tr>
+      <td>Last Updated</td>
+      <td>2026-03-01</td>
+    </tr>
+    <tr>
+      <td>Author</td>
+      <td>Leo</td>
+    </tr>
+    <tr>
+      <td>Reviewer</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Approver</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Related Documents</td>
+      <td>FRD-NMD-0001, PSD-0001</td>
+    </tr>
+    <tr>
+      <td>Classification</td>
+      <td>Internal</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>1. Event Overview</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Event Name</td>
+      <td><code>canonical.status.changed</code></td>
+    </tr>
+    <tr>
+      <td>Domain</td>
+      <td>canonical</td>
+    </tr>
+    <tr>
+      <td>Event Type</td>
+      <td>notification</td>
+    </tr>
+    <tr>
+      <td>Trigger</td>
+      <td>The status of a canonical record changes — either directly by a Data Owner or Source Processing, or as a result of a top-down status cascade from a parent record. One event is emitted per affected record including cascade-triggered descendants.</td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Business Description</strong></p>
+<p>Signals to downstream systems that the operational status of a canonical instrument has changed. Consumers gate their processing behaviour on canonical status — Active enables full data loading, Inactive enables reference data only, Disable suppresses all loading. The new_status field is included in the payload to allow consumers to act without a round-trip to the Query API.</p>
+<hr>
+<h2>2. Ownership</h2>
+<p><strong>Producer Team:</strong> NMD Team <strong>Producer Service:</strong> NMD-CANONICAL (FRD-NMD-0001) <strong>Escalation Contact:</strong> Team Lead</p>
+<h3>Registered Consumers</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Team</th>
+      <th>Service</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>NMD Team</td>
+      <td>Data Ingestion Module (FRD-NMD-0002)</td>
+      <td>Gate data loading behaviour by canonical status — Active allows full ingestion, Inactive reference data only, Disable suppresses all loading</td>
+    </tr>
+    <tr>
+      <td>NMD Team</td>
+      <td>Query &amp; Export Module (FRD-NMD-0003)</td>
+      <td>Refresh export eligibility — Active and Inactive records included per caller permissions, Disabled records excluded</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>3. Channel Configuration</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Topic</td>
+      <td><code>nmd.canonical.status.changed</code></td>
+    </tr>
+    <tr>
+      <td>Partition Key</td>
+      <td><code>canonical_key</code></td>
+    </tr>
+    <tr>
+      <td>Partitions</td>
+      <td>TBD — platform standard</td>
+    </tr>
+    <tr>
+      <td>Replication Factor</td>
+      <td>TBD — platform standard</td>
+    </tr>
+    <tr>
+      <td>Retention</td>
+      <td>TBD — platform standard</td>
+    </tr>
+    <tr>
+      <td>Compression</td>
+      <td>snappy</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>4. Message Specification</h2>
+<h3>CloudEvents Headers</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Header</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>specversion</code></td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <td><code>type</code></td>
+      <td>canonical.status.changed</td>
+    </tr>
+    <tr>
+      <td><code>source</code></td>
+      <td>nmd/canonical</td>
+    </tr>
+    <tr>
+      <td><code>id</code></td>
+      <td>UUID — unique per event</td>
+    </tr>
+    <tr>
+      <td><code>time</code></td>
+      <td>ISO 8601 timestamp</td>
+    </tr>
+    <tr>
+      <td><code>datacontenttype</code></td>
+      <td>application/json</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Payload</h3>
+<p><strong>Schema Format:</strong> TBD</p>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>canonical_key</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>The canonical key hash of the record whose status changed</td>
+    </tr>
+    <tr>
+      <td><code>new_status</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>The new status value — one of: Active, Inactive, Disable. Included in payload to allow consumers to act without a round-trip to the Query API.</td>
+    </tr>
+    <tr>
+      <td><code>triggered_by</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td>Identifies the change trigger — one of: User, SourceProcessing, Cascade. Cascade indicates the status change was propagated from a parent record.</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>5. Data Transformation</h2>
+<h3>Producer Mapping</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Source Field</th>
+      <th>Event Field</th>
+      <th>Transform</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>canonical_key (Canonical Record)</td>
+      <td><code>payload.canonical_key</code></td>
+      <td>Direct copy</td>
+    </tr>
+    <tr>
+      <td>status (Canonical Record — post-update value)</td>
+      <td><code>payload.new_status</code></td>
+      <td>Direct copy of new status value</td>
+    </tr>
+    <tr>
+      <td>change_trigger (audit log entry)</td>
+      <td><code>payload.triggered_by</code></td>
+      <td>Map to User</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Consumer Mappings</h3>
+<p><strong>Data Ingestion Module (FRD-NMD-0002)</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Event Field</th>
+      <th>Consumer Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>payload.canonical_key</code></td>
+      <td>Identify which instrument&#x27;s ingestion pipeline to adjust</td>
+    </tr>
+    <tr>
+      <td><code>payload.new_status</code></td>
+      <td>Active → enable full ingestion; Inactive → reference data only; Disable → suppress all loading</td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Query &amp; Export Module (FRD-NMD-0003)</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Event Field</th>
+      <th>Consumer Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>payload.canonical_key</code></td>
+      <td>Identify which instrument&#x27;s export eligibility to refresh</td>
+    </tr>
+    <tr>
+      <td><code>payload.new_status</code></td>
+      <td>Active/Inactive → include per caller permissions; Disable → exclude from all exports</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>6. Schema Evolution</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Compatibility Strategy</td>
+      <td>Backward compatible — new optional fields may be added without a version bump; no existing fields (canonical_key, new_status, triggered_by) may be removed or have their type changed without a major version increment</td>
+    </tr>
+    <tr>
+      <td>Breaking Changes</td>
+      <td>Topic rename, field removal, field type change, new required field, partition key change — all require major version bump and 30-day consumer migration notice</td>
+    </tr>
+    <tr>
+      <td>Deprecation Policy</td>
+      <td>Deprecated fields must be flagged in the schema with a deprecation notice and remain present for a minimum of 30 days before removal</td>
+    </tr>
+    <tr>
+      <td>Versioning</td>
+      <td>Breaking changes result in a new event type (e.g., canonical.status.changed.v2) published in parallel until all consumers have migrated</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>7. Delivery SLA</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Guarantee</td>
+      <td>At-least-once — consumers must be idempotent on (canonical_key, new_status) combination</td>
+    </tr>
+    <tr>
+      <td>Ordering</td>
+      <td>Ordered per canonical_key within a partition — status changes for the same record are processed in order</td>
+    </tr>
+    <tr>
+      <td>Latency</td>
+      <td>TBD — within platform event pipeline SLA; cascade events may produce a burst of messages for large hierarchies</td>
+    </tr>
+    <tr>
+      <td>Availability</td>
+      <td>TBD — platform standard</td>
+    </tr>
+    <tr>
+      <td>Retry Policy</td>
+      <td>Standard Kafka producer retry — platform standard</td>
+    </tr>
+    <tr>
+      <td>Dead Letter Topic</td>
+      <td><code>nmd.canonical.status.changed.dlt</code> — failed consumer messages routed here after max retries</td>
+    </tr>
+    <tr>
+      <td>Idempotency</td>
+      <td>Consumers must deduplicate on (canonical_key, event id); cascade scenarios may produce high event volumes — consumers should be designed for burst throughput</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>8. Security</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Authentication</td>
+      <td>Kafka ACL — mTLS or SASL (TBD — platform standard)</td>
+    </tr>
+    <tr>
+      <td>Produce Permission</td>
+      <td>NMD-CANONICAL service only</td>
+    </tr>
+    <tr>
+      <td>Consume Permission</td>
+      <td>Data Ingestion Module (FRD-NMD-0002), Query &amp; Export Module (FRD-NMD-0003)</td>
+    </tr>
+    <tr>
+      <td>Encryption</td>
+      <td>TLS in transit — platform standard</td>
+    </tr>
+    <tr>
+      <td>PII Handling</td>
+      <td>No PII in payload — canonical_key is a deterministic hash; new_status and triggered_by are operational metadata only</td>
+    </tr>
+    <tr>
+      <td>Compliance</td>
+      <td>Internal classification — no regulatory data handling requirements for this event</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>9. Observability</h2>
+<p><strong>Metrics:</strong></p>
+<ul>
+  <li>Event production rate (events/sec) — monitor for cascade bursts</li>
+  <li>Consumer lag per partition</li>
+  <li>DLT message count</li>
+  <li>Cascade event volume per parent change (to detect runaway cascades)</li>
+</ul>
+<p><strong>Alerting:</strong></p>
+<ul>
+  <li>Alert on DLT message count &gt; 0</li>
+  <li>Alert on consumer lag exceeding threshold (TBD)</li>
+  <li>Alert on cascade event burst exceeding expected volume threshold (TBD)</li>
+</ul>
+<p><strong>Tracing:</strong> Propagate trace ID in CloudEvents extension header; link cascade child events to parent event trace for full cascade visibility</p>
+<p><strong>Logging:</strong> Producer logs canonical_key, new_status, triggered_by, and event ID on each publish; consumer logs canonical_key and new_status on receipt</p>
+<hr>
+<h2>Change Log</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th>Date</th>
+      <th>Author</th>
+      <th>Summary</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>v0.1</td>
+      <td>2026-03-01</td>
+      <td>Leo</td>
+      <td>Initial draft — status change notification carrying canonical_key, new_status, and triggered_by; one event per affected record including cascade-triggered descendants</td>
+    </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>
