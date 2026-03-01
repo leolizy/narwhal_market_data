@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FRD-NMD-0001 — Product Canonical Management &amp; Query</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.65;
+      color: #2d3748;
+      background: #f7f8fa;
+      margin: 0;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      padding: 2.5rem 3rem;
+    }
+    h1 {
+      font-size: 2em;
+      color: #1a3d5c;
+      border-bottom: 3px solid #2c5f8a;
+      padding-bottom: .4em;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 1.45em;
+      color: #2c5f8a;
+      border-bottom: 1px solid #d0dce8;
+      padding-bottom: .25em;
+      margin-top: 2.2em;
+    }
+    h3 { font-size: 1.15em; color: #3a6ea8; margin-top: 1.5em; }
+    h4, h5, h6 { color: #4a5568; margin-top: 1.2em; }
+    p { margin: .8em 0; }
+    a { color: #2c5f8a; }
+    hr {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 2em 0;
+    }
+    code {
+      background: #eef2f7;
+      padding: .15em .4em;
+      border-radius: 4px;
+      font-size: .88em;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+    }
+    pre {
+      background: #1e2433;
+      color: #cdd5e0;
+      padding: 1.1em 1.4em;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1em 0;
+    }
+    pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+      font-size: .9em;
+    }
+    blockquote {
+      border-left: 4px solid #2c5f8a;
+      margin: 1em 0;
+      padding: .6em 1.1em;
+      background: #f0f5fb;
+      color: #4a5568;
+      border-radius: 0 4px 4px 0;
+    }
+    blockquote p { margin: 0; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1.2em 0;
+      font-size: .9em;
+    }
+    th {
+      background: #2c5f8a;
+      color: #fff;
+      padding: .55em .9em;
+      text-align: left;
+      font-weight: 600;
+    }
+    td {
+      padding: .45em .9em;
+      border: 1px solid #d0dce8;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #f7f9fc; }
+    ul, ol { padding-left: 1.8em; margin: .6em 0; }
+    li { margin: .3em 0; }
+    strong { color: #1a3d5c; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+<h1>FRD-NMD-0001: Product Canonical Management &amp; Query</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Document ID</td>
+      <td>FRD-NMD-0001</td>
+    </tr>
+    <tr>
+      <td>Module Code</td>
+      <td>NMD-CANONICAL</td>
+    </tr>
+    <tr>
+      <td>Title</td>
+      <td>Product Canonical Management &amp; Query</td>
+    </tr>
+    <tr>
+      <td>Version</td>
+      <td>v0.2</td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>Draft</td>
+    </tr>
+    <tr>
+      <td>Classification</td>
+      <td>Internal</td>
+    </tr>
+    <tr>
+      <td>Created Date</td>
+      <td>2026-03-01</td>
+    </tr>
+    <tr>
+      <td>Last Updated</td>
+      <td>2026-03-01</td>
+    </tr>
+    <tr>
+      <td>Author</td>
+      <td>Leo</td>
+    </tr>
+    <tr>
+      <td>Reviewer</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Approver</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Parent BRD</td>
+      <td>PC-NMD-0001</td>
+    </tr>
+    <tr>
+      <td>Related Documents</td>
+      <td>PC-NMD-0001</td>
+    </tr>
+    <tr>
+      <td>Tags</td>
+      <td>market-data, canonical, product-management</td>
+    </tr>
+    <tr>
+      <td>Supersedes</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>1. Overview</h2>
+<p><strong>Summary:</strong> This module owns the product canonical — the master reference record for every financial instrument in NMD. It is the authoritative identity layer that all ingestion, normalization, and export modules resolve their data against.</p>
+<p><strong>Purpose:</strong> To define the functional requirements for maintaining and querying the NMD product canonical entity table, including the 5-column hierarchical model, canonical key computation, status lifecycle, and cross-module query interface.</p>
+<p><strong>Audience:</strong> Developers, QA engineers, and business analysts building or testing the NMD platform</p>
+<hr>
+<h2>2. Scope</h2>
+<h3>In Scope</h3>
+<ol>
+  <li>Product canonical entity table maintenance — create, update, deactivate records</li>
+  <li>5-column hierarchical model: Exchange, Commodity, Product Type, Product Code, Contract</li>
+  <li>Deterministic canonical key hash computation</li>
+  <li>Status lifecycle management: Active, Inactive, Disable with top-down inheritance</li>
+  <li>User and Source Processing creation and status management</li>
+  <li>Full audit trail for all canonical record changes</li>
+  <li>Canonical query interface — lookup by key, source identifier, and attributes</li>
+  <li>Phase 1 asset classes: Futures &amp; Options, FX</li>
+  <li>Predefined entity type definitions per asset class</li>
+</ol>
+<h3>Out of Scope</h3>
+<ol>
+  <li>Data ingestion source management and processing (FRD-NMD-0002)</li>
+  <li>Query and export APIs for downstream systems (FRD-NMD-0003)</li>
+  <li>Operator UI implementation (FRD-NMD-0004)</li>
+  <li>Bulk import of canonical records</li>
+  <li>Phase 2+ asset classes: Equities, Fixed Income, Structured Products</li>
+</ol>
+<hr>
+<h2>3. Definitions</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Term</th>
+      <th>Definition</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Canonical Record</td>
+      <td>A single row in the canonical entity table representing one unique financial instrument, identified by its canonical key</td>
+    </tr>
+    <tr>
+      <td>Canonical Key</td>
+      <td>A deterministic hash computed from all 5 hierarchy columns (with null placeholders for skipped levels) that uniquely identifies a market data entity across all NMD modules</td>
+    </tr>
+    <tr>
+      <td>4-Layer Hierarchy</td>
+      <td>The structural model: Exchange (L1) → Commodity (L2) → Product [Type + Code] (L3) → Contract (L4)</td>
+    </tr>
+    <tr>
+      <td>Asset Class</td>
+      <td>A category of financial instruments (e.g., Futures &amp; Options, FX) that defines its own mapping of the 5 hierarchy columns and supported product types</td>
+    </tr>
+    <tr>
+      <td>Entity Type</td>
+      <td>A predefined canonical record shape for a given asset class, specifying which hierarchy columns are populated and the permitted contract column format (e.g., Future Contract, Option Contract)</td>
+    </tr>
+    <tr>
+      <td>Golden Source</td>
+      <td>A designated data source whose ingested data is treated as authoritative for canonical record creation and update, as defined in the source configuration</td>
+    </tr>
+    <tr>
+      <td>Status Cascade</td>
+      <td>The automatic propagation of a canonical record&#x27;s status change to all descendant records in the hierarchy, exempting records already in Disabled state</td>
+    </tr>
+    <tr>
+      <td>Source Processing</td>
+      <td>The automated ingestion pipeline (FRD-NMD-0002) that creates or updates canonical records based on source configuration</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>4. Business Context</h2>
+<p><strong>Parent PC Objectives Supported:</strong> <code>OBJ-001</code>, <code>OBJ-002</code>, <code>OBJ-005</code></p>
+<p>The product canonical is the data foundation of NMD. Without a clean, maintained canonical, cross-source data linkage is impossible — every ingestion run, query, and export depends on resolving instrument identity against this table. This module eliminates the absence of a single authoritative product record that currently causes data inconsistency across internal systems.</p>
+<hr>
+<h2>5. Actors</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Actor</th>
+      <th>Type</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ACT-001</td>
+      <td>Data Owner</td>
+      <td>Human (primary)</td>
+      <td>Creates, updates, and manages canonical records and status via the Operator UI</td>
+    </tr>
+    <tr>
+      <td>ACT-002</td>
+      <td>Operator UI</td>
+      <td>Internal system (primary)</td>
+      <td>Exposes canonical management and query functions to data owners</td>
+    </tr>
+    <tr>
+      <td>ACT-003</td>
+      <td>Data Ingestion Module</td>
+      <td>Internal system (primary)</td>
+      <td>Resolves ingested data against canonical records; auto-creates canonical records when processing data from a golden source</td>
+    </tr>
+    <tr>
+      <td>ACT-004</td>
+      <td>Query &amp; Export Module</td>
+      <td>Internal system (secondary)</td>
+      <td>Reads canonical records to enrich and serve downstream queries and exports</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>6. Functional Overview</h2>
+<p>The Product Canonical module provides two core capabilities: (1) Canonical Management — full lifecycle management of instrument master records including creation, update, deactivation, status management, and audit trail; (2) Canonical Query — a read interface for all internal modules to resolve instrument identity by canonical key, source identifier, or attribute search.</p>
+<hr>
+<h2>7. Event Triggers</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Trigger</th>
+      <th>Type</th>
+      <th>Initiates</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ET-001</td>
+      <td>Data owner creates a new instrument record via UI</td>
+      <td>User action</td>
+      <td>FA-01: Canonical Maintenance</td>
+    </tr>
+    <tr>
+      <td>ET-002</td>
+      <td>Data owner updates an existing canonical record</td>
+      <td>User action</td>
+      <td>FA-01: Canonical Maintenance</td>
+    </tr>
+    <tr>
+      <td>ET-003</td>
+      <td>Data owner deactivates or retires an instrument</td>
+      <td>User action</td>
+      <td>FA-01: Canonical Maintenance</td>
+    </tr>
+    <tr>
+      <td>ET-004</td>
+      <td>Data owner changes the status of a canonical record</td>
+      <td>User action</td>
+      <td>FA-01: Canonical Maintenance (status change + cascade)</td>
+    </tr>
+    <tr>
+      <td>ET-005</td>
+      <td>Internal module requests canonical lookup by source identifier</td>
+      <td>System event</td>
+      <td>FA-02: Canonical Query</td>
+    </tr>
+    <tr>
+      <td>ET-006</td>
+      <td>Internal module requests canonical lookup by canonical key</td>
+      <td>System event</td>
+      <td>FA-02: Canonical Query</td>
+    </tr>
+    <tr>
+      <td>ET-007</td>
+      <td>Data owner searches canonical by attribute (exchange, commodity, product type, product code)</td>
+      <td>User action</td>
+      <td>FA-02: Canonical Query</td>
+    </tr>
+    <tr>
+      <td>ET-008</td>
+      <td>Data Ingestion Module processes data from a golden source and encounters an instrument</td>
+      <td>System event</td>
+      <td>FA-01: Canonical Maintenance (auto-create or update)</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>8. Functional Requirements</h2>
+<h3>FA-01: Product Canonical Maintenance</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Requirement</th>
+      <th>Priority</th>
+      <th>Traces To</th>
+      <th>Acceptance Criteria</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>FR-NMD-001-001</td>
+      <td>System shall maintain a canonical entity table with 5 columns representing 4 hierarchical layers: Exchange (L1), Commodity (L2), Product Type + Product Code (L3 — Product), and Contract (L4)</td>
+      <td>Must</td>
+      <td>FR-001</td>
+      <td>Canonical table exists with all 5 columns; all Phase 1 asset classes can be represented</td>
+    </tr>
+    <tr>
+      <td>FR-NMD-001-002</td>
+      <td>System shall compute a deterministic canonical key as a hash of all 5 columns in fixed order, using null placeholders for skipped levels; the same 5-column input must always produce the same key</td>
+      <td>Must</td>
+      <td>FR-001</td>
+      <td>Hash is reproducible across all callers; same 5-column values always produce identical key</td>
+    </tr>
+    <tr>
+      <td>FR-NMD-001-003</td>
+      <td>The 4-layer structure shall be defined as: Exchange (primary trading venue), Commodity (underlying of the product), Product (type + code — the product published/traded on the exchange), Contract (additional contract identifier for derivatives)</td>
+      <td>Must</td>
+      <td>FR-001</td>
+      <td>All 4 layers are present and correctly defined in the data model</td>
+    </tr>
+    <tr>
+      <td>FR-NMD-001-004</td>
+      <td>Each asset class shall define its own mapping of the 5 columns and its supported product types; no asset class may reuse another&#x27;s column mapping or product type definitions</td>
+      <td>Must</td>
+      <td>FR-001</td>
+      <td>Phase 1 asset classes (Futures &amp; Options, FX) each have distinct, non-overlapping column mappings and product type definitions</td>
+    </tr>
+    <tr>
+      <td>FR-NMD-001-005</td>
+      <td>System shall support three canonical status values: Active (all reference data and daily updates imported), Inactive (reference data only), Disable (no data loaded)</td>
+      <td>Must</td>
+      <td>FR-001</td>
+      <td>All three status values are supported; ingestion pipeline gates data loading by canonical status correctly</td>
+    </tr>
+    <tr>
+      <td>FR-NMD-001-006</td>
+      <td>Canonical status shall be inherited top-down — a status change at a parent level shall trigger automatic status sync to all descendant records, except descendants already in Disabled state which remain unchanged</td>
+      <td>Must</td>
+      <td>FR-001</td>
+      <td>Parent status change cascades correctly to all non-Disabled descendants; Disabled descendants are unaffected</td>
+    </tr>
+    <tr>
+      <td>FR-NMD-001-007</td>
+      <td>Canonical status shall be manageable by: User (may set any record to any status, subject to parent constraints), or Source Processing (status defined by source configuration)</td>
+      <td>Must</td>
+      <td>FR-001</td>
+      <td>Both User and Source Processing can set canonical status within defined rules</td>
+    </tr>
+    <tr>
+      <td>FR-NMD-001-008</td>
+      <td>Canonical records shall be created by: User (manual creation via UI — bulk import not required in Phase 1), or Source Processing (auto-created as defined by source processing configuration)</td>
+      <td>Must</td>
+      <td>FR-001</td>
+      <td>Both creation paths produce valid canonical records with correct initial status</td>
+    </tr>
+    <tr>
+      <td>FR-NMD-001-009</td>
+      <td>System shall maintain a full audit trail of all canonical record changes — capturing who or what made the change, when, which field changed, old value, and new value</td>
+      <td>Must</td>
+      <td>FR-001</td>
+      <td>Every canonical write produces an immutable audit log entry; no write path bypasses the audit trail</td>
+    </tr>
+  </tbody>
+</table>
+<h3>FA-02: Product Canonical Query</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Requirement</th>
+      <th>Priority</th>
+      <th>Traces To</th>
+      <th>Acceptance Criteria</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>FR-NMD-001-010</td>
+      <td>System shall support lookup of a canonical record by canonical key (hash)</td>
+      <td>Must</td>
+      <td>FR-001</td>
+      <td>Exact match by canonical key returns correct record or NOT_FOUND</td>
+    </tr>
+    <tr>
+      <td>FR-NMD-001-011</td>
+      <td>System shall support lookup by source-specific identifier, returning the matching canonical record</td>
+      <td>Must</td>
+      <td>FR-001</td>
+      <td>Source identifier resolves to correct canonical record across all Phase 1 asset classes</td>
+    </tr>
+    <tr>
+      <td>FR-NMD-001-012</td>
+      <td>System shall support search by one or more attributes: Exchange, Commodity, Product Type, Product Code</td>
+      <td>Must</td>
+      <td>FR-001</td>
+      <td>Attribute search returns all matching records; supports single and multi-attribute filter combinations</td>
+    </tr>
+    <tr>
+      <td>FR-NMD-001-013</td>
+      <td>System shall return the full canonical record including all 5 hierarchy columns, canonical key, status, and audit metadata</td>
+      <td>Must</td>
+      <td>FR-001</td>
+      <td>All required fields present in every query response</td>
+    </tr>
+    <tr>
+      <td>FR-NMD-001-014</td>
+      <td>System shall return only Active canonical records by default; support optional filter to include Inactive and Disabled records</td>
+      <td>Should</td>
+      <td>FR-001</td>
+      <td>Default query excludes Inactive and Disabled; optional filter correctly includes them</td>
+    </tr>
+  </tbody>
+</table>
+<h3>FA-03: Asset Class Canonical Definitions</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Requirement</th>
+      <th>Priority</th>
+      <th>Traces To</th>
+      <th>Acceptance Criteria</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>FR-NMD-001-015</td>
+      <td>System shall predefine the following entity types for the Futures &amp; Options asset class, specifying which hierarchy columns are populated and the permitted contract column formats. Columns 3-4 (Product Type, Product Code) are null-placeholder for entity types that do not use them. Product Type must be one of: PHY (Physical), FUT (Futures), CMB (Combination), OOP (Option on Physical), OOF (Option on Future), OOC (Option on Combination).</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<p>Entity types:</p>
+<ul>
+  <li>Exchange: Exchange only (L1); columns 2-5 null</li>
+  <li>Commodity: Exchange + Commodity (L1-L2); columns 3-5 null</li>
+  <li>Product: Exchange + Commodity + Product Type + Product Code (L1-L3); column 5 null</li>
+  <li>Future Contract: all 5 columns; contract format: YYYYMM | YYYYMMDD | YYYYMMWN</li>
+  <li>Option Reference Contract: all 5 columns; contract format: YYYYMM | YYYYMMDD | YYYYMMWN</li>
+  <li>Option Contract: all 5 columns; contract format: YYYYMM_C/P_NN.NN | YYYYMMDD_C/P_NN.NN | YYYYMMWN_C/P_NN.NN | Must | FR-001 | All 6 Futures &amp; Options entity types are representable in the canonical table; contract format validated per entity type on create/update; Product Type values restricted to the defined set; canonical key hash computed with null placeholders for unpopulated columns |</li>
+</ul>
+<hr>
+<h2>9. Business Rules</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Rule</th>
+      <th>Affects</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>BRL-001</td>
+      <td>Exchange is mandatory on every canonical record — no record may exist without an Exchange</td>
+      <td>FR-NMD-001-001</td>
+    </tr>
+    <tr>
+      <td>BRL-002</td>
+      <td>Canonical key is a deterministic hash of all 5 columns in fixed order; null placeholders used for skipped levels; same 5-column values always produce the same key</td>
+      <td>FR-NMD-001-002</td>
+    </tr>
+    <tr>
+      <td>BRL-003</td>
+      <td>Each asset class defines its own mapping of the 5 columns AND its supported product types; no asset class may reuse another&#x27;s column mapping or product type definitions</td>
+      <td>FR-NMD-001-004</td>
+    </tr>
+    <tr>
+      <td>BRL-004</td>
+      <td>Status cascade is top-down: Exchange → Commodity → Product → Contract; a parent status change propagates to all descendants except children already in Disabled state — Disabled children are exempt from cascade and remain Disabled</td>
+      <td>FR-NMD-001-006</td>
+    </tr>
+    <tr>
+      <td>BRL-005</td>
+      <td>A child record&#x27;s status may not be more permissive than its parent: child cannot be Active if parent is Inactive or Disabled; child cannot be Inactive if parent is Disabled</td>
+      <td>FR-NMD-001-006, FR-NMD-001-007</td>
+    </tr>
+    <tr>
+      <td>BRL-006</td>
+      <td>User may set any record to any status directly (subject to BRL-005); Source Processing may only set status as defined in its source configuration</td>
+      <td>FR-NMD-001-007</td>
+    </tr>
+    <tr>
+      <td>BRL-007</td>
+      <td>When Source Processing creates a canonical record, initial status is defined by the source configuration — not defaulted to Active</td>
+      <td>FR-NMD-001-008</td>
+    </tr>
+    <tr>
+      <td>BRL-008</td>
+      <td>Duplicate canonical records are not permitted — identical 5-column hash cannot be inserted twice</td>
+      <td>FR-NMD-001-001, FR-NMD-001-002</td>
+    </tr>
+    <tr>
+      <td>BRL-009</td>
+      <td>Audit trail entries are immutable — no audit record may be updated or deleted after creation</td>
+      <td>FR-NMD-001-009</td>
+    </tr>
+    <tr>
+      <td>BRL-010</td>
+      <td>A canonical record&#x27;s entity type must match one of the predefined entity types for its asset class — records with invalid column population patterns or contract formats are rejected on create/update</td>
+      <td>FR-NMD-001-015</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>10. Exception Scenarios</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Trigger Condition</th>
+      <th>Expected Behaviour</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>EX-001</td>
+      <td>Source Processing attempts to create a canonical record with a hash that already exists</td>
+      <td>Reject creation; return conflict error with existing record reference; do not update existing record</td>
+    </tr>
+    <tr>
+      <td>EX-002a</td>
+      <td>User attempts to set a child record to Active when parent is Inactive or Disabled</td>
+      <td>Reject; return validation error stating parent status constraint</td>
+    </tr>
+    <tr>
+      <td>EX-002b</td>
+      <td>User attempts to set a child record to Inactive when parent is Disabled</td>
+      <td>Reject; return validation error stating parent status constraint</td>
+    </tr>
+    <tr>
+      <td>EX-003</td>
+      <td>Parent status change cascade encounters DB error mid-update</td>
+      <td>Roll back entire cascade; leave all records at previous status; alert operator. Note: children already in Disabled state not changing is expected behaviour — not a failure</td>
+    </tr>
+    <tr>
+      <td>EX-004</td>
+      <td>Source Processing attempts to create a canonical record missing Exchange</td>
+      <td>Reject; return validation error; log failed attempt with source details</td>
+    </tr>
+    <tr>
+      <td>EX-005</td>
+      <td>Canonical lookup by source-specific identifier returns no match</td>
+      <td>Return empty result with NOT_FOUND status code; do not auto-create</td>
+    </tr>
+    <tr>
+      <td>EX-006</td>
+      <td>Hash collision — two distinct 5-column combinations produce the same hash</td>
+      <td>Log critical alert; block both records until resolved; never silently overwrite</td>
+    </tr>
+    <tr>
+      <td>EX-007</td>
+      <td>Create or update attempted with contract format not matching the entity type&#x27;s permitted formats</td>
+      <td>Reject; return validation error specifying permitted formats for the entity type; do not persist</td>
+    </tr>
+    <tr>
+      <td>EX-008</td>
+      <td>Create or update attempted with Product Type value not in the defined set for the asset class</td>
+      <td>Reject; return validation error listing permitted Product Type values; do not persist</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>11. Module Interface</h2>
+<h3>APIs Provided</h3>
+<table>
+  <thead>
+    <tr>
+      <th>API Name</th>
+      <th>Operations</th>
+      <th>Consumers</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Canonical Management API</td>
+      <td>Create canonical record, Update canonical record, Deactivate canonical record, Change canonical status</td>
+      <td>Operator UI (FRD-NMD-0004), Data Ingestion Module (FRD-NMD-0002)</td>
+    </tr>
+    <tr>
+      <td>Canonical Query API</td>
+      <td>Lookup by canonical key, Lookup by source identifier, Search by attributes</td>
+      <td>Data Ingestion Module (FRD-NMD-0002), Query &amp; Export Module (FRD-NMD-0003), Operator UI (FRD-NMD-0004)</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Events Published</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Event</th>
+      <th>Trigger</th>
+      <th>Consumers</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>canonical.record.created</td>
+      <td>New canonical record created by User or Source Processing</td>
+      <td>FRD-NMD-0002</td>
+    </tr>
+    <tr>
+      <td>canonical.record.updated</td>
+      <td>Canonical record fields updated</td>
+      <td>FRD-NMD-0002, FRD-NMD-0003</td>
+    </tr>
+    <tr>
+      <td>canonical.status.changed</td>
+      <td>Status changed on any record including cascade-triggered changes</td>
+      <td>FRD-NMD-0002, FRD-NMD-0003</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Data Owned</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Entity</th>
+      <th>Ownership</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Canonical Entity Table</td>
+      <td>FRD-NMD-0001</td>
+      <td>Single authoritative table — all other modules are read-only consumers</td>
+    </tr>
+    <tr>
+      <td>Canonical Audit Log</td>
+      <td>FRD-NMD-0001</td>
+      <td>Immutable; owned and written only by this module</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>12. Cross-Module Interactions</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Dependency</th>
+      <th>Type</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Source Processing (FRD-NMD-0002)</td>
+      <td>Internal system</td>
+      <td>Provides source configuration — golden source flag, initial status on creation, types of ingestion feed</td>
+    </tr>
+    <tr>
+      <td>Operator UI (FRD-NMD-0004)</td>
+      <td>Internal system</td>
+      <td>Delivers user actions for canonical CRUD and status changes</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>13. Data Requirements</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Entity</th>
+      <th>Operations</th>
+      <th>Sensitivity</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Canonical Record</td>
+      <td>Create, Read, Update</td>
+      <td>Internal</td>
+      <td>No hard delete — retirement via Disable status only</td>
+    </tr>
+    <tr>
+      <td>Canonical Audit Log</td>
+      <td>Create, Read</td>
+      <td>Internal</td>
+      <td>Immutable — no update or delete permitted</td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Data Retention:</strong> Indefinite — canonical records and audit log are permanent; no purge policy</p>
+<hr>
+<h2>14. Non-Functional Requirements</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Requirement</th>
+      <th>Source NFR</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>NFR-NMD-001-001</td>
+      <td>Canonical query response time shall meet the platform latency target (TBD, e.g., &lt;100ms p95) — this is a hot path called by every ingestion run</td>
+      <td>PC NFR-004</td>
+    </tr>
+    <tr>
+      <td>NFR-NMD-001-002</td>
+      <td>Status cascade on a large parent (e.g., disabling an Exchange with thousands of descendants) shall complete within a defined SLA window without blocking canonical queries</td>
+      <td>PC NFR-001</td>
+    </tr>
+    <tr>
+      <td>NFR-NMD-001-003</td>
+      <td>Canonical record writes and status changes shall be transactional — partial updates are not permitted</td>
+      <td>PC NFR-003</td>
+    </tr>
+    <tr>
+      <td>NFR-NMD-001-004</td>
+      <td>Canonical data is the cross-module golden source — read access available to all internal modules; write access restricted to authorised users and Source Processing only</td>
+      <td>PC NFR-005</td>
+    </tr>
+    <tr>
+      <td>NFR-NMD-001-005</td>
+      <td>All canonical data at rest shall be encrypted</td>
+      <td>PC NFR-007</td>
+    </tr>
+    <tr>
+      <td>NFR-NMD-001-006</td>
+      <td>All canonical writes shall be captured in the audit log — no write path may bypass the audit trail</td>
+      <td>PC NFR-003</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>15. Traceability Matrix</h2>
+<table>
+  <thead>
+    <tr>
+      <th>PC Requirement</th>
+      <th>FRD Requirements</th>
+      <th>Downstream</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>FR-001</td>
+      <td>FR-NMD-001-001, FR-NMD-001-002, FR-NMD-001-003, FR-NMD-001-004, FR-NMD-001-005, FR-NMD-001-006, FR-NMD-001-007, FR-NMD-001-008, FR-NMD-001-009, FR-NMD-001-010, FR-NMD-001-011, FR-NMD-001-012, FR-NMD-001-013, FR-NMD-001-014, FR-NMD-001-015</td>
+      <td>PSD, DC, UT</td>
+    </tr>
+    <tr>
+      <td>PC NFR-002</td>
+      <td>NFR-NMD-001-002</td>
+      <td>NFTS</td>
+    </tr>
+    <tr>
+      <td>PC NFR-003</td>
+      <td>NFR-NMD-001-003, NFR-NMD-001-006</td>
+      <td>NFTS</td>
+    </tr>
+    <tr>
+      <td>PC NFR-004</td>
+      <td>NFR-NMD-001-001</td>
+      <td>NFTS</td>
+    </tr>
+    <tr>
+      <td>PC NFR-005</td>
+      <td>NFR-NMD-001-004</td>
+      <td>HLD, NFTS</td>
+    </tr>
+    <tr>
+      <td>PC NFR-007</td>
+      <td>NFR-NMD-001-005</td>
+      <td>DBAD, NFTS</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>16. Acceptance Criteria</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Criterion</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>AC-001</td>
+      <td>Canonical entity table supports all 5 columns across all Phase 1 asset classes (Futures &amp; Options, FX) with correct column mappings</td>
+    </tr>
+    <tr>
+      <td>AC-002</td>
+      <td>Canonical key hash is deterministic — same 5-column input always produces the same key across all callers</td>
+    </tr>
+    <tr>
+      <td>AC-003</td>
+      <td>Status cascade correctly propagates to all descendants on parent status change; Disabled children remain unchanged</td>
+    </tr>
+    <tr>
+      <td>AC-004</td>
+      <td>User status constraint violations (EX-002a, EX-002b) are rejected with correct error responses</td>
+    </tr>
+    <tr>
+      <td>AC-005</td>
+      <td>All canonical writes produce an immutable audit log entry with full field-level change detail</td>
+    </tr>
+    <tr>
+      <td>AC-006</td>
+      <td>Canonical query API returns correct results for lookup by key, lookup by source identifier, and attribute search</td>
+    </tr>
+    <tr>
+      <td>AC-007</td>
+      <td>Canonical query returns Active records only by default; Inactive and Disabled records returned only when explicitly requested</td>
+    </tr>
+    <tr>
+      <td>AC-008</td>
+      <td>Source Processing auto-creation applies initial status from source configuration — never defaults to Active</td>
+    </tr>
+    <tr>
+      <td>AC-009</td>
+      <td>Duplicate canonical records (same hash) are rejected by both User and Source Processing creation paths</td>
+    </tr>
+    <tr>
+      <td>AC-010</td>
+      <td>All canonical data at rest is encrypted; write access restricted to authorised users and Source Processing</td>
+    </tr>
+    <tr>
+      <td>AC-011</td>
+      <td>All 6 Futures &amp; Options entity types (Exchange, Commodity, Product, Future Contract, Option Reference Contract, Option Contract) are representable in the canonical table with correct column population</td>
+    </tr>
+    <tr>
+      <td>AC-012</td>
+      <td>Contract format validated per entity type — invalid formats rejected on create/update (EX-007)</td>
+    </tr>
+    <tr>
+      <td>AC-013</td>
+      <td>Product Type values outside the defined set (PHY, FUT, CMB, OOP, OOF, OOC) are rejected for Futures &amp; Options records (EX-008)</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>17. Assumptions &amp; Constraints</h2>
+<h3>Assumptions</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Assumption</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ASM-001</td>
+      <td>Asset class column mappings for Futures &amp; Options and FX will be defined before detailed design begins</td>
+    </tr>
+    <tr>
+      <td>ASM-002</td>
+      <td>Hash algorithm selection (e.g., SHA-256, MD5, MurmurHash) will be agreed upon before implementation — all modules must use the same algorithm</td>
+    </tr>
+    <tr>
+      <td>ASM-003</td>
+      <td>Source Processing (FRD-NMD-0002) will define and own the golden source flag and initial status configuration — this module consumes that configuration</td>
+    </tr>
+    <tr>
+      <td>ASM-004</td>
+      <td>No bulk import is required for Phase 1 — data owners create canonical records manually or via Source Processing</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Constraints</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Constraint</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CON-001</td>
+      <td>Phase 1 asset classes: Futures &amp; Options and FX only</td>
+    </tr>
+    <tr>
+      <td>CON-002</td>
+      <td>No hard deletes — canonical records are permanent; retirement via Disable status only</td>
+    </tr>
+    <tr>
+      <td>CON-003</td>
+      <td>Write access to canonical table restricted to this module only — all other modules are read-only consumers</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>18. Dependencies</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Dependency</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>DEP-001</td>
+      <td>FRD-NMD-0002 (Source Processing) — must define source configuration schema (golden source flag, initial status, ingestion feed types) before canonical module design is finalised</td>
+    </tr>
+    <tr>
+      <td>DEP-002</td>
+      <td>Asset class mapping definitions for Phase 1 (Futures &amp; Options, FX) — required before canonical table schema can be finalised</td>
+    </tr>
+    <tr>
+      <td>DEP-003</td>
+      <td>Hash algorithm agreed across all NMD modules — canonical key computation must be consistent platform-wide</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>19. Open Issues</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Issue</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>OI-001</td>
+      <td>Hash algorithm not yet selected — impacts canonical key computation across all modules</td>
+    </tr>
+    <tr>
+      <td>OI-002</td>
+      <td>Asset class column mappings for Phase 1 not yet defined — impacts table schema and validation rules</td>
+    </tr>
+    <tr>
+      <td>OI-003</td>
+      <td>Specific exchange(s) for Futures &amp; Options Phase 1 not yet confirmed — impacts asset class mapping</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>20. Approvals</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Role</th>
+      <th>Name</th>
+      <th>Date</th>
+      <th>Signature</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Author</td>
+      <td>Leo</td>
+      <td>TBD</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Reviewer</td>
+      <td>TBD</td>
+      <td>TBD</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Approver</td>
+      <td>TBD</td>
+      <td>TBD</td>
+      <td>TBD</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2>Change Log</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th>Date</th>
+      <th>Author</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>v0.1</td>
+      <td>2026-03-01</td>
+      <td>Leo</td>
+      <td>Initial draft</td>
+    </tr>
+    <tr>
+      <td>v0.2</td>
+      <td>2026-03-01</td>
+      <td>Leo</td>
+      <td>Added FA-03 Asset Class Canonical Definitions with FR-NMD-001-015 — predefines 6 Futures &amp; Options entity types (Exchange, Commodity, Product, Future Contract, Option Reference Contract, Option Contract) with column population rules, contract format validation (YYYYMM</td>
+    </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>
