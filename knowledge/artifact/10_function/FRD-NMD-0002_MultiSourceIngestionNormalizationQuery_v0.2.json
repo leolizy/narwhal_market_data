@@ -1,0 +1,1159 @@
+{
+  "kind": "FunctionalRequirements",
+  "metadata": {
+    "document_id": "FRD-NMD-0002",
+    "module_code": "ING",
+    "title": "Multi-Source Ingestion, Normalization & Query",
+    "version": "v0.2",
+    "status": "Draft",
+    "classification": "Internal",
+    "created_date": "2026-03-01",
+    "last_updated": "2026-03-01",
+    "author": "Leo",
+    "reviewer": "TBD",
+    "approver": "TBD",
+    "parent_brd": "PC-NMD-0001",
+    "related_documents": [
+      "FRD-NMD-0001"
+    ],
+    "tags": [
+      "market-data",
+      "ingestion",
+      "normalization",
+      "query-api",
+      "scd-type-2",
+      "reprocessing"
+    ],
+    "supersedes": null
+  },
+  "overview": {
+    "summary": "The ING module handles ingestion of reference data and daily updates from multiple external source types, generates derived sources, normalizes data against the product canonical, and exposes query/export APIs for downstream consumption. It is the operational core of NMD — everything between source and consumer.",
+    "purpose": "This document specifies the functional requirements for the Multi-Source Ingestion, Normalization & Query module within the Narwhal Market Data platform. It translates PC-NMD-0001 requirements FR-002 through FR-008 and FR-010 into detailed, testable specifications.",
+    "audience": "Developers, QA engineers, data owners, and downstream system integrators."
+  },
+  "scope": {
+    "in_scope": [
+      "Source onboarding — configuring and registering new data sources via common framework (FR-010)",
+      "Reference data ingestion — product static, contracts, with SCD Type 2 persistence (FR-002)",
+      "Daily update ingestion — settlement prices, margin rates, corporate actions per business date (FR-003)",
+      "Multi-source type support — exchange websites, public APIs, SFTP, structured documents, data feeds (FR-004)",
+      "Derived source processing — transform and reshape already-ingested data for customized export formats (FR-005)",
+      "Data normalization, mapping control, and validation linked to product canonical (FR-006)",
+      "Centralized ingestion framework — scheduling, run tracking, snapshot persistence (FR-007)",
+      "Reprocessing — authorized re-ingestion with delta versioning for corrections",
+      "Settlement history — versioned daily updates with business date tagging",
+      "Query and export APIs for downstream system consumption (FR-008)"
+    ],
+    "out_of_scope": [
+      "Product canonical maintenance (covered by FRD-NMD-0001)",
+      "UI for data owners to manage sources, ingestion, and data (FR-009)",
+      "Real-time streaming and subscription-based data delivery (Phase 3)",
+      "Direct integration or data delivery to downstream systems (Phase 2)",
+      "Equities (Phase 2)",
+      "Fixed income and structured products (Phase 3)"
+    ]
+  },
+  "definitions": {
+    "items": [
+      {
+        "term": "Snapshot",
+        "definition": "A point-in-time extract of data from one or more sources, used as input to the normalization pipeline."
+      },
+      {
+        "term": "Derived Source",
+        "definition": "A source that transforms and reshapes already-ingested data from one or more upstream sources into customized export formats, rather than pulling from an external system. Constructed by parsing source data in a configured step sequence where later steps override earlier values."
+      },
+      {
+        "term": "Ingestion Framework",
+        "definition": "The centralized component that manages, schedules, tracks, and monitors the processing of all data sources."
+      },
+      {
+        "term": "Source Adapter",
+        "definition": "A pluggable component that handles connectivity and parsing for a specific source type (e.g., SFTP, REST API, website scraper)."
+      },
+      {
+        "term": "SCD Type 2",
+        "definition": "Slowly Changing Dimension Type 2 — a persistence pattern that tracks changes over time using effective_date / expiry_date ranges. A new record version is created when content changes; the previous version is expired, not overwritten."
+      },
+      {
+        "term": "Reprocessing",
+        "definition": "Authorized re-ingestion of a source for a given business date, triggered when corrections or restatements are received. Increments the version and persists only delta records."
+      },
+      {
+        "term": "Delta Record",
+        "definition": "A record persisted during reprocessing that contains only the changed values compared to the previous version for the same business date."
+      },
+      {
+        "term": "Business Date",
+        "definition": "The trading or valuation date to which a daily update record belongs, as opposed to the calendar date when the data was ingested."
+      },
+      {
+        "term": "Composite Key",
+        "definition": "The combination of source, entity, and record_type used to identify a unique record for SCD Type 2 change detection in reference data."
+      },
+      {
+        "term": "Active Layer (Reference Data)",
+        "definition": "Storage tier containing current, non-expired SCD Type 2 reference data records. This is the data served by the query API."
+      },
+      {
+        "term": "Active Layer (Daily Updates)",
+        "definition": "Storage tier containing daily update records from the last 7 days, latest version per business date. This is the data served by the query API."
+      },
+      {
+        "term": "Archive Layer (Reference Data)",
+        "definition": "Separate database containing expired SCD Type 2 reference data records. Retained for audit and historical queries."
+      },
+      {
+        "term": "Archive Layer (Daily Updates)",
+        "definition": "Separate database containing superseded daily update versions and daily update records older than 7 days before the current day snapshot. Retained for audit and historical queries."
+      }
+    ]
+  },
+  "business_context": {
+    "content": "This module delivers on the core NMD value proposition — eliminating direct vendor/exchange dependencies by centralizing ingestion and normalization. It provides a single, authoritative pipeline from external data sources to normalized, queryable data for downstream consumption.",
+    "parent_objectives": [
+      {
+        "id": "OBJ-001",
+        "description": "Eliminate vendor feed dependencies",
+        "supported_by": [
+          "FR-002",
+          "FR-003",
+          "FR-004"
+        ]
+      },
+      {
+        "id": "OBJ-002",
+        "description": "Single authoritative data source",
+        "supported_by": [
+          "FR-005",
+          "FR-006"
+        ]
+      },
+      {
+        "id": "OBJ-003",
+        "description": "Reduce onboarding time",
+        "supported_by": [
+          "FR-007",
+          "FR-010"
+        ]
+      },
+      {
+        "id": "OBJ-004",
+        "description": "Normalized, queryable API",
+        "supported_by": [
+          "FR-008"
+        ]
+      }
+    ]
+  },
+  "actors": {
+    "items": [
+      {
+        "name": "Ingestion Framework",
+        "type": "System",
+        "role": "Primary",
+        "description": "Orchestrates scheduled and on-demand ingestion runs"
+      },
+      {
+        "name": "External Data Source",
+        "type": "External",
+        "role": "External",
+        "description": "Exchanges, vendors — provides raw data via SFTP/API/website/files"
+      },
+      {
+        "name": "Product Canonical",
+        "type": "System",
+        "role": "Secondary",
+        "description": "Provides master instrument records for normalization linking (FRD-NMD-0001)"
+      },
+      {
+        "name": "Downstream System",
+        "type": "System",
+        "role": "Secondary",
+        "description": "Consumes normalized data via query/export APIs"
+      },
+      {
+        "name": "Data Owner",
+        "type": "Human",
+        "role": "Secondary",
+        "description": "Monitors ingestion, triggers manual runs, validates output"
+      }
+    ]
+  },
+  "functional_overview": {
+    "content": "It automates collection, validation, and normalization of reference data and daily updates to the canonical entity. It also supports derived sources that transform and reshape already-ingested data for customized export formats.\n\nThe module processes two distinct data categories that share the same source adapter framework, scheduling, and validation approach, but differ in persistence and retention behavior:\n\nReference Data — Static or semi-static product attributes such as contract specifications, multipliers, and payment methods. Reference data is persisted using SCD Type 2 with date ranges (effective_date / expiry_date). A new snapshot is created only when content changes for the same composite key (source, entity, record_type). Expired records are retained in another database for reference.\n\nDaily Updates — Settlement prices, margin rates, and corporate actions received per business date. Daily update records are tagged to a specific business date with a version starting at 1. When corrections arrive via authorized reprocessing, the version increments and only delta records (changed values) are persisted in the new version. Older versions are retained in another database for reference. Records of dates a week before the current day snapshot will also be moved to that database.\n\nThe module covers: source onboarding, scheduling, run tracking, normalization, mapping control, snapshot persistence, validation, daily update ingestion and validation, settlement history, reprocessing, derived source processing, and query.",
+    "diagrams": []
+  },
+  "event_triggers": {
+    "items": [
+      {
+        "id": "ET-001",
+        "trigger": "Scheduled ingestion run (e.g. daily EOD)",
+        "type": "Scheduled",
+        "initiates": "FR-ING-007, FR-ING-008, FR-ING-010, FR-ING-011, FR-ING-012 — pull from configured sources"
+      },
+      {
+        "id": "ET-002",
+        "trigger": "Manual ingestion trigger by data owner",
+        "type": "User action",
+        "initiates": "FR-ING-007, FR-ING-008, FR-ING-010, FR-ING-011, FR-ING-012 — on-demand pull for specific source"
+      },
+      {
+        "id": "ET-003",
+        "trigger": "Source file/data available (e.g. SFTP file landed)",
+        "type": "External signal",
+        "initiates": "FR-ING-007, FR-ING-008, FR-ING-010, FR-ING-011, FR-ING-012 — event-driven ingestion"
+      },
+      {
+        "id": "ET-004",
+        "trigger": "Ingestion complete",
+        "type": "System event",
+        "initiates": "FR-ING-014, FR-ING-015, FR-ING-016 — triggers normalization and snapshot derivation"
+      },
+      {
+        "id": "ET-005",
+        "trigger": "Downstream system query request",
+        "type": "System event",
+        "initiates": "FR-ING-024 through FR-ING-028 — API serves normalized data"
+      },
+      {
+        "id": "ET-006",
+        "trigger": "Authorized reprocessing request for a source and business date",
+        "type": "User action",
+        "initiates": "FR-ING-032 — re-ingest with version increment, delta persistence"
+      },
+      {
+        "id": "ET-007",
+        "trigger": "Daily retention window shift (current day advances)",
+        "type": "Scheduled",
+        "initiates": "FR-ING-039 — move daily update records older than 7 days to archive DB"
+      },
+      {
+        "id": "ET-008",
+        "trigger": "SCD Type 2 expiry detected during reference data ingestion",
+        "type": "System event",
+        "initiates": "FR-ING-037 — move expired reference records to archive DB"
+      }
+    ]
+  },
+  "functional_requirements": {
+    "functional_areas": [
+      {
+        "area": "Source Connectivity",
+        "parent_requirement": "FR-004",
+        "requirements": [
+          {
+            "id": "FR-ING-001",
+            "description": "System shall support ingestion from exchange websites via HTTP/HTTPS",
+            "priority": "Must",
+            "parent": "FR-004",
+            "acceptance_criteria": "At least one exchange website source adapter successfully ingests data"
+          },
+          {
+            "id": "FR-ING-002",
+            "description": "System shall support ingestion from public APIs (REST/JSON)",
+            "priority": "Must",
+            "parent": "FR-004",
+            "acceptance_criteria": "At least one REST API source adapter successfully ingests data"
+          },
+          {
+            "id": "FR-ING-003",
+            "description": "System shall support ingestion from SFTP file drops",
+            "priority": "Must",
+            "parent": "FR-004",
+            "acceptance_criteria": "SFTP adapter connects, detects new files, and ingests successfully"
+          },
+          {
+            "id": "FR-ING-004",
+            "description": "System shall support ingestion from structured documents (CSV, XML, PDF)",
+            "priority": "Must",
+            "parent": "FR-004",
+            "acceptance_criteria": "Document adapter parses CSV, XML, and PDF formats and extracts data correctly"
+          },
+          {
+            "id": "FR-ING-005",
+            "description": "System shall support ingestion from data feeds",
+            "priority": "Must",
+            "parent": "FR-004",
+            "acceptance_criteria": "Feed adapter connects and ingests data from at least one feed source"
+          },
+          {
+            "id": "FR-ING-006",
+            "description": "Each source type shall be handled by a pluggable source adapter with a common interface",
+            "priority": "Must",
+            "parent": "FR-004",
+            "acceptance_criteria": "New source adapter can be added without modifying core ingestion framework code"
+          }
+        ]
+      },
+      {
+        "area": "Source Onboarding",
+        "parent_requirement": "FR-010",
+        "requirements": [
+          {
+            "id": "FR-ING-029",
+            "description": "System shall support onboarding of new data sources via a common framework without changes to core ingestion logic",
+            "priority": "Should",
+            "parent": "FR-010",
+            "acceptance_criteria": "New source onboarded and producing data without code changes to core framework"
+          },
+          {
+            "id": "FR-ING-030",
+            "description": "System shall provide a source configuration interface to define connection details, schedule, mapping rules, and validation rules per source",
+            "priority": "Must",
+            "parent": "FR-010",
+            "acceptance_criteria": "Source configuration created with all required fields; source activates on schedule"
+          },
+          {
+            "id": "FR-ING-031",
+            "description": "System shall validate source configuration before activating a new source for scheduled ingestion",
+            "priority": "Must",
+            "parent": "FR-010",
+            "acceptance_criteria": "Invalid configuration rejected with clear error; source not activated until valid"
+          }
+        ]
+      },
+      {
+        "area": "Reference Data Ingestion",
+        "parent_requirement": "FR-002",
+        "requirements": [
+          {
+            "id": "FR-ING-007",
+            "description": "System shall ingest product static data (contract specs, tick sizes, lot sizes) from configured sources",
+            "priority": "Must",
+            "parent": "FR-002",
+            "acceptance_criteria": "Product static data ingested and stored as versioned source snapshot"
+          },
+          {
+            "id": "FR-ING-008",
+            "description": "System shall ingest contract listings (expiry dates, series, strike prices) from configured sources",
+            "priority": "Must",
+            "parent": "FR-002",
+            "acceptance_criteria": "Contract listings ingested and stored as versioned source snapshot"
+          },
+          {
+            "id": "FR-ING-009",
+            "description": "System shall persist ingested reference data using SCD Type 2 with effective_date / expiry_date ranges. A new snapshot is created only when content changes for the same composite key (source, entity, record_type)",
+            "priority": "Must",
+            "parent": "FR-002",
+            "acceptance_criteria": "Unchanged records do not generate new versions; changed records create new SCD Type 2 entry with correct date ranges"
+          }
+        ]
+      },
+      {
+        "area": "Daily Update Ingestion",
+        "parent_requirement": "FR-003",
+        "requirements": [
+          {
+            "id": "FR-ING-010",
+            "description": "System shall ingest daily settlement prices from configured sources",
+            "priority": "Must",
+            "parent": "FR-003",
+            "acceptance_criteria": "Settlement prices ingested with correct business date and version tagging"
+          },
+          {
+            "id": "FR-ING-011",
+            "description": "System shall ingest margin rates from configured sources",
+            "priority": "Must",
+            "parent": "FR-003",
+            "acceptance_criteria": "Margin rates ingested and stored as dated source snapshot"
+          },
+          {
+            "id": "FR-ING-012",
+            "description": "System shall ingest corporate events from configured sources",
+            "priority": "Must",
+            "parent": "FR-003",
+            "acceptance_criteria": "Corporate events ingested and stored as dated source snapshot"
+          },
+          {
+            "id": "FR-ING-013",
+            "description": "System shall tag daily update records to a specific business date with a version starting at 1. When corrections arrive via authorized reprocessing, the version increments and only delta records (changed values) are persisted in the new version",
+            "priority": "Must",
+            "parent": "FR-003",
+            "acceptance_criteria": "Version increments on reprocessing; only changed values persisted in new version; previous versions retained in archive"
+          },
+          {
+            "id": "FR-ING-032",
+            "description": "System shall support authorized reprocessing of a source for a given business date, incrementing the version and persisting only delta records",
+            "priority": "Must",
+            "parent": "FR-003",
+            "acceptance_criteria": "Reprocessing creates new version with only delta records; requires authorization"
+          },
+          {
+            "id": "FR-ING-033",
+            "description": "System shall maintain settlement history — all versions of daily updates per business date queryable for audit",
+            "priority": "Must",
+            "parent": "FR-003",
+            "acceptance_criteria": "All versions of a daily update for a given business date retrievable via API or archive query"
+          }
+        ]
+      },
+      {
+        "area": "Derived Source Processing",
+        "parent_requirement": "FR-005",
+        "requirements": [
+          {
+            "id": "FR-ING-014",
+            "description": "System shall support derived sources that transform and reshape already-ingested data from upstream sources into customized export formats, constructed by parsing source data in a configured step sequence where later steps override earlier values",
+            "priority": "Must",
+            "parent": "FR-005",
+            "acceptance_criteria": "Derived source produces correct output from upstream ingested data in configured step order"
+          }
+        ]
+      },
+      {
+        "area": "Normalization & Validation",
+        "parent_requirement": "FR-006",
+        "requirements": [
+          {
+            "id": "FR-ING-015",
+            "description": "System shall normalize ingested data to a standard internal format",
+            "priority": "Must",
+            "parent": "FR-006",
+            "acceptance_criteria": "Output data conforms to internal schema regardless of source format"
+          },
+          {
+            "id": "FR-ING-016",
+            "description": "System shall link each normalized record to its corresponding product canonical record",
+            "priority": "Must",
+            "parent": "FR-006",
+            "acceptance_criteria": "Every normalized record carries a canonical record ID or is flagged as unmatched"
+          },
+          {
+            "id": "FR-ING-017",
+            "description": "System shall flag records that cannot be matched to a canonical record for manual review",
+            "priority": "Must",
+            "parent": "FR-006",
+            "acceptance_criteria": "Unmatched records visible with unmatched status; data owner can review and resolve"
+          },
+          {
+            "id": "FR-ING-034",
+            "description": "System shall provide mapping control to define field-level transformation and normalization rules per source",
+            "priority": "Must",
+            "parent": "FR-007",
+            "acceptance_criteria": "Mapping rules applied during normalization; field transformations produce expected output"
+          },
+          {
+            "id": "FR-ING-035",
+            "description": "System shall validate ingested data against configured validation rules before persistence",
+            "priority": "Must",
+            "parent": "FR-007",
+            "acceptance_criteria": "Records failing validation are flagged and not persisted to active layer"
+          }
+        ]
+      },
+      {
+        "area": "Ingestion Framework",
+        "parent_requirement": "FR-007",
+        "requirements": [
+          {
+            "id": "FR-ING-018",
+            "description": "System shall provide a centralized registry of all configured data sources",
+            "priority": "Must",
+            "parent": "FR-007",
+            "acceptance_criteria": "Source registry lists all configured sources with connection details and schedules"
+          },
+          {
+            "id": "FR-ING-019",
+            "description": "System shall support scheduled ingestion runs (configurable per source)",
+            "priority": "Must",
+            "parent": "FR-007",
+            "acceptance_criteria": "Scheduled runs execute at configured times without manual intervention"
+          },
+          {
+            "id": "FR-ING-020",
+            "description": "System shall support manual on-demand ingestion for a specific source",
+            "priority": "Must",
+            "parent": "FR-007",
+            "acceptance_criteria": "Data owner can trigger ingestion for a specific source and monitor its progress"
+          },
+          {
+            "id": "FR-ING-021",
+            "description": "System shall detect source file availability and trigger ingestion automatically",
+            "priority": "Must",
+            "parent": "FR-007",
+            "acceptance_criteria": "File landing on SFTP or equivalent triggers ingestion within configured detection interval"
+          },
+          {
+            "id": "FR-ING-022",
+            "description": "System shall track ingestion run status (pending, running, completed, failed) per source",
+            "priority": "Must",
+            "parent": "FR-007",
+            "acceptance_criteria": "Run status queryable in real time; historical runs retained"
+          },
+          {
+            "id": "FR-ING-023",
+            "description": "System shall log all ingestion activity with source, timestamp, record counts, and outcome",
+            "priority": "Must",
+            "parent": "FR-007",
+            "acceptance_criteria": "Audit log contains source ID, run timestamp, records processed, records failed, and final outcome"
+          }
+        ]
+      },
+      {
+        "area": "Query & Export API",
+        "parent_requirement": "FR-008",
+        "requirements": [
+          {
+            "id": "FR-ING-024",
+            "description": "System shall expose a query API to retrieve normalized reference data by instrument, product type, or exchange",
+            "priority": "Must",
+            "parent": "FR-008",
+            "acceptance_criteria": "API returns correct reference data filtered by requested parameters"
+          },
+          {
+            "id": "FR-ING-025",
+            "description": "System shall expose a query API to retrieve daily settlement prices by instrument and date/date range",
+            "priority": "Must",
+            "parent": "FR-008",
+            "acceptance_criteria": "API returns correct settlement prices for requested instrument and date range"
+          },
+          {
+            "id": "FR-ING-026",
+            "description": "System shall expose a query API to retrieve margin rates by instrument and date",
+            "priority": "Must",
+            "parent": "FR-008",
+            "acceptance_criteria": "API returns correct margin rates for requested instrument and date"
+          },
+          {
+            "id": "FR-ING-027",
+            "description": "System shall support bulk export of normalized data as file download (CSV/JSON)",
+            "priority": "Should",
+            "parent": "FR-008",
+            "acceptance_criteria": "Bulk export generates downloadable file in requested format with correct data"
+          },
+          {
+            "id": "FR-ING-028",
+            "description": "System shall support filtering, pagination, and sorting on all query endpoints",
+            "priority": "Must",
+            "parent": "FR-008",
+            "acceptance_criteria": "All query endpoints accept filter, page, page_size, and sort parameters and return correct results"
+          },
+          {
+            "id": "FR-ING-036",
+            "description": "System shall support query of archived data (expired reference records, older daily update versions and dates) from the archive database",
+            "priority": "Should",
+            "parent": "FR-008",
+            "acceptance_criteria": "Archive query returns correct historical data from the archive database"
+          }
+        ]
+      },
+      {
+        "area": "Data Retention",
+        "parent_requirement": "FR-006, FR-003",
+        "requirements": [
+          {
+            "id": "FR-ING-037",
+            "description": "System shall move expired SCD Type 2 reference data records to the archive database",
+            "priority": "Must",
+            "parent": "FR-006",
+            "acceptance_criteria": "Expired reference records no longer in active DB; present in archive DB"
+          },
+          {
+            "id": "FR-ING-038",
+            "description": "System shall move superseded daily update versions to the archive database",
+            "priority": "Must",
+            "parent": "FR-003",
+            "acceptance_criteria": "Only latest version per business date remains in active DB; older versions in archive DB"
+          },
+          {
+            "id": "FR-ING-039",
+            "description": "System shall move daily update records older than 7 days before the current day snapshot to the archive database",
+            "priority": "Must",
+            "parent": "FR-003",
+            "acceptance_criteria": "Active DB contains only last 7 days of daily updates; older records in archive DB"
+          }
+        ]
+      }
+    ]
+  },
+  "business_rules": {
+    "items": [
+      {
+        "id": "BRL-001",
+        "rule": "A source snapshot must be fully ingested before normalization begins — no partial processing",
+        "affects": [
+          "FR-ING-014",
+          "FR-ING-015"
+        ]
+      },
+      {
+        "id": "BRL-002",
+        "rule": "Derived sources transform already-ingested data by parsing in a configured step sequence — each step overlays the previous, so later steps override earlier values for the same field. Derived sources use the same adapter framework as external sources.",
+        "affects": [
+          "FR-ING-014"
+        ]
+      },
+      {
+        "id": "BRL-003",
+        "rule": "Daily update records are tagged to a business date with version starting at 1. Corrections via authorized reprocessing increment the version; only delta records (changed values) are persisted in the new version. Older versions are retained in the archive database.",
+        "affects": [
+          "FR-ING-013",
+          "FR-ING-032",
+          "FR-ING-038"
+        ]
+      },
+      {
+        "id": "BRL-004",
+        "rule": "Normalization must not create or modify product canonical records — only link to existing ones",
+        "affects": [
+          "FR-ING-016"
+        ]
+      },
+      {
+        "id": "BRL-005",
+        "rule": "Ingestion runs for the same source must not execute concurrently — queue or reject if already running",
+        "affects": [
+          "FR-ING-019",
+          "FR-ING-020",
+          "FR-ING-021"
+        ]
+      },
+      {
+        "id": "BRL-006",
+        "rule": "All API query results return data from the latest completed normalization run only — in-progress data is never exposed",
+        "affects": [
+          "FR-ING-024",
+          "FR-ING-025",
+          "FR-ING-026"
+        ]
+      },
+      {
+        "id": "BRL-007",
+        "rule": "Reference data changes are detected by comparing incoming data against the current active record for the same composite key (source, entity, record_type). A new SCD Type 2 record is created only when content differs — unchanged records do not generate new versions.",
+        "affects": [
+          "FR-ING-009"
+        ]
+      },
+      {
+        "id": "BRL-008",
+        "rule": "Reprocessing requires explicit authorization — the system shall not allow ad-hoc re-ingestion without a controlled trigger.",
+        "affects": [
+          "FR-ING-032"
+        ]
+      },
+      {
+        "id": "BRL-009",
+        "rule": "Daily update records older than 7 days before the current day snapshot are moved to the archive database. This retention window applies per business date, not per ingestion date.",
+        "affects": [
+          "FR-ING-039"
+        ]
+      }
+    ]
+  },
+  "exception_scenarios": {
+    "items": [
+      {
+        "id": "EXC-001",
+        "trigger_condition": "External source unavailable (connection failure, timeout)",
+        "system_behavior": "Retry up to configured max attempts with backoff; log each attempt",
+        "user_visible_outcome": "Ingestion run marked 'Failed' with error detail; alert raised"
+      },
+      {
+        "id": "EXC-002",
+        "trigger_condition": "Source file format changed (unexpected schema/columns)",
+        "system_behavior": "Abort ingestion for that source; do not process partial data",
+        "user_visible_outcome": "Run marked 'Failed — Schema Mismatch'; data owner notified"
+      },
+      {
+        "id": "EXC-003",
+        "trigger_condition": "Record cannot be matched to a canonical record during normalization",
+        "system_behavior": "Record flagged as 'Unmatched'; normalization continues for remaining records",
+        "user_visible_outcome": "Unmatched records visible in query API with unmatched status; data owner review required"
+      },
+      {
+        "id": "EXC-004",
+        "trigger_condition": "Duplicate ingestion run triggered (same source, same schedule window)",
+        "system_behavior": "Second run rejected per BRL-005",
+        "user_visible_outcome": "Data owner informed run was skipped — previous run still active"
+      },
+      {
+        "id": "EXC-005",
+        "trigger_condition": "Source returns empty dataset (zero records)",
+        "system_behavior": "Log warning; do not overwrite previous snapshot with empty data",
+        "user_visible_outcome": "Run marked 'Completed — Empty'; previous snapshot remains current"
+      },
+      {
+        "id": "EXC-006",
+        "trigger_condition": "Reprocessing requested without authorization",
+        "system_behavior": "Reject the request; do not re-ingest",
+        "user_visible_outcome": "Request denied with 'Unauthorized reprocessing' message; event logged"
+      },
+      {
+        "id": "EXC-007",
+        "trigger_condition": "Reprocessing produces zero delta records (no changes detected)",
+        "system_behavior": "Log info; no new version created",
+        "user_visible_outcome": "Run marked 'Completed — No Deltas'; current version unchanged"
+      },
+      {
+        "id": "EXC-008",
+        "trigger_condition": "Archive DB unavailable when retention move triggered",
+        "system_behavior": "Retain records in active DB; retry archive move on next cycle",
+        "user_visible_outcome": "Alert raised; records remain queryable in active DB until archive succeeds"
+      },
+      {
+        "id": "EXC-009",
+        "trigger_condition": "SCD Type 2 change detection fails (composite key mismatch or corrupt data)",
+        "system_behavior": "Abort ingestion for that source; flag records for review",
+        "user_visible_outcome": "Run marked 'Failed — Key Resolution Error'; data owner notified"
+      }
+    ]
+  },
+  "module_interface": {
+    "apis_provided": [
+      {
+        "name": "Query Reference Data",
+        "description": "Retrieve normalized reference data by instrument, product type, or exchange",
+        "consumers": [
+          "Downstream systems"
+        ]
+      },
+      {
+        "name": "Query Settlement Prices",
+        "description": "Retrieve settlement prices by instrument and date/date range",
+        "consumers": [
+          "Downstream systems"
+        ]
+      },
+      {
+        "name": "Query Margin Rates",
+        "description": "Retrieve margin rates by instrument and date",
+        "consumers": [
+          "Downstream systems"
+        ]
+      },
+      {
+        "name": "Bulk Export",
+        "description": "Download normalized data as CSV/JSON",
+        "consumers": [
+          "Downstream systems"
+        ]
+      },
+      {
+        "name": "Ingestion Status",
+        "description": "Query ingestion run status per source",
+        "consumers": [
+          "Data owner",
+          "UI (FR-009)"
+        ]
+      },
+      {
+        "name": "Archive Query",
+        "description": "Retrieve expired reference records, older daily update versions and dates from archive database",
+        "consumers": [
+          "Downstream systems",
+          "Data owner"
+        ]
+      }
+    ],
+    "events_published": [
+      {
+        "name": "IngestionCompleted",
+        "trigger": "Ingestion run finishes (success or failure)",
+        "potential_consumers": [
+          "Normalization pipeline",
+          "Monitoring"
+        ]
+      },
+      {
+        "name": "NormalizationCompleted",
+        "trigger": "Normalization run finishes",
+        "potential_consumers": [
+          "Query layer (data now current)",
+          "Monitoring"
+        ]
+      },
+      {
+        "name": "UnmatchedRecordsDetected",
+        "trigger": "Records failed canonical matching",
+        "potential_consumers": [
+          "Data owner notification"
+        ]
+      }
+    ],
+    "data_owned": [
+      {
+        "entity": "Reference Data Record",
+        "ownership": "ING",
+        "notes": "SCD Type 2 records; active in main DB, expired in archive DB"
+      },
+      {
+        "entity": "Daily Update Record",
+        "ownership": "ING",
+        "notes": "Business-date-tagged with versioning; last 7 days active, older in archive DB"
+      },
+      {
+        "entity": "Derived Source Output",
+        "ownership": "ING",
+        "notes": "Output of derived source processing"
+      },
+      {
+        "entity": "Normalized Record",
+        "ownership": "ING",
+        "notes": "Linked to canonical, serves query API"
+      },
+      {
+        "entity": "Ingestion Run Log",
+        "ownership": "ING",
+        "notes": "Operational audit trail"
+      }
+    ]
+  },
+  "cross_module_interactions": {
+    "items": [
+      {
+        "source": "Product Canonical (FRD-NMD-0001)",
+        "what_consumed": "Canonical instrument records",
+        "purpose": "Linking normalized data to master records (FR-ING-016)"
+      },
+      {
+        "source": "External Data Sources",
+        "what_consumed": "Raw market data (SFTP, API, website, files, feeds)",
+        "purpose": "Input to ingestion pipeline"
+      }
+    ]
+  },
+  "data_requirements": {
+    "entities": [
+      {
+        "name": "Reference Data Record",
+        "crud": "CRU",
+        "ownership": "ING",
+        "sensitivity": "Internal",
+        "description": "SCD Type 2 records with effective_date / expiry_date. Active records in main DB, expired records moved to archive DB"
+      },
+      {
+        "name": "Daily Update Record",
+        "crud": "CR",
+        "ownership": "ING",
+        "sensitivity": "Internal",
+        "description": "Business-date-tagged records with version counter. Latest 7 days in active DB, older records and superseded versions moved to archive DB"
+      },
+      {
+        "name": "Derived Source Output",
+        "crud": "CR",
+        "ownership": "ING",
+        "sensitivity": "Internal",
+        "description": "Output of derived source processing, reshaping ingested data for export formats"
+      },
+      {
+        "name": "Normalized Record",
+        "crud": "CRU",
+        "ownership": "ING",
+        "sensitivity": "Internal",
+        "description": "Linked to canonical, serves query API"
+      },
+      {
+        "name": "Ingestion Run Log",
+        "crud": "CR",
+        "ownership": "ING",
+        "sensitivity": "Internal",
+        "description": "Operational audit trail for all ingestion activity"
+      },
+      {
+        "name": "Source Configuration",
+        "crud": "CRUD",
+        "ownership": "ING",
+        "sensitivity": "Internal",
+        "description": "Source registry, connection details, schedules, mapping rules, validation rules, step sequences"
+      },
+      {
+        "name": "Unmatched Record",
+        "crud": "CR",
+        "ownership": "ING",
+        "sensitivity": "Internal",
+        "description": "Flagged for data owner review during normalization"
+      }
+    ],
+    "data_retention": "Two-tier storage with separate retention behavior per data category:\n\nReference Data:\n  Active DB — current, non-expired SCD Type 2 records (latest effective version per composite key).\n  Archive DB — expired SCD Type 2 records, retained for audit and historical queries.\n\nDaily Updates:\n  Active DB — records from the last 7 days (latest version per business date).\n  Archive DB — superseded versions and records older than 7 days before current day snapshot.\n\nBoth archive databases are queryable via FR-ING-036."
+  },
+  "nonfunctional_requirements": {
+    "items": [
+      {
+        "id": "NFR-ING-001",
+        "description": "Daily settlement file processing must complete within SLA window (ref NFR-001: T+1 by 08:00)",
+        "category": "Performance",
+        "design_impact": "Pipeline must be optimized for batch throughput; may require parallel source processing"
+      },
+      {
+        "id": "NFR-ING-002",
+        "description": "Query API responses must meet latency target (ref NFR-004: <500ms p95)",
+        "category": "Performance",
+        "design_impact": "Normalized data must be pre-indexed/materialized, not computed on query"
+      },
+      {
+        "id": "NFR-ING-003",
+        "description": "All ingested data must be traceable to its source with full audit log (ref NFR-003)",
+        "category": "Data Integrity",
+        "design_impact": "Every record carries source ID, snapshot version, ingestion run ID"
+      },
+      {
+        "id": "NFR-ING-004",
+        "description": "Ingestion failures must trigger operational alerts (ref NFR-008)",
+        "category": "Observability",
+        "design_impact": "Framework must integrate with alerting; EXC-001 through EXC-009 all produce alerts"
+      },
+      {
+        "id": "NFR-ING-005",
+        "description": "Source adapter addition must not require changes to core ingestion framework (ref NFR-006)",
+        "category": "Maintainability",
+        "design_impact": "Adapter interface must be stable and pluggable"
+      }
+    ]
+  },
+  "traceability": {
+    "matrix": [
+      {
+        "pc_requirement": "FR-002",
+        "description": "Ingest reference data from external sources",
+        "frd_requirements": [
+          "FR-ING-007",
+          "FR-ING-008",
+          "FR-ING-009"
+        ],
+        "downstream": [
+          "PSD",
+          "DC",
+          "UT"
+        ]
+      },
+      {
+        "pc_requirement": "FR-003",
+        "description": "Ingest daily updates from external sources",
+        "frd_requirements": [
+          "FR-ING-010",
+          "FR-ING-011",
+          "FR-ING-012",
+          "FR-ING-013",
+          "FR-ING-032",
+          "FR-ING-033",
+          "FR-ING-038",
+          "FR-ING-039"
+        ],
+        "downstream": [
+          "PSD",
+          "DC",
+          "UT"
+        ]
+      },
+      {
+        "pc_requirement": "FR-004",
+        "description": "Support multiple source types",
+        "frd_requirements": [
+          "FR-ING-001",
+          "FR-ING-002",
+          "FR-ING-003",
+          "FR-ING-004",
+          "FR-ING-005",
+          "FR-ING-006"
+        ],
+        "downstream": [
+          "PSD",
+          "AEC",
+          "UT"
+        ]
+      },
+      {
+        "pc_requirement": "FR-005",
+        "description": "Generate derived sources from ingested data",
+        "frd_requirements": [
+          "FR-ING-014"
+        ],
+        "downstream": [
+          "PSD",
+          "DC",
+          "UT"
+        ]
+      },
+      {
+        "pc_requirement": "FR-006",
+        "description": "Normalize and clean ingested data",
+        "frd_requirements": [
+          "FR-ING-015",
+          "FR-ING-016",
+          "FR-ING-017",
+          "FR-ING-034",
+          "FR-ING-035",
+          "FR-ING-037"
+        ],
+        "downstream": [
+          "PSD",
+          "DC",
+          "UT"
+        ]
+      },
+      {
+        "pc_requirement": "FR-007",
+        "description": "Centralized ingestion framework",
+        "frd_requirements": [
+          "FR-ING-018",
+          "FR-ING-019",
+          "FR-ING-020",
+          "FR-ING-021",
+          "FR-ING-022",
+          "FR-ING-023"
+        ],
+        "downstream": [
+          "PSD",
+          "UT"
+        ]
+      },
+      {
+        "pc_requirement": "FR-008",
+        "description": "Query and export APIs",
+        "frd_requirements": [
+          "FR-ING-024",
+          "FR-ING-025",
+          "FR-ING-026",
+          "FR-ING-027",
+          "FR-ING-028",
+          "FR-ING-036"
+        ],
+        "downstream": [
+          "API",
+          "UT"
+        ]
+      },
+      {
+        "pc_requirement": "FR-010",
+        "description": "Support onboarding new data feeds via common framework",
+        "frd_requirements": [
+          "FR-ING-029",
+          "FR-ING-030",
+          "FR-ING-031"
+        ],
+        "downstream": [
+          "PSD",
+          "UT"
+        ]
+      }
+    ]
+  },
+  "acceptance_criteria": {
+    "items": [
+      {
+        "id": "AC-001",
+        "criteria": "At least one source adapter successfully ingests reference data and daily updates from an external source"
+      },
+      {
+        "id": "AC-002",
+        "criteria": "Derived source processing produces correct output from upstream ingested data in configured step order"
+      },
+      {
+        "id": "AC-003",
+        "criteria": "All normalized records are linked to a canonical record or flagged as unmatched"
+      },
+      {
+        "id": "AC-004",
+        "criteria": "Query API returns normalized data with <500ms p95 latency"
+      },
+      {
+        "id": "AC-005",
+        "criteria": "Ingestion framework tracks run status and logs all activity with full source traceability"
+      },
+      {
+        "id": "AC-006",
+        "criteria": "Settlement price versioning works correctly — multiple intraday updates tracked via delta versioning, latest tagged"
+      },
+      {
+        "id": "AC-007",
+        "criteria": "All nine exception scenarios (EXC-001 through EXC-009) behave as specified"
+      },
+      {
+        "id": "AC-008",
+        "criteria": "SCD Type 2 persistence works correctly — new versions created only on content change, expired records moved to archive"
+      },
+      {
+        "id": "AC-009",
+        "criteria": "Reprocessing creates new version with delta records only when authorized"
+      },
+      {
+        "id": "AC-010",
+        "criteria": "Data retention operates correctly — daily updates older than 7 days moved to archive DB"
+      },
+      {
+        "id": "AC-011",
+        "criteria": "New source can be onboarded via configuration without changes to core ingestion logic"
+      }
+    ]
+  },
+  "assumptions_and_constraints": {
+    "assumptions": [
+      {
+        "id": "ASM-001",
+        "description": "Exchange files for Futures and Options and FX are accessible via public or permissioned sources (SFTP, website, API)"
+      },
+      {
+        "id": "ASM-004",
+        "description": "Exchange selection for Futures and Options will be confirmed before detailed design begins"
+      }
+    ],
+    "constraints": [
+      {
+        "id": "CON-002",
+        "description": "Data types limited to Futures and Options and FX in Phase 1"
+      },
+      {
+        "id": "CON-003",
+        "description": "Exchange selection for Futures and Options TBC"
+      }
+    ]
+  },
+  "dependencies": {
+    "items": [
+      {
+        "id": "DEP-001",
+        "description": "Exchange or official source access credentials or agreements for Futures and Options (TBC)"
+      },
+      {
+        "id": "DEP-002",
+        "description": "Confirmation of target exchanges for Phase 1 Futures and Options data"
+      },
+      {
+        "id": "DEP-ING-001",
+        "description": "Product Canonical module (FRD-NMD-0001) operational for normalization linking"
+      }
+    ]
+  },
+  "open_issues": {
+    "items": []
+  },
+  "approvals": {
+    "items": [
+      {
+        "role": "Author",
+        "name": "Leo",
+        "date": "TBD",
+        "signature": "TBD"
+      },
+      {
+        "role": "Reviewer",
+        "name": "TBD",
+        "date": "TBD",
+        "signature": "TBD"
+      },
+      {
+        "role": "Approver",
+        "name": "TBD",
+        "date": "TBD",
+        "signature": "TBD"
+      }
+    ]
+  },
+  "change_log": {
+    "entries": [
+      {
+        "version": "v0.1",
+        "date": "2026-03-01",
+        "author": "Leo",
+        "description": "Initial draft"
+      },
+      {
+        "version": "v0.2",
+        "date": "2026-03-01",
+        "author": "Leo",
+        "description": "Major update: revised functional overview with two-category data model (reference data with SCD Type 2, daily updates with delta versioning). Added source onboarding (FR-010), reprocessing, derived source processing, mapping control, validation, data retention rules, and archive query. Total requirements increased from 28 to 39. Added 4 new exception scenarios, 3 new business rules, 3 new event triggers."
+      }
+    ]
+  }
+}

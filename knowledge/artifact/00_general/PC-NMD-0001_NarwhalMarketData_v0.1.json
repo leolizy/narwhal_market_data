@@ -1,0 +1,499 @@
+{
+  "kind": "PlatformCanon",
+  "metadata": {
+    "document_id": "PC-NMD-0001",
+    "title": "Narwhal Market Data",
+    "version": "v0.1",
+    "status": "Draft",
+    "classification": "Internal",
+    "created_date": "2026-03-01",
+    "last_updated": "2026-03-01",
+    "author": "Leo",
+    "reviewer": "TBD",
+    "approver": "TBD",
+    "business_sponsor": "TBD",
+    "related_documents": [],
+    "tags": [
+      "market-data",
+      "sell-side",
+      "fintech"
+    ],
+    "supersedes": null
+  },
+  "executive_summary": {
+    "content": "Narwhal Market Data (NMD) is a centralized data gateway for sell-side financial market operations. It automates reference data collection from multiple sources, ingests daily settlement prices, and provides standardized query APIs to downstream systems — reducing duplication, improving data consistency, and strengthening operational resilience through a shared enterprise-grade platform. Phase 1 delivers a SILO service with the core functional flow: product canonical maintenance, multi-source snapshot import, data normalization, and query/export APIs."
+  },
+  "problem_statement": {
+    "content": "Multiple internal systems independently pull from external market data vendors and exchanges directly. There is no centralized ingestion layer, causing reference data, settlement prices, and margin inputs to be duplicated across systems. Onboarding a new data feed requires extensive human effort and project arrangements to deploy changes across all systems. There is no single authoritative product canonical, leading to data inconsistency and operational fragility."
+  },
+  "objectives": {
+    "items": [
+      {
+        "id": "OBJ-001",
+        "description": "Eliminate dependency on market data vendors by processing exchange files and data directly for internal systems",
+        "success_measure": "Zero vendor feed dependencies for covered data types in Phase 1"
+      },
+      {
+        "id": "OBJ-002",
+        "description": "Provide a single authoritative source for reference data, settlement prices, and margin inputs",
+        "success_measure": "All consuming systems source from NMD, not external vendors"
+      },
+      {
+        "id": "OBJ-003",
+        "description": "Reduce time to onboard a new consuming system and support a new data feed",
+        "success_measure": "Target onboarding time TBD — baseline to be measured in Phase 1"
+      },
+      {
+        "id": "OBJ-004",
+        "description": "Deliver a normalized, queryable data API for downstream system consumption",
+        "success_measure": "API available with documented endpoints for all Phase 1 data types"
+      },
+      {
+        "id": "OBJ-005",
+        "description": "Establish Phase 1 SILO service as the foundation for future enhancements",
+        "success_measure": "Phase 1 delivered; architecture supports plugging in SSO, integrations, and multi-system features in future phases"
+      }
+    ]
+  },
+  "scope": {
+    "in_scope": [
+      "Product canonical maintenance",
+      "Multi-source snapshot import and generation — reference data (product static, contracts) and daily updates (settlement prices, margin rates, corporate events)",
+      "External official source ingestion: exchange websites, rulebooks, public APIs, documents, SFTP files, feeds, and any integratable system",
+      "Derived snapshot generation from multiple external sources",
+      "Data normalization and clean-up pipeline linking to product canonical",
+      "Centralized market data ingestion framework to manage and track all source processing",
+      "Query and export APIs for downstream system consumption",
+      "Simple UI for data owners to manage sources, ingestion, and data",
+      "Phase 1 data types: Futures and Options (exchange TBC), FX"
+    ],
+    "out_of_scope": [
+      "Any processing outside market data management",
+      "Direct integration or data delivery to downstream systems (Phase 2)",
+      "Equities (Phase 2)",
+      "Fixed income and structured products (Phase 3)",
+      "SSO integration (Phase 3)",
+      "Real-time streaming and subscription-based data delivery (Phase 3)"
+    ],
+    "domain_definitions": [
+      {
+        "term": "Phase 1",
+        "definition": "SILO service delivering core functional flow: product canonical, multi-source ingestion, normalization, query/export APIs, and operator UI"
+      },
+      {
+        "term": "Phase 2",
+        "definition": "Extends Phase 1 with equities data types and direct downstream system integration/data delivery"
+      },
+      {
+        "term": "Phase 3",
+        "definition": "Extends Phase 2 with fixed income, structured products, SSO, and real-time streaming subscription delivery"
+      }
+    ]
+  },
+  "stakeholders": {
+    "items": [
+      {
+        "role": "Author / Delivery Lead",
+        "party": "Leo",
+        "interest": "Building and delivering the platform"
+      },
+      {
+        "role": "Data Owner / Operator",
+        "party": "Internal team (TBD)",
+        "interest": "Operates the UI, manages ingestion sources, and validates output data"
+      },
+      {
+        "role": "Downstream System",
+        "party": "Internal systems (TBD)",
+        "interest": "Queries normalized data via API or file export"
+      },
+      {
+        "role": "Business Sponsor",
+        "party": "TBD",
+        "interest": "Funds and approves the initiative"
+      },
+      {
+        "role": "External Data Source",
+        "party": "Exchanges and vendors (TBD)",
+        "interest": "Provides raw market data"
+      }
+    ]
+  },
+  "current_state": {
+    "items": [
+      "Multiple internal systems independently pull from external market data vendors and exchanges directly",
+      "No centralized ingestion layer",
+      "Reference data, settlement prices, and margin inputs are duplicated across systems",
+      "Onboarding a new data feed requires extensive human effort and project arrangements to deploy changes across all systems",
+      "No single authoritative product canonical"
+    ]
+  },
+  "future_state": {
+    "vision": "NMD acts as the single gateway for all market data, providing a centralized, authoritative, and normalized data platform for sell-side financial operations.",
+    "target_outcomes": [
+      "Data owners manage sources and ingestion via a simple UI",
+      "Downstream systems query clean, normalized data via standardized APIs or file delivery (TBD)",
+      "New feeds and consuming systems can be onboarded through a common framework",
+      "Phase 1 covers Futures and Options and FX; roadmap established for Phases 2 and 3"
+    ]
+  },
+  "requirements": {
+    "functional": [
+      {
+        "id": "FR-001",
+        "description": "System shall maintain a product canonical (master record for each instrument)",
+        "priority": "Must",
+        "objectives": [
+          "OBJ-001",
+          "OBJ-002"
+        ]
+      },
+      {
+        "id": "FR-002",
+        "description": "System shall ingest reference data (product static, contracts) from external sources",
+        "priority": "Must",
+        "objectives": [
+          "OBJ-001"
+        ]
+      },
+      {
+        "id": "FR-003",
+        "description": "System shall ingest daily updates (settlement prices, margin rates, corporate events) from external sources",
+        "priority": "Must",
+        "objectives": [
+          "OBJ-001"
+        ]
+      },
+      {
+        "id": "FR-004",
+        "description": "System shall support multiple source types: exchange websites, public APIs, SFTP, documents, feeds, and any integratable system",
+        "priority": "Must",
+        "objectives": [
+          "OBJ-001"
+        ]
+      },
+      {
+        "id": "FR-005",
+        "description": "System shall generate derived snapshots from multiple external sources",
+        "priority": "Must",
+        "objectives": [
+          "OBJ-002"
+        ]
+      },
+      {
+        "id": "FR-006",
+        "description": "System shall normalize and clean ingested data, linking it to the product canonical",
+        "priority": "Must",
+        "objectives": [
+          "OBJ-002"
+        ]
+      },
+      {
+        "id": "FR-007",
+        "description": "System shall provide a centralized ingestion framework to manage and track all source processing",
+        "priority": "Must",
+        "objectives": [
+          "OBJ-003"
+        ]
+      },
+      {
+        "id": "FR-008",
+        "description": "System shall expose query and export APIs for downstream system consumption",
+        "priority": "Must",
+        "objectives": [
+          "OBJ-004"
+        ]
+      },
+      {
+        "id": "FR-009",
+        "description": "System shall provide a simple UI for data owners to manage sources, ingestion, and data",
+        "priority": "Must",
+        "objectives": [
+          "OBJ-004"
+        ]
+      },
+      {
+        "id": "FR-010",
+        "description": "System shall support onboarding of new data feeds via a common framework without changes to core ingestion logic",
+        "priority": "Should",
+        "objectives": [
+          "OBJ-003"
+        ]
+      }
+    ],
+    "nonfunctional": [
+      {
+        "id": "NFR-001",
+        "description": "System shall process and normalize daily settlement files within a defined SLA window (e.g., T+1 by 08:00)",
+        "priority": "Must",
+        "category": "Performance"
+      },
+      {
+        "id": "NFR-002",
+        "description": "System shall be available during market data processing hours with a defined uptime target (e.g., 99.5%)",
+        "priority": "Must",
+        "category": "Availability"
+      },
+      {
+        "id": "NFR-003",
+        "description": "All ingested data shall be traceable to its source with a full audit log",
+        "priority": "Must",
+        "category": "Data Integrity"
+      },
+      {
+        "id": "NFR-004",
+        "description": "API responses for query endpoints shall meet a defined latency target (e.g., <500ms p95)",
+        "priority": "Should",
+        "category": "Performance"
+      },
+      {
+        "id": "NFR-005",
+        "description": "System shall enforce access control — data owners vs read-only downstream consumers",
+        "priority": "Must",
+        "category": "Security"
+      },
+      {
+        "id": "NFR-006",
+        "description": "System shall support addition of new data sources without changes to core framework",
+        "priority": "Should",
+        "category": "Maintainability"
+      },
+      {
+        "id": "NFR-007",
+        "description": "All data in transit and at rest shall be encrypted",
+        "priority": "Must",
+        "category": "Security"
+      },
+      {
+        "id": "NFR-008",
+        "description": "System shall provide operational monitoring and alerting for ingestion failures",
+        "priority": "Must",
+        "category": "Observability"
+      },
+      {
+        "id": "NFR-009",
+        "description": "Phase 1 shall be deployable as a standalone SILO service with no SSO or cross-system dependencies",
+        "priority": "Must",
+        "category": "Portability"
+      }
+    ],
+    "constraints": [
+      {
+        "id": "CON-001",
+        "description": "Phase 1 is a SILO service — no SSO, no downstream system integrations"
+      },
+      {
+        "id": "CON-002",
+        "description": "Data types limited to Futures and Options and FX in Phase 1"
+      },
+      {
+        "id": "CON-003",
+        "description": "Exchange selection for Futures and Options TBC"
+      },
+      {
+        "id": "CON-004",
+        "description": "Downstream system specifics TBD"
+      }
+    ]
+  },
+  "assumptions_and_constraints": {
+    "assumptions": [
+      {
+        "id": "ASM-001",
+        "description": "Exchange files for Futures and Options and FX are accessible via public or permissioned sources (SFTP, website, API)"
+      },
+      {
+        "id": "ASM-002",
+        "description": "Data owners will be available to operate the UI and validate ingested data"
+      },
+      {
+        "id": "ASM-003",
+        "description": "Downstream systems will integrate via query API or file export — no push delivery required in Phase 1"
+      },
+      {
+        "id": "ASM-004",
+        "description": "Exchange selection for Futures and Options will be confirmed before detailed design begins"
+      },
+      {
+        "id": "ASM-005",
+        "description": "Phase 1 is a standalone SILO — no dependency on enterprise SSO or authentication systems"
+      }
+    ],
+    "constraints": [
+      {
+        "id": "CON-001",
+        "description": "Phase 1 is a SILO service — no SSO, no downstream system integrations"
+      },
+      {
+        "id": "CON-002",
+        "description": "Data types limited to Futures and Options and FX in Phase 1"
+      },
+      {
+        "id": "CON-003",
+        "description": "Exchange selection for Futures and Options TBC"
+      },
+      {
+        "id": "CON-004",
+        "description": "Downstream system specifics TBD"
+      }
+    ]
+  },
+  "risks": {
+    "items": [
+      {
+        "id": "RSK-001",
+        "description": "Exchange file formats change without notice, breaking ingestion pipelines",
+        "likelihood": "Medium",
+        "impact": "High",
+        "mitigation": "Build source adapters with schema versioning; monitor for format changes"
+      },
+      {
+        "id": "RSK-002",
+        "description": "Exchange selection for Phase 1 delayed, blocking data source design",
+        "likelihood": "Medium",
+        "impact": "High",
+        "mitigation": "Confirm exchanges early; use FX as initial development target to unblock progress"
+      },
+      {
+        "id": "RSK-003",
+        "description": "Downstream system requirements unclear, leading to API redesign",
+        "likelihood": "Medium",
+        "impact": "Medium",
+        "mitigation": "Define API contract early; validate with at least one consuming system before Phase 1 delivery"
+      },
+      {
+        "id": "RSK-004",
+        "description": "Single operator dependency — if data owner is unavailable, ingestion stalls",
+        "likelihood": "Low",
+        "impact": "High",
+        "mitigation": "Document operational runbook; build alerting so ingestion failures are visible to broader team"
+      }
+    ]
+  },
+  "success_metrics": {
+    "items": [
+      {
+        "id": "SM-001",
+        "description": "Number of external vendor/exchange direct dependencies eliminated from downstream systems",
+        "target": "At least 1 downstream system migrated to NMD in Phase 1",
+        "objective": "OBJ-001"
+      },
+      {
+        "id": "SM-002",
+        "description": "Single authoritative product canonical in place covering Phase 1 data types",
+        "target": "100% of Phase 1 instruments represented in the canonical",
+        "objective": "OBJ-002"
+      },
+      {
+        "id": "SM-003",
+        "description": "Time to onboard a new data feed (from source identified to data available in API)",
+        "target": "TBD — baseline to be measured in Phase 1",
+        "objective": "OBJ-003"
+      },
+      {
+        "id": "SM-004",
+        "description": "Query API live and consumed by at least one downstream system",
+        "target": "At least 1 downstream system consuming NMD API by Phase 1 delivery",
+        "objective": "OBJ-004"
+      },
+      {
+        "id": "SM-005",
+        "description": "Phase 1 SILO service deployed and operational",
+        "target": "Deployed to target environment and passing acceptance criteria",
+        "objective": "OBJ-005"
+      }
+    ]
+  },
+  "dependencies": {
+    "items": [
+      {
+        "id": "DEP-001",
+        "description": "Exchange or official source access credentials or agreements for Futures and Options (TBC)"
+      },
+      {
+        "id": "DEP-002",
+        "description": "Confirmation of target exchanges for Phase 1 Futures and Options data"
+      },
+      {
+        "id": "DEP-003",
+        "description": "At least one downstream system identified as Phase 1 consumer for API validation"
+      }
+    ]
+  },
+  "glossary": {
+    "items": [
+      {
+        "term": "Product Canonical",
+        "definition": "The master reference record for a financial instrument, serving as the authoritative identity across all data sources"
+      },
+      {
+        "term": "Reference Data",
+        "definition": "Static or slowly-changing data describing a financial instrument (e.g., contract specs, expiry dates, tick sizes)"
+      },
+      {
+        "term": "Daily Update",
+        "definition": "Time-sensitive data published on a scheduled basis (e.g., settlement prices, margin rates, corporate events)"
+      },
+      {
+        "term": "Settlement Price",
+        "definition": "The official end-of-day price for a financial instrument, published by the exchange, used for margin and P&L calculations"
+      },
+      {
+        "term": "Margin Rate",
+        "definition": "The collateral requirement set by an exchange or clearing house for holding a position"
+      },
+      {
+        "term": "Snapshot",
+        "definition": "A point-in-time extract of data from one or more sources, used as input to the normalization pipeline"
+      },
+      {
+        "term": "SILO Service",
+        "definition": "A standalone, self-contained service deployment with no cross-system integrations or SSO dependencies"
+      },
+      {
+        "term": "Data Owner",
+        "definition": "An internal operator responsible for managing data sources, monitoring ingestion, and validating output via the NMD UI"
+      },
+      {
+        "term": "Ingestion Framework",
+        "definition": "The centralized component that manages, schedules, tracks, and monitors the processing of all data sources"
+      },
+      {
+        "term": "Canonical Key",
+        "definition": "A standardized identifier used to link data from multiple sources to the same product canonical record"
+      }
+    ]
+  },
+  "approvals": {
+    "items": [
+      {
+        "role": "Author",
+        "name": "Leo",
+        "date": "TBD",
+        "signature": "TBD"
+      },
+      {
+        "role": "Reviewer",
+        "name": "TBD",
+        "date": "TBD",
+        "signature": "TBD"
+      },
+      {
+        "role": "Approver",
+        "name": "TBD",
+        "date": "TBD",
+        "signature": "TBD"
+      }
+    ]
+  },
+  "change_log": {
+    "entries": [
+      {
+        "version": "v0.1",
+        "date": "2026-03-01",
+        "author": "Leo",
+        "description": "Initial draft"
+      }
+    ]
+  }
+}

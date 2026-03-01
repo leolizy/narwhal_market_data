@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PC-NMD-0001: Narwhal Market Data</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.65;
+      color: #2d3748;
+      background: #f7f8fa;
+      margin: 0;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      padding: 2.5rem 3rem;
+    }
+    h1 {
+      font-size: 2em;
+      color: #1a3d5c;
+      border-bottom: 3px solid #2c5f8a;
+      padding-bottom: .4em;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 1.45em;
+      color: #2c5f8a;
+      border-bottom: 1px solid #d0dce8;
+      padding-bottom: .25em;
+      margin-top: 2.2em;
+    }
+    h3 { font-size: 1.15em; color: #3a6ea8; margin-top: 1.5em; }
+    h4, h5, h6 { color: #4a5568; margin-top: 1.2em; }
+    p { margin: .8em 0; }
+    a { color: #2c5f8a; }
+    hr {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 2em 0;
+    }
+    code {
+      background: #eef2f7;
+      padding: .15em .4em;
+      border-radius: 4px;
+      font-size: .88em;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+    }
+    pre {
+      background: #1e2433;
+      color: #cdd5e0;
+      padding: 1.1em 1.4em;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1em 0;
+    }
+    pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+      font-size: .9em;
+    }
+    blockquote {
+      border-left: 4px solid #2c5f8a;
+      margin: 1em 0;
+      padding: .6em 1.1em;
+      background: #f0f5fb;
+      color: #4a5568;
+      border-radius: 0 4px 4px 0;
+    }
+    blockquote p { margin: 0; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1.2em 0;
+      font-size: .9em;
+    }
+    th {
+      background: #2c5f8a;
+      color: #fff;
+      padding: .55em .9em;
+      text-align: left;
+      font-weight: 600;
+    }
+    td {
+      padding: .45em .9em;
+      border: 1px solid #d0dce8;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #f7f9fc; }
+    ul, ol { padding-left: 1.8em; margin: .6em 0; }
+    li { margin: .3em 0; }
+    strong { color: #1a3d5c; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+<h1>PC-NMD-0001: Narwhal Market Data</h1>
+<h2>Metadata</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Document ID</td>
+      <td>PC-NMD-0001</td>
+    </tr>
+    <tr>
+      <td>Title</td>
+      <td>Narwhal Market Data</td>
+    </tr>
+    <tr>
+      <td>Version</td>
+      <td>v0.1</td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>Draft</td>
+    </tr>
+    <tr>
+      <td>Classification</td>
+      <td>Internal</td>
+    </tr>
+    <tr>
+      <td>Created Date</td>
+      <td>2026-03-01</td>
+    </tr>
+    <tr>
+      <td>Last Updated</td>
+      <td>2026-03-01</td>
+    </tr>
+    <tr>
+      <td>Author</td>
+      <td>Leo</td>
+    </tr>
+    <tr>
+      <td>Reviewer</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Approver</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Business Sponsor</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Tags</td>
+      <td>market-data, sell-side, fintech</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Executive Summary</h2>
+<p>Narwhal Market Data (NMD) is a centralized data gateway for sell-side financial market operations. It automates reference data collection from multiple sources, ingests daily settlement prices, and provides standardized query APIs to downstream systems — reducing duplication, improving data consistency, and strengthening operational resilience through a shared enterprise-grade platform. Phase 1 delivers a SILO service with the core functional flow: product canonical maintenance, multi-source snapshot import, data normalization, and query/export APIs.</p>
+<h2>Problem Statement</h2>
+<p>Multiple internal systems independently pull from external market data vendors and exchanges directly. There is no centralized ingestion layer, causing reference data, settlement prices, and margin inputs to be duplicated across systems. Onboarding a new data feed requires extensive human effort and project arrangements to deploy changes across all systems. There is no single authoritative product canonical, leading to data inconsistency and operational fragility.</p>
+<h2>Objectives</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Objective</th>
+      <th>Success Measure</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>OBJ-001</td>
+      <td>Eliminate dependency on market data vendors by processing exchange files and data directly for internal systems</td>
+      <td>Zero vendor feed dependencies for covered data types in Phase 1</td>
+    </tr>
+    <tr>
+      <td>OBJ-002</td>
+      <td>Provide a single authoritative source for reference data, settlement prices, and margin inputs</td>
+      <td>All consuming systems source from NMD, not external vendors</td>
+    </tr>
+    <tr>
+      <td>OBJ-003</td>
+      <td>Reduce time to onboard a new consuming system and support a new data feed</td>
+      <td>Target onboarding time TBD — baseline to be measured in Phase 1</td>
+    </tr>
+    <tr>
+      <td>OBJ-004</td>
+      <td>Deliver a normalized, queryable data API for downstream system consumption</td>
+      <td>API available with documented endpoints for all Phase 1 data types</td>
+    </tr>
+    <tr>
+      <td>OBJ-005</td>
+      <td>Establish Phase 1 SILO service as the foundation for future enhancements</td>
+      <td>Phase 1 delivered; architecture supports plugging in SSO, integrations, and multi-system features in future phases</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Scope</h2>
+<h3>In Scope</h3>
+<ul>
+  <li>Product canonical maintenance</li>
+  <li>Multi-source snapshot import and generation — reference data (product static, contracts) and</li>
+</ul>
+<p>  daily updates (settlement prices, margin rates, corporate events)</p>
+<ul>
+  <li>External official source ingestion: exchange websites, rulebooks, public APIs, documents, SFTP</li>
+</ul>
+<p>  files, feeds, and any integratable system</p>
+<ul>
+  <li>Derived snapshot generation from multiple external sources</li>
+  <li>Data normalization and clean-up pipeline linking to product canonical</li>
+  <li>Centralized market data ingestion framework to manage and track all source processing</li>
+  <li>Query and export APIs for downstream system consumption</li>
+  <li>Simple UI for data owners to manage sources, ingestion, and data</li>
+  <li>Phase 1 data types: Futures and Options (exchange TBC), FX</li>
+</ul>
+<h3>Out of Scope</h3>
+<ul>
+  <li>Any processing outside market data management</li>
+  <li>Direct integration or data delivery to downstream systems (Phase 2)</li>
+  <li>Equities (Phase 2)</li>
+  <li>Fixed income and structured products (Phase 3)</li>
+  <li>SSO integration (Phase 3)</li>
+  <li>Real-time streaming and subscription-based data delivery (Phase 3)</li>
+</ul>
+<h3>Domain Definitions</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Term</th>
+      <th>Definition</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Phase 1</td>
+      <td>SILO service delivering core functional flow: product canonical, multi-source ingestion, normalization, query/export APIs, and operator UI</td>
+    </tr>
+    <tr>
+      <td>Phase 2</td>
+      <td>Extends Phase 1 with equities data types and direct downstream system integration/data delivery</td>
+    </tr>
+    <tr>
+      <td>Phase 3</td>
+      <td>Extends Phase 2 with fixed income, structured products, SSO, and real-time streaming subscription delivery</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Stakeholders</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Role</th>
+      <th>Party</th>
+      <th>Interest</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Author / Delivery Lead</td>
+      <td>Leo</td>
+      <td>Building and delivering the platform</td>
+    </tr>
+    <tr>
+      <td>Data Owner / Operator</td>
+      <td>Internal team (TBD)</td>
+      <td>Operates the UI, manages ingestion sources, and validates output data</td>
+    </tr>
+    <tr>
+      <td>Downstream System</td>
+      <td>Internal systems (TBD)</td>
+      <td>Queries normalized data via API or file export</td>
+    </tr>
+    <tr>
+      <td>Business Sponsor</td>
+      <td>TBD</td>
+      <td>Funds and approves the initiative</td>
+    </tr>
+    <tr>
+      <td>External Data Source</td>
+      <td>Exchanges and vendors (TBD)</td>
+      <td>Provides raw market data</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Current State</h2>
+<ul>
+  <li>Multiple internal systems independently pull from external market data vendors and exchanges directly</li>
+  <li>No centralized ingestion layer</li>
+  <li>Reference data, settlement prices, and margin inputs are duplicated across systems</li>
+  <li>Onboarding a new data feed requires extensive human effort and project arrangements to deploy</li>
+</ul>
+<p>  changes across all systems</p>
+<ul>
+  <li>No single authoritative product canonical</li>
+</ul>
+<h2>Future State</h2>
+<p><strong>Vision:</strong> NMD acts as the single gateway for all market data, providing a centralized, authoritative, and normalized data platform for sell-side financial operations.</p>
+<p><strong>Target Outcomes:</strong></p>
+<ul>
+  <li>Data owners manage sources and ingestion via a simple UI</li>
+  <li>Downstream systems query clean, normalized data via standardized APIs or file delivery (TBD)</li>
+  <li>New feeds and consuming systems can be onboarded through a common framework</li>
+  <li>Phase 1 covers Futures and Options and FX; roadmap established for Phases 2 and 3</li>
+</ul>
+<h2>Requirements</h2>
+<h3>Functional Requirements</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Requirement</th>
+      <th>Priority</th>
+      <th>Objectives</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>FR-001</td>
+      <td>System shall maintain a product canonical (master record for each instrument)</td>
+      <td>Must</td>
+      <td>OBJ-001, OBJ-002</td>
+    </tr>
+    <tr>
+      <td>FR-002</td>
+      <td>System shall ingest reference data (product static, contracts) from external sources</td>
+      <td>Must</td>
+      <td>OBJ-001</td>
+    </tr>
+    <tr>
+      <td>FR-003</td>
+      <td>System shall ingest daily updates (settlement prices, margin rates, corporate events) from external sources</td>
+      <td>Must</td>
+      <td>OBJ-001</td>
+    </tr>
+    <tr>
+      <td>FR-004</td>
+      <td>System shall support multiple source types: exchange websites, public APIs, SFTP, documents, feeds, and any integratable system</td>
+      <td>Must</td>
+      <td>OBJ-001</td>
+    </tr>
+    <tr>
+      <td>FR-005</td>
+      <td>System shall generate derived snapshots from multiple external sources</td>
+      <td>Must</td>
+      <td>OBJ-002</td>
+    </tr>
+    <tr>
+      <td>FR-006</td>
+      <td>System shall normalize and clean ingested data, linking it to the product canonical</td>
+      <td>Must</td>
+      <td>OBJ-002</td>
+    </tr>
+    <tr>
+      <td>FR-007</td>
+      <td>System shall provide a centralized ingestion framework to manage and track all source processing</td>
+      <td>Must</td>
+      <td>OBJ-003</td>
+    </tr>
+    <tr>
+      <td>FR-008</td>
+      <td>System shall expose query and export APIs for downstream system consumption</td>
+      <td>Must</td>
+      <td>OBJ-004</td>
+    </tr>
+    <tr>
+      <td>FR-009</td>
+      <td>System shall provide a simple UI for data owners to manage sources, ingestion, and data</td>
+      <td>Must</td>
+      <td>OBJ-004</td>
+    </tr>
+    <tr>
+      <td>FR-010</td>
+      <td>System shall support onboarding of new data feeds via a common framework without changes to core ingestion logic</td>
+      <td>Should</td>
+      <td>OBJ-003</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Non-Functional Requirements</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Requirement</th>
+      <th>Priority</th>
+      <th>Category</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>NFR-001</td>
+      <td>System shall process and normalize daily settlement files within a defined SLA window (e.g., T+1 by 08:00)</td>
+      <td>Must</td>
+      <td>Performance</td>
+    </tr>
+    <tr>
+      <td>NFR-002</td>
+      <td>System shall be available during market data processing hours with a defined uptime target (e.g., 99.5%)</td>
+      <td>Must</td>
+      <td>Availability</td>
+    </tr>
+    <tr>
+      <td>NFR-003</td>
+      <td>All ingested data shall be traceable to its source with a full audit log</td>
+      <td>Must</td>
+      <td>Data Integrity</td>
+    </tr>
+    <tr>
+      <td>NFR-004</td>
+      <td>API responses for query endpoints shall meet a defined latency target (e.g., &lt;500ms p95)</td>
+      <td>Should</td>
+      <td>Performance</td>
+    </tr>
+    <tr>
+      <td>NFR-005</td>
+      <td>System shall enforce access control — data owners vs read-only downstream consumers</td>
+      <td>Must</td>
+      <td>Security</td>
+    </tr>
+    <tr>
+      <td>NFR-006</td>
+      <td>System shall support addition of new data sources without changes to core framework</td>
+      <td>Should</td>
+      <td>Maintainability</td>
+    </tr>
+    <tr>
+      <td>NFR-007</td>
+      <td>All data in transit and at rest shall be encrypted</td>
+      <td>Must</td>
+      <td>Security</td>
+    </tr>
+    <tr>
+      <td>NFR-008</td>
+      <td>System shall provide operational monitoring and alerting for ingestion failures</td>
+      <td>Must</td>
+      <td>Observability</td>
+    </tr>
+    <tr>
+      <td>NFR-009</td>
+      <td>Phase 1 shall be deployable as a standalone SILO service with no SSO or cross-system dependencies</td>
+      <td>Must</td>
+      <td>Portability</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Constraints</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Constraint</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CON-001</td>
+      <td>Phase 1 is a SILO service — no SSO, no downstream system integrations</td>
+    </tr>
+    <tr>
+      <td>CON-002</td>
+      <td>Data types limited to Futures and Options and FX in Phase 1</td>
+    </tr>
+    <tr>
+      <td>CON-003</td>
+      <td>Exchange selection for Futures and Options TBC</td>
+    </tr>
+    <tr>
+      <td>CON-004</td>
+      <td>Downstream system specifics TBD</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Assumptions and Constraints</h2>
+<h3>Assumptions</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Assumption</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ASM-001</td>
+      <td>Exchange files for Futures and Options and FX are accessible via public or permissioned sources (SFTP, website, API)</td>
+    </tr>
+    <tr>
+      <td>ASM-002</td>
+      <td>Data owners will be available to operate the UI and validate ingested data</td>
+    </tr>
+    <tr>
+      <td>ASM-003</td>
+      <td>Downstream systems will integrate via query API or file export — no push delivery required in Phase 1</td>
+    </tr>
+    <tr>
+      <td>ASM-004</td>
+      <td>Exchange selection for Futures and Options will be confirmed before detailed design begins</td>
+    </tr>
+    <tr>
+      <td>ASM-005</td>
+      <td>Phase 1 is a standalone SILO — no dependency on enterprise SSO or authentication systems</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Risks</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Risk</th>
+      <th>Likelihood</th>
+      <th>Impact</th>
+      <th>Mitigation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>RSK-001</td>
+      <td>Exchange file formats change without notice, breaking ingestion pipelines</td>
+      <td>Medium</td>
+      <td>High</td>
+      <td>Build source adapters with schema versioning; monitor for format changes</td>
+    </tr>
+    <tr>
+      <td>RSK-002</td>
+      <td>Exchange selection for Phase 1 delayed, blocking data source design</td>
+      <td>Medium</td>
+      <td>High</td>
+      <td>Confirm exchanges early; use FX as initial development target to unblock progress</td>
+    </tr>
+    <tr>
+      <td>RSK-003</td>
+      <td>Downstream system requirements unclear, leading to API redesign</td>
+      <td>Medium</td>
+      <td>Medium</td>
+      <td>Define API contract early; validate with at least one consuming system before Phase 1 delivery</td>
+    </tr>
+    <tr>
+      <td>RSK-004</td>
+      <td>Single operator dependency — if data owner is unavailable, ingestion stalls</td>
+      <td>Low</td>
+      <td>High</td>
+      <td>Document operational runbook; build alerting so ingestion failures are visible to broader team</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Success Metrics</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Metric</th>
+      <th>Target</th>
+      <th>Objective</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SM-001</td>
+      <td>Number of external vendor/exchange direct dependencies eliminated from downstream systems</td>
+      <td>At least 1 downstream system migrated to NMD in Phase 1</td>
+      <td>OBJ-001</td>
+    </tr>
+    <tr>
+      <td>SM-002</td>
+      <td>Single authoritative product canonical in place covering Phase 1 data types</td>
+      <td>100% of Phase 1 instruments represented in the canonical</td>
+      <td>OBJ-002</td>
+    </tr>
+    <tr>
+      <td>SM-003</td>
+      <td>Time to onboard a new data feed (from source identified to data available in API)</td>
+      <td>TBD — baseline to be measured in Phase 1</td>
+      <td>OBJ-003</td>
+    </tr>
+    <tr>
+      <td>SM-004</td>
+      <td>Query API live and consumed by at least one downstream system</td>
+      <td>At least 1 downstream system consuming NMD API by Phase 1 delivery</td>
+      <td>OBJ-004</td>
+    </tr>
+    <tr>
+      <td>SM-005</td>
+      <td>Phase 1 SILO service deployed and operational</td>
+      <td>Deployed to target environment and passing acceptance criteria</td>
+      <td>OBJ-005</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Dependencies</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Dependency</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>DEP-001</td>
+      <td>Exchange or official source access credentials or agreements for Futures and Options (TBC)</td>
+    </tr>
+    <tr>
+      <td>DEP-002</td>
+      <td>Confirmation of target exchanges for Phase 1 Futures and Options data</td>
+    </tr>
+    <tr>
+      <td>DEP-003</td>
+      <td>At least one downstream system identified as Phase 1 consumer for API validation</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Glossary</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Term</th>
+      <th>Definition</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Product Canonical</td>
+      <td>The master reference record for a financial instrument, serving as the authoritative identity across all data sources</td>
+    </tr>
+    <tr>
+      <td>Reference Data</td>
+      <td>Static or slowly-changing data describing a financial instrument (e.g., contract specs, expiry dates, tick sizes)</td>
+    </tr>
+    <tr>
+      <td>Daily Update</td>
+      <td>Time-sensitive data published on a scheduled basis (e.g., settlement prices, margin rates, corporate events)</td>
+    </tr>
+    <tr>
+      <td>Settlement Price</td>
+      <td>The official end-of-day price for a financial instrument, published by the exchange, used for margin and P&amp;L calculations</td>
+    </tr>
+    <tr>
+      <td>Margin Rate</td>
+      <td>The collateral requirement set by an exchange or clearing house for holding a position</td>
+    </tr>
+    <tr>
+      <td>Snapshot</td>
+      <td>A point-in-time extract of data from one or more sources, used as input to the normalization pipeline</td>
+    </tr>
+    <tr>
+      <td>SILO Service</td>
+      <td>A standalone, self-contained service deployment with no cross-system integrations or SSO dependencies</td>
+    </tr>
+    <tr>
+      <td>Data Owner</td>
+      <td>An internal operator responsible for managing data sources, monitoring ingestion, and validating output via the NMD UI</td>
+    </tr>
+    <tr>
+      <td>Ingestion Framework</td>
+      <td>The centralized component that manages, schedules, tracks, and monitors the processing of all data sources</td>
+    </tr>
+    <tr>
+      <td>Canonical Key</td>
+      <td>A standardized identifier used to link data from multiple sources to the same product canonical record</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Approvals</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Role</th>
+      <th>Name</th>
+      <th>Date</th>
+      <th>Signature</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Author</td>
+      <td>Leo</td>
+      <td>TBD</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Reviewer</td>
+      <td>TBD</td>
+      <td>TBD</td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>Approver</td>
+      <td>TBD</td>
+      <td>TBD</td>
+      <td>TBD</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Change Log</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th>Date</th>
+      <th>Author</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>v0.1</td>
+      <td>2026-03-01</td>
+      <td>Leo</td>
+      <td>Initial draft</td>
+    </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>
